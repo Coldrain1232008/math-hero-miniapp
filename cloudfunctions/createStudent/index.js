@@ -11,38 +11,47 @@ exports.main = async (event) => {
     return { openid: WX_OPENID }
   }
 
-  // 防止重复创建
-  const exist = await db.collection('students')
-    .where({ classId: event.classId, openid: WX_OPENID })
-    .get()
-
-  if (exist.data.length > 0) {
-    // 如果是预导入的占位记录，更新它
-    const existing = exist.data[0]
-    if (!existing.talentId || existing.talentId === '') {
-      // 更新预导入的占位记录
-      await db.collection('students').doc(existing._id).update({
-        data: {
-          heroName: event.heroName,
-          gender: event.gender,
-          avatar: event.avatar,
-          talentId: event.talentId,
-          talentName: event.talentName,
-          talentCategory: event.talentCategory,
-          talentColor: event.talentColor,
-          updatedAt: db.serverDate(),
-        },
-      })
-      return { success: true, id: existing._id }
-    }
-    return { success: false, message: '已有角色', id: existing._id }
+  // 防止重复创建：优先用 _id 精确查找（预导入学生），其次用 openid 查找
+  let existing = null
+  if (event.studentId) {
+    const res = await db.collection('students').doc(event.studentId).get()
+    existing = res.data
+  } else {
+    const exist = await db.collection('students')
+      .where({ classId: event.classId, openid: WX_OPENID })
+      .get()
+    if (exist.data.length > 0) existing = exist.data[0]
   }
 
+  if (existing) {
+    // 已有完整角色
+    if (existing.talentId && existing.talentId !== '') {
+      return { success: false, message: '已有角色', id: existing._id }
+    }
+    // 预导入的占位记录 -> 更新为完整角色
+    await db.collection('students').doc(existing._id).update({
+      data: {
+        openid: WX_OPENID,
+        heroName: event.heroName,
+        gender: event.gender,
+        avatar: event.avatar,
+        talentId: event.talentId,
+        talentName: event.talentName,
+        talentCategory: event.talentCategory,
+        talentColor: event.talentColor,
+        updatedAt: db.serverDate(),
+      },
+    })
+    return { success: true, id: existing._id }
+  }
+
+  // 全新学生（未通过教师导入）
   try {
     const res = await db.collection('students').add({
       data: {
         classId: event.classId,
         openid: WX_OPENID,
+        studentKey: '',  // 教师导入时生成，自主注册无个人密钥
         heroName: event.heroName,
         gender: event.gender,
         avatar: event.avatar,

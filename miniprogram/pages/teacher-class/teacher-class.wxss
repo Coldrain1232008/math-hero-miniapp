@@ -21,6 +21,12 @@
 .mini-attr text { font-size: 20rpx; font-weight: 600; }
 .mini-val { font-size: 24rpx; color: #333; margin-top: 4rpx; }
 
+.s-key-section { display: flex; align-items: center; gap: 12rpx; margin-bottom: 16rpx; padding: 12rpx 16rpx; background: #f0f4ff; border-radius: 10rpx; }
+.s-key-label { font-size: 22rpx; color: #888; white-space: nowrap; }
+.s-key-box { display: flex; align-items: center; gap: 12rpx; flex: 1; }
+.s-key-text { font-size: 28rpx; font-weight: bold; color: #6c63ff; font-family: 'Menlo', 'Consolas', monospace; letter-spacing: 4rpx; }
+.btn-copy { font-size: 22rpx; padding: 6rpx 20rpx; background: #6c63ff; color: #fff; border-radius: 20rpx; border: none; margin: 0; line-height: 1.6; }
+
 .s-footer { display: flex; justify-content: space-between; align-items: center; }
 .s-exp { font-size: 24rpx; color: #999; }
 .s-actions { }

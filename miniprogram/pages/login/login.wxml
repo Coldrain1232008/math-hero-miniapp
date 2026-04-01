@@ -9,24 +9,51 @@
   </view>
 
   <view class="form-area">
-    <view class="input-group">
-      <text class="input-label">密钥</text>
-      <input
-        class="input-field"
-        placeholder="输入班级密钥"
-        value="{{secretKey}}"
-        bindinput="onKeyInput"
-        password
-      />
-    </view>
-
     <view class="role-switch">
       <view class="role-btn {{role === 'student' ? 'active' : ''}}" bindtap="setStudent">学生</view>
       <view class="role-btn {{role === 'teacher' ? 'active' : ''}}" bindtap="setTeacher">教师</view>
     </view>
 
-    <button class="btn-primary login-btn" bindtap="onLogin" loading="{{loading}}">进入</button>
+    <!-- 教师登录 -->
+    <block wx:if="{{role === 'teacher'}}">
+      <view class="input-group">
+        <text class="input-label">教师密钥</text>
+        <input
+          class="input-field"
+          placeholder="输入教师密钥"
+          value="{{secretKey}}"
+          bindinput="onKeyInput"
+          password
+        />
+      </view>
+      <button class="btn-primary login-btn" bindtap="onLogin" loading="{{loading}}">进入</button>
+    </block>
+
+    <!-- 学生登录 -->
+    <block wx:else>
+      <view class="input-group">
+        <text class="input-label">班级密钥</text>
+        <input
+          class="input-field"
+          placeholder="输入班级密钥"
+          value="{{classKey}}"
+          bindinput="onClassKeyInput"
+          password
+        />
+      </view>
+      <view class="input-group">
+        <text class="input-label">个人密钥</text>
+        <input
+          class="input-field"
+          placeholder="输入老师给你的个人密钥"
+          value="{{studentKey}}"
+          bindinput="onStudentKeyInput"
+          password
+        />
+      </view>
+      <button class="btn-primary login-btn" bindtap="onLogin" loading="{{loading}}">进入</button>
+    </block>
   </view>
 
-  <text class="hint">由班主任提供班级密钥</text>
+  <text class="hint">由班主任提供密钥</text>
 </view>

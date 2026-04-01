@@ -61,7 +61,17 @@ Page({
         data: { names, classId: app.globalData.classId },
       })
       if (res.result?.success) {
-        wx.showToast({ title: `成功导入 ${names.length} 人`, icon: 'success' })
+        const results = res.result.results || []
+        const newStudents = results.filter(r => r.status === 'created')
+        const existStudents = results.filter(r => r.status === 'exists')
+        let msg = ''
+        if (newStudents.length > 0) {
+          msg += `新增 ${newStudents.length} 人`
+        }
+        if (existStudents.length > 0) {
+          msg += (msg ? '，' : '') + `${existStudents.length} 人已存在`
+        }
+        wx.showToast({ title: msg, icon: 'success' })
         this.hideAddDialog()
         this.loadStudents()
       }
@@ -70,6 +80,17 @@ Page({
       wx.showToast({ title: '导入失败', icon: 'none' })
     }
     this.setData({ addLoading: false })
+  },
+
+  // 复制学生个人密钥到剪贴板
+  copyKey(e) {
+    const { key, name } = e.currentTarget.dataset
+    wx.setClipboardData({
+      data: key,
+      success() {
+        wx.showToast({ title: `${name} 的密钥已复制`, icon: 'success' })
+      }
+    })
   },
 
   // 赠送重置天赋机会

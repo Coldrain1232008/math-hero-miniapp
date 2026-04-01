@@ -66,11 +66,13 @@ Page({
     this.setData({ creating: true })
     const app = getApp()
     const { heroName, gender, selectedAvatar, talent } = this.data
+    // 预导入学生的 _id（通过登录时传入 globalData）
+    const existingId = app.globalData.studentInfo?._id || ''
 
     try {
       const studentData = {
         classId: app.globalData.classId,
-        openid: '', // 云函数端获取
+        studentId: existingId,  // 预导入学生传 _id，云函数据此更新
         heroName: heroName.trim(),
         gender,
         avatar: selectedAvatar,
@@ -78,11 +80,6 @@ Page({
         talentName: talent.name,
         talentCategory: talent.categoryId,
         talentColor: talent.color,
-        totalExp: 0,
-        level: 1,
-        rerollChances: 0, // 可通过成绩获得的重置机会
-        createdAt: db.serverDate(),
-        updatedAt: db.serverDate(),
       }
 
       const res = await wx.cloud.callFunction({
@@ -91,7 +88,14 @@ Page({
       })
 
       if (res.result && res.result.success) {
-        app.globalData.studentInfo = { ...studentData, _id: res.result.id }
+        // 更新 globalData 中的学生信息
+        app.globalData.studentInfo = {
+          ...app.globalData.studentInfo,
+          ...studentData,
+          totalExp: app.globalData.studentInfo?.totalExp || 0,
+          level: app.globalData.studentInfo?.level || 1,
+          _id: res.result.id || existingId,
+        }
         wx.showToast({ title: '角色创建成功！', icon: 'success' })
         setTimeout(() => {
           wx.reLaunch({ url: '/pages/character/character' })

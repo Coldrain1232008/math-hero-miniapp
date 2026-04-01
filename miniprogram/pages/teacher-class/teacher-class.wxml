@@ -25,6 +25,15 @@
         </view>
       </view>
 
+      <!-- 个人密钥显示 -->
+      <view class="s-key-section">
+        <view class="s-key-label">个人密钥：</view>
+        <view class="s-key-box">
+          <text class="s-key-text">{{item.studentKey || '-'}}</text>
+          <button wx:if="{{item.studentKey}}" class="btn-copy" catchtap="copyKey" data-key="{{item.studentKey}}" data-name="{{item.heroName}}">复制</button>
+        </view>
+      </view>
+
       <view class="s-footer">
         <text class="s-exp">{{item.totalExp}} EXP</text>
         <view class="s-actions">
@@ -40,7 +49,7 @@
   <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddDialog">
     <view class="modal-box" catchtap="">
       <text class="modal-title">批量导入学生</text>
-      <text class="modal-desc">每行一个名字，系统自动创建账号</text>
+      <text class="modal-desc">每行一个名字，系统自动创建账号和个人密钥</text>
       <textarea
         class="name-textarea"
         placeholder="张三&#10;李四&#10;王五"
