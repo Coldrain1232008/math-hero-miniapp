@@ -1,0 +1,9 @@
+{
+  "name": "fixStudentKeys",
+  "version": "1.0.0",
+  "description": "为没有个人密钥的旧学生补发 studentKey",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

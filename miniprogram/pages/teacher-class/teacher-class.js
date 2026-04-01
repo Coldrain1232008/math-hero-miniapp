@@ -6,15 +6,6 @@ const _ = db.command
 
 const ATTR_COLORS = ['#6c63ff', '#f59e0b', '#10b981', '#ec4899', '#3b82f6', '#ef4444']
 
-function genKey(len = 6) {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let key = ''
-  for (let i = 0; i < len; i++) {
-    key += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return key
-}
-
 Page({
   data: {
     students: [],
@@ -75,7 +66,7 @@ Page({
     })
   },
 
-  // ========== 补发密钥（为没有 studentKey 的旧学生自动生成） ==========
+  // ========== 补发密钥（通过云函数为没有 studentKey 的旧学生自动生成） ==========
   async fixKeys() {
     const noKeyStudents = this.data.students.filter(s => !s.studentKey || s.studentKey === '')
     if (noKeyStudents.length === 0) {
@@ -89,21 +80,24 @@ Page({
       success: async (res) => {
         if (!res.confirm) return
         wx.showLoading({ title: '生成中...' })
-        let successCount = 0
-        for (const s of noKeyStudents) {
-          try {
-            const newKey = genKey(6)
-            await db.collection('students').doc(s._id).update({
-              data: { studentKey: newKey, updatedAt: db.serverDate() }
-            })
-            successCount++
-          } catch (e) {
-            console.error(`补发密钥失败: ${s._id}`, e)
+        try {
+          const result = await wx.cloud.callFunction({
+            name: 'fixStudentKeys',
+            data: { classId: getApp().globalData.classId },
+          })
+          wx.hideLoading()
+          if (result.result?.success) {
+            const { count, total } = result.result
+            wx.showToast({ title: count > 0 ? `已为 ${count}/${total} 人补发密钥` : '所有学生都已有密钥', icon: 'success' })
+            this.loadStudents()
+          } else {
+            wx.showToast({ title: result.result?.message || '操作失败', icon: 'none' })
           }
+        } catch (e) {
+          wx.hideLoading()
+          console.error('补发密钥失败:', e)
+          wx.showToast({ title: '操作失败，请重试', icon: 'none' })
         }
-        wx.hideLoading()
-        wx.showToast({ title: `已为 ${successCount} 人补发密钥`, icon: 'success' })
-        this.loadStudents()
       }
     })
   },
