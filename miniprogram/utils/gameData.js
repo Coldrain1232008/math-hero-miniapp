@@ -241,36 +241,25 @@ const TALENT_DATA = {
 }
 
 /**
- * 升级经验表（参考游戏数值：前期平缓，中期加速，后期陡峭）
- * 设计思路：
- *   - 每天最多获得约 5 经验（1节课1经验 × 5节）
- *   - 优秀考试可得 100-150 经验
- *   - 让学生在一个学期（约18周）内能升到 10-15 级
- *   - 20级封顶，留有空间感
+ * Upgrade experience table (v1.0.1: 100 levels)
+ * Design goals:
+ *   - Lv1-3: 1 EXP each (every class score = level up!)
+ *   - Lv10: cumulative ~31 EXP (~1 week active student)
+ *   - Lv20: cumulative ~135 EXP (~1 month, with some exams)
+ *   - Lv35: cumulative ~476 EXP (mid-semester active)
+ *   - Lv50: cumulative ~1139 EXP (full semester top student)
+ *   - Lv100: cumulative ~9453 EXP (legendary, almost impossible)
+ *
+ * Typical semester EXP:
+ *   - Top student:    ~940 EXP (6 exams ranked #1 + 40 class scores) -> Lv47
+ *   - Average student: ~430 EXP (6 exams mid-rank + 10 class scores) -> Lv34
+ *
+ * Experience sources:
+ *   - Class score: +1 EXP per award
+ *   - Exam rank #1: +150 EXP, last place: +50 EXP, linear interpolation
  */
-const LEVEL_EXP_TABLE = [
-  0,    // Lv1 起始
-  50,   // Lv1→2  累计 50
-  120,  // Lv2→3  累计 170
-  210,  // Lv3→4  累计 380
-  320,  // Lv4→5  累计 700
-  450,  // Lv5→6  累计 1150
-  600,  // Lv6→7  累计 1750
-  780,  // Lv7→8  累计 2530
-  990,  // Lv8→9  累计 3520
-  1230, // Lv9→10 累计 4750
-  1500, // Lv10→11 累计 6250
-  1800, // Lv11→12 累计 8050
-  2130, // Lv12→13 累计 10180
-  2490, // Lv13→14 累计 12670
-  2880, // Lv14→15 累计 15550
-  3300, // Lv15→16 累计 18850
-  3750, // Lv16→17 累计 22600
-  4230, // Lv17→18 累计 26830
-  4740, // Lv18→19 累计 31570
-  5280, // Lv19→20 累计 36850（满级）
-]
-const MAX_LEVEL = 20
+const LEVEL_EXP_TABLE = [0, 1, 1, 1, 2, 2, 2, 4, 5, 6, 7, 7, 8, 9, 9, 10, 11, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 22, 23, 24, 25, 26, 27, 28, 30, 31, 32, 33, 34, 35, 37, 39, 41, 43, 46, 48, 50, 53, 55, 57, 60, 62, 64, 66, 69, 71, 74, 78, 82, 86, 90, 93, 97, 101, 105, 109, 112, 116, 120, 124, 128, 131, 135, 139, 143, 147, 154, 162, 169, 177, 184, 192, 199, 207, 214, 222, 229, 237, 244, 252, 259, 267, 274, 282, 289, 297, 304, 312, 319, 327]
+const MAX_LEVEL = 100
 
 /**
  * 根据班级总人数和排名，计算本次考试经验值

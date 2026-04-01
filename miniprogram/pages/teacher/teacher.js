@@ -11,6 +11,9 @@ Page({
 
   onShow() {
     const app = getApp()
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar()._updateRole()
+    }
     if (!app.globalData.isTeacher) {
       wx.reLaunch({ url: '/pages/login/login' })
       return

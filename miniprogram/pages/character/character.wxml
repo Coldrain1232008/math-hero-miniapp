@@ -20,7 +20,7 @@
     </view>
 
     <!-- 经验条 -->
-    <view wx:if="{{levelInfo.level < 20}}" class="exp-bar-wrap">
+    <view wx:if="{{levelInfo.level < 100}}" class="exp-bar-wrap">
       <view class="exp-bar-label">
         <text>距离 Lv.{{levelInfo.level + 1}}</text>
         <text>{{levelInfo.progressExp}} / {{levelInfo.needExp}}</text>

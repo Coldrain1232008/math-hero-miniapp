@@ -19,6 +19,10 @@ Page({
   },
 
   onShow() {
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar()._updateRole()
+      this.getTabBar().setData({ selected: 0 })
+    }
     this.loadData()
   },
 
