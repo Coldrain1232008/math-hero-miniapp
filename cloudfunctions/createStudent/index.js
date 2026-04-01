@@ -29,10 +29,11 @@ exports.main = async (event) => {
       return { success: false, message: '已有角色', id: existing._id }
     }
     // 预导入的占位记录 -> 更新为完整角色
+    // 注意：保留 studentId 和 realName（教师导入时设置），只更新 heroName 等角色信息
     await db.collection('students').doc(existing._id).update({
       data: {
         openid: WX_OPENID,
-        heroName: event.heroName,
+        heroName: event.heroName,  // 学生设置的角色名
         gender: event.gender,
         avatar: event.avatar,
         talentId: event.talentId,
@@ -45,13 +46,15 @@ exports.main = async (event) => {
     return { success: true, id: existing._id }
   }
 
-  // 全新学生（未通过教师导入）
+  // 全新学生（未通过教师导入）- 自主注册，无学号
   try {
     const res = await db.collection('students').add({
       data: {
         classId: event.classId,
         openid: WX_OPENID,
-        studentKey: '',  // 教师导入时生成，自主注册无个人密钥
+        studentId: '',           // 自主注册无学号
+        realName: '',            // 自主注册无真实姓名
+        studentKey: '',          // 自主注册无个人密钥
         heroName: event.heroName,
         gender: event.gender,
         avatar: event.avatar,

@@ -41,7 +41,13 @@
           <text class="s-avatar-icon">{{item.avatarIcon || '🧙'}}</text>
         </view>
         <view class="s-main">
-          <text class="s-hero-name">{{item.heroName}}</text>
+          <!-- 显示学号+姓名+角色名 -->
+          <view class="s-id-name-row">
+            <text class="s-student-id" wx:if="{{item.studentId}}">{{item.studentId}}</text>
+            <text class="s-real-name">{{item.realName || '-'}}</text>
+          </view>
+          <text class="s-hero-name" wx:if="{{item.heroName}}">角色：{{item.heroName}}</text>
+          <text class="s-hero-name pending" wx:else>角色：未创建</text>
           <view class="s-talent-tag" style="color:{{item.talentColor}}">{{item.talentName}}</view>
         </view>
         <view class="s-level-badge">Lv.{{item.level}}</view>
@@ -60,7 +66,7 @@
         <view class="s-key-box">
           <text class="s-key-text" wx:if="{{item.studentKey}}">{{item.studentKey}}</text>
           <text class="s-key-text no-key" wx:else>未生成</text>
-          <button wx:if="{{item.studentKey}}" class="btn-copy" catchtap="copyKey" data-key="{{item.studentKey}}" data-name="{{item.heroName}}">复制</button>
+          <button wx:if="{{item.studentKey}}" class="btn-copy" catchtap="copyKey" data-key="{{item.studentKey}}" data-name="{{item.realName}}">复制</button>
         </view>
       </view>
 
@@ -68,9 +74,9 @@
       <view class="s-footer">
         <text class="s-exp">{{item.totalExp}} EXP</text>
         <view class="s-actions">
-          <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.heroName}}">🎲 重置</button>
-          <button class="btn-sm btn-remove" catchtap="removeStudent" data-id="{{item._id}}" data-name="{{item.heroName}}">移出</button>
-          <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.heroName}}">永久删除</button>
+          <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.realName}}">🎲 重置</button>
+          <button class="btn-sm btn-remove" catchtap="removeStudent" data-id="{{item._id}}" data-name="{{item.realName}}">移出</button>
+          <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.realName}}">永久删除</button>
         </view>
       </view>
     </view>
@@ -80,13 +86,13 @@
   <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddDialog">
     <view class="modal-box" catchtap="preventBubble">
       <text class="modal-title">批量导入学生</text>
-      <text class="modal-desc">每行一个名字，系统自动创建账号和个人密钥</text>
+      <text class="modal-desc">每行一个学生，格式：学号 姓名 或 学号,姓名</text>
       <textarea
         class="name-textarea"
-        placeholder="张三&#10;李四&#10;王五"
+        placeholder="20240101 张三&#10;20240102 李四&#10;20240103 王五"
         value="{{nameInput}}"
         bindinput="onNameInput"
-        maxlength="500"
+        maxlength="1000"
       />
       <view class="modal-btns">
         <button class="btn-secondary" bindtap="hideAddDialog">取消</button>

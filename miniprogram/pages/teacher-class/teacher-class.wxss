@@ -86,7 +86,11 @@
 .s-avatar-circle { width: 80rpx; height: 80rpx; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .s-avatar-icon { font-size: 40rpx; }
 .s-main { flex: 1; }
-.s-hero-name { font-size: 32rpx; font-weight: bold; color: #333; display: block; margin-bottom: 6rpx; }
+.s-id-name-row { display: flex; align-items: center; gap: 16rpx; margin-bottom: 4rpx; }
+.s-student-id { font-size: 24rpx; color: #6c63ff; font-weight: 600; background: #f0f4ff; padding: 2rpx 10rpx; border-radius: 6rpx; }
+.s-real-name { font-size: 30rpx; font-weight: bold; color: #333; }
+.s-hero-name { font-size: 26rpx; color: #666; display: block; margin-bottom: 6rpx; }
+.s-hero-name.pending { color: #999; font-style: italic; }
 .s-talent-tag { font-size: 22rpx; padding: 3rpx 12rpx; background: rgba(0,0,0,0.04); border-radius: 8rpx; display: inline-block; }
 .s-level-badge { background: linear-gradient(135deg, #f6d365, #fda085); color: #fff; font-size: 22rpx; font-weight: bold; padding: 6rpx 16rpx; border-radius: 20rpx; }
 

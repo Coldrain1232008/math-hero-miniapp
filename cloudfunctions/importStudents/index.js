@@ -1,5 +1,5 @@
 // cloudfunctions/importStudents/index.js
-// 老师批量导入学生名单（预创建占位记录，生成学生密钥）
+// 老师批量导入学生名单（支持 学号,姓名 或 学号 姓名 或 姓名 格式）
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
@@ -13,19 +13,70 @@ function genKey(len = 6) {
   return key
 }
 
+// 解析输入行，支持多种格式：
+// "20240101 张三" -> {studentId: '20240101', realName: '张三'}
+// "20240101,张三" -> {studentId: '20240101', realName: '张三'}
+// "20240101, 张三" -> {studentId: '20240101', realName: '张三'}
+// "张三" -> {studentId: null, realName: '张三'}（无学号时自动生成）
+function parseStudentLine(line) {
+  line = line.trim()
+  if (!line) return null
+
+  // 尝试匹配 学号,姓名 或 学号 姓名 格式
+  // 学号通常是数字
+  const match = line.match(/^(\d+)[,，\s]+(.+)$/)
+  if (match) {
+    return {
+      studentId: match[1].trim(),
+      realName: match[2].trim()
+    }
+  }
+
+  // 只有姓名，没有学号
+  return {
+    studentId: null,
+    realName: line
+  }
+}
+
+// 生成唯一学号（当用户未提供时）
+function generateStudentId(classId, index) {
+  const timestamp = Date.now().toString(36).slice(-4).toUpperCase()
+  const idx = String(index + 1).padStart(3, '0')
+  return `AUTO${timestamp}${idx}`
+}
+
 exports.main = async (event) => {
-  const { names, classId } = event
-  if (!names || names.length === 0) return { success: false }
+  const { lines, classId } = event
+  if (!lines || lines.length === 0) return { success: false, message: '没有数据' }
+  if (!classId) return { success: false, message: '缺少 classId' }
 
   try {
     const results = []
-    for (const name of names) {
-      // 检查是否已存在
+    for (let i = 0; i < lines.length; i++) {
+      const parsed = parseStudentLine(lines[i])
+      if (!parsed) continue
+
+      let { studentId, realName } = parsed
+
+      // 如果没有提供学号，自动生成
+      if (!studentId) {
+        studentId = generateStudentId(classId, i)
+      }
+
+      // 检查该学号是否已存在（同一班级内）
       const exist = await db.collection('students')
-        .where({ classId, realName: name })
+        .where({ classId, studentId })
         .get()
+
       if (exist.data.length > 0) {
-        results.push({ name, key: exist.data[0].studentKey, status: 'exists' })
+        results.push({
+          studentId,
+          realName,
+          key: exist.data[0].studentKey,
+          status: 'exists',
+          message: '学号已存在'
+        })
         continue
       }
 
@@ -33,8 +84,9 @@ exports.main = async (event) => {
       await db.collection('students').add({
         data: {
           classId,
-          realName: name,
-          heroName: name,           // 默认英雄名=真实名，学生可自行修改
+          studentId,                // 学号（唯一标识，不可修改）
+          realName,                 // 真实姓名（不可修改）
+          heroName: '',             // 角色名（学生创建角色后设置）
           studentKey,               // 学生登录密钥
           openid: '',               // 待学生首次登录后绑定
           avatar: 'A1',
@@ -50,7 +102,13 @@ exports.main = async (event) => {
           updatedAt: db.serverDate(),
         },
       })
-      results.push({ name, key: studentKey, status: 'created' })
+
+      results.push({
+        studentId,
+        realName,
+        key: studentKey,
+        status: 'created'
+      })
     }
 
     return { success: true, results }

@@ -131,8 +131,13 @@ Page({
     let text = `【数学英雄 - ${classInfo?.name || '我的班级'}】\n`
     text += `班级密钥：${classInfo?.studentKey || '-'}\n`
     text += `\n--- 学生个人密钥 ---\n`
+    text += `格式：学号 姓名 角色名 密钥\n\n`
     students.forEach(s => {
-      text += `${s.heroName || '-'}：${s.studentKey || '未生成'}\n`
+      const id = s.studentId || '-'
+      const realName = s.realName || '-'
+      const heroName = s.heroName || '未创建'
+      const key = s.studentKey || '未生成'
+      text += `${id} ${realName} ${heroName} ${key}\n`
     })
 
     wx.setClipboardData({
@@ -149,13 +154,14 @@ Page({
   onNameInput(e) { this.setData({ nameInput: e.detail.value }) },
 
   async importNames() {
-    const names = this.data.nameInput
+    // 直接传递原始输入行，由云函数解析学号和姓名
+    const lines = this.data.nameInput
       .split('\n')
       .map(n => n.trim())
       .filter(n => n.length > 0)
 
-    if (names.length === 0) {
-      wx.showToast({ title: '请输入名字', icon: 'none' })
+    if (lines.length === 0) {
+      wx.showToast({ title: '请输入学生信息', icon: 'none' })
       return
     }
 
@@ -164,7 +170,7 @@ Page({
     try {
       const res = await wx.cloud.callFunction({
         name: 'importStudents',
-        data: { names, classId: app.globalData.classId },
+        data: { lines, classId: app.globalData.classId },
       })
       if (res.result?.success) {
         const results = res.result.results || []
@@ -176,6 +182,8 @@ Page({
         wx.showToast({ title: msg, icon: 'success' })
         this.hideAddDialog()
         this.loadStudents()
+      } else {
+        wx.showToast({ title: res.result?.message || '导入失败', icon: 'none' })
       }
     } catch (e) {
       console.error(e)
