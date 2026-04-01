@@ -3,3 +3,4 @@ miniprogram_npm/
 .cloud/
 *.log
 .DS_Store
+project.private.config.json
