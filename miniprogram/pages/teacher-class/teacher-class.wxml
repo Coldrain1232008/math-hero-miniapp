@@ -74,13 +74,16 @@
         </view>
       </view>
 
-      <!-- 操作区 -->
-      <view class="s-footer">
-        <text class="s-exp">{{item.totalExp}} EXP</text>
-        <view class="s-actions">
-          <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.realName}}">🎲 重置</button>
-          <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.realName}}">🗑️ 删除</button>
-        </view>
+      <!-- 经验值显示 -->
+      <view class="s-exp-row">
+        <text class="s-exp-label">总经验值</text>
+        <text class="s-exp-value">{{item.totalExp}} EXP</text>
+      </view>
+      
+      <!-- 操作按钮 -->
+      <view class="s-actions-row">
+        <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.realName}}">🎲 重置</button>
+        <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.realName}}">🗑️ 删除</button>
       </view>
     </view>
   </view>
@@ -116,22 +119,38 @@
         <view wx:if="{{pendingTasks.length === 0}}" class="task-empty">
           <text>暂无待确认任务</text>
         </view>
-        <view wx:for="{{pendingTasks}}" wx:key="_id" class="task-item">
-          <view class="task-info">
-            <view class="task-student">
-              <text class="student-name">{{item.studentName}}</text>
-              <text class="student-id" wx:if="{{item.studentId}}">({{item.studentId}})</text>
+        <view wx:for="{{pendingTasks}}" wx:key="_id" class="task-card">
+          <!-- 头部：学生信息 -->
+          <view class="task-header">
+            <view class="task-student-info">
+              <text class="task-student-name">{{item.studentName}}</text>
+              <text class="task-student-id" wx:if="{{item.studentId}}">{{item.studentId}}</text>
             </view>
+            <text class="task-submit-time">{{item.submitTimeStr}}</text>
+          </view>
+          
+          <!-- 中部：任务内容 -->
+          <view class="task-body">
             <text class="task-title">{{item.title}}</text>
             <text class="task-desc">{{item.desc}}</text>
-            <view class="task-meta">
-              <text class="task-exp">+{{item.expReward}} EXP</text>
-              <text class="task-time">{{item.submitTimeStr}}</text>
-            </view>
           </view>
-          <view class="task-actions">
-            <button class="btn-reject" catchtap="rejectTask" data-id="{{item._id}}">✕</button>
-            <button class="btn-confirm" catchtap="confirmTask" data-id="{{item._id}}">✓</button>
+          
+          <!-- 底部：经验值和操作 -->
+          <view class="task-footer">
+            <view class="task-reward">
+              <text class="reward-label">奖励</text>
+              <text class="reward-value">+{{item.expReward}} EXP</text>
+            </view>
+            <view class="task-actions">
+              <button class="btn-task-reject" catchtap="rejectTask" data-id="{{item._id}}">
+                <text class="btn-icon">✕</text>
+                <text class="btn-text">拒绝</text>
+              </button>
+              <button class="btn-task-confirm" catchtap="confirmTask" data-id="{{item._id}}">
+                <text class="btn-icon">✓</text>
+                <text class="btn-text">确认</text>
+              </button>
+            </view>
           </view>
         </view>
       </scroll-view>

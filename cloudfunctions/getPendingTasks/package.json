@@ -1,0 +1,9 @@
+{
+  "name": "getPendingTasks",
+  "version": "1.0.0",
+  "description": "获取班级中所有待确认的任务",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

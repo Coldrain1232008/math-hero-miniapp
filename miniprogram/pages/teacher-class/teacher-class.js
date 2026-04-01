@@ -1,8 +1,6 @@
 // pages/teacher-class/teacher-class.js
 const { calcLevel, calcAttributes, ATTR_NAMES } = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
-const db = wx.cloud.database()
-const _ = db.command
 
 const ATTR_COLORS = ['#6c63ff', '#f59e0b', '#10b981', '#ec4899', '#3b82f6', '#ef4444']
 
@@ -34,8 +32,13 @@ Page({
   async loadClassInfo() {
     const app = getApp()
     try {
-      const res = await db.collection('classes').doc(app.globalData.classId).get()
-      this.setData({ classInfo: res.data })
+      const res = await wx.cloud.callFunction({
+        name: 'getClassData',
+        data: { classId: app.globalData.classId, action: 'classInfo' }
+      })
+      if (res.result && res.result.success) {
+        this.setData({ classInfo: res.result.classInfo })
+      }
     } catch (e) { console.error(e) }
   },
 
@@ -43,21 +46,23 @@ Page({
   async loadStudents() {
     const app = getApp()
     try {
-      const res = await db.collection('students')
-        .where({ classId: app.globalData.classId })
-        .orderBy('totalExp', 'desc')
-        .get()
-
-      const students = res.data.map(s => {
-        const levelInfo = calcLevel(s.totalExp)
-        const attrs = calcAttributes(s.talentId, levelInfo.level)
-        const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
-        const attrDisplay = ATTR_NAMES.map((name, i) => ({
-          name, val: attrs[i], color: ATTR_COLORS[i],
-        }))
-        return { ...s, level: levelInfo.level, attrDisplay, avatarColor: avatarInfo.color, avatarIcon: avatarInfo.icon }
+      const res = await wx.cloud.callFunction({
+        name: 'getClassData',
+        data: { classId: app.globalData.classId, action: 'students' }
       })
-      this.setData({ students })
+
+      if (res.result && res.result.success) {
+        const students = res.result.students.map(s => {
+          const levelInfo = calcLevel(s.totalExp)
+          const attrs = calcAttributes(s.talentId, levelInfo.level)
+          const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
+          const attrDisplay = ATTR_NAMES.map((name, i) => ({
+            name, val: attrs[i], color: ATTR_COLORS[i],
+          }))
+          return { ...s, level: levelInfo.level, attrDisplay, avatarColor: avatarInfo.color, avatarIcon: avatarInfo.icon }
+        })
+        this.setData({ students })
+      }
     } catch (e) { console.error(e) }
   },
 
@@ -218,14 +223,21 @@ Page({
       confirmColor: '#ef4444',
       success: async (res) => {
         if (!res.confirm) return
+        wx.showLoading({ title: '操作中...' })
         try {
-          // 清空 classId，表示不在任何班级
-          await db.collection('students').doc(id).update({
-            data: { classId: '', updatedAt: db.serverDate() }
+          const result = await wx.cloud.callFunction({
+            name: 'updateStudent',
+            data: { action: 'removeFromClass', studentId: id }
           })
-          wx.showToast({ title: `已将 ${name} 移出班级`, icon: 'success' })
-          this.loadStudents()
+          wx.hideLoading()
+          if (result.result && result.result.success) {
+            wx.showToast({ title: `已将 ${name} 移出班级`, icon: 'success' })
+            this.loadStudents()
+          } else {
+            wx.showToast({ title: result.result?.error || '操作失败', icon: 'none' })
+          }
         } catch (e) {
+          wx.hideLoading()
           wx.showToast({ title: '操作失败', icon: 'none' })
         }
       },
@@ -284,46 +296,24 @@ Page({
   async loadPendingTasks() {
     const app = getApp()
     try {
-      // 获取班级所有学生的待确认任务
-      const studentRes = await db.collection('students')
-        .where({ classId: app.globalData.classId })
-        .get()
-      
-      const studentIds = studentRes.data.map(s => s._id)
-      const studentMap = {}
-      studentRes.data.forEach(s => {
-        studentMap[s._id] = s
+      // 使用云函数查询待确认任务（避免前端权限问题）
+      const res = await wx.cloud.callFunction({
+        name: 'getPendingTasks',
+        data: { classId: app.globalData.classId }
       })
       
-      if (studentIds.length === 0) {
-        this.setData({ pendingTasks: [], pendingTaskCount: 0 })
-        return
-      }
-      
-      const taskRes = await db.collection('dailyTasks')
-        .where({
-          studentId: db.command.in(studentIds),
-          status: 'submitted'
+      if (res.result && res.result.success) {
+        this.setData({ 
+          pendingTasks: res.result.pendingTasks || [], 
+          pendingTaskCount: res.result.count || 0 
         })
-        .orderBy('submitTime', 'asc')
-        .get()
-      
-      const pendingTasks = taskRes.data.map(task => {
-        const student = studentMap[task.studentId] || {}
-        return {
-          ...task,
-          studentName: student.realName || student.heroName || '未知',
-          studentId: student.studentId || '',
-          submitTimeStr: this._formatTime(task.submitTime)
-        }
-      })
-      
-      this.setData({ 
-        pendingTasks, 
-        pendingTaskCount: pendingTasks.length 
-      })
+      } else {
+        console.error('加载待确认任务失败:', res.result?.error)
+        this.setData({ pendingTasks: [], pendingTaskCount: 0 })
+      }
     } catch (e) {
       console.error('加载待确认任务失败:', e)
+      this.setData({ pendingTasks: [], pendingTaskCount: 0 })
     }
   },
 
@@ -441,13 +431,21 @@ Page({
       content: `确定给 ${name} +1 次重置天赋机会？`,
       success: async (res) => {
         if (!res.confirm) return
+        wx.showLoading({ title: '操作中...' })
         try {
-          await db.collection('students').doc(id).update({
-            data: { rerollChances: _.inc(1) },
+          const result = await wx.cloud.callFunction({
+            name: 'updateStudent',
+            data: { action: 'grantReroll', studentId: id }
           })
-          wx.showToast({ title: `已给 ${name} +1 次机会`, icon: 'success' })
-          this.loadStudents()
+          wx.hideLoading()
+          if (result.result && result.result.success) {
+            wx.showToast({ title: `已给 ${name} +1 次机会`, icon: 'success' })
+            this.loadStudents()
+          } else {
+            wx.showToast({ title: result.result?.error || '操作失败', icon: 'none' })
+          }
         } catch (e) {
+          wx.hideLoading()
           wx.showToast({ title: '操作失败', icon: 'none' })
         }
       },

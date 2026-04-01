@@ -1,0 +1,9 @@
+{
+  "name": "undoExp",
+  "version": "1.0.0",
+  "description": "撤回经验值操作",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~3.0.0"
+  }
+}

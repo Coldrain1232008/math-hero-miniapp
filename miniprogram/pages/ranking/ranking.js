@@ -1,7 +1,6 @@
 // pages/ranking/ranking.js
 const { calcLevel, calcAttributes, ATTR_NAMES } = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
-const db = wx.cloud.database()
 
 // 称号配置
 const TITLE_CONFIG = {
@@ -92,35 +91,37 @@ Page({
 
     try {
       wx.showNavigationBarLoading()
-      const res = await db.collection('students')
-        .where({ classId })
-        .orderBy('totalExp', 'desc')
-        .limit(50)
-        .get()
-
-      const maxExp = res.data[0]?.totalExp || 1
-
-      const rankList = res.data.map((s, i) => {
-        const levelInfo = calcLevel(s.totalExp)
-        const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
-        const title = this.calcTitle(s)
-        return {
-          ...s,
-          rank: i + 1,
-          level: levelInfo.level,
-          isMe: s._id === myStudentId,
-          expPercent: Math.round(s.totalExp / maxExp * 100),
-          avatarColor: avatarInfo.color,
-          avatarIcon: avatarInfo.icon,
-          title: title,
-        }
+      const res = await wx.cloud.callFunction({
+        name: 'getClassData',
+        data: { classId, action: 'ranking' }
       })
 
-      const topThree = rankList.slice(0, 3)
-      const myItem = rankList.find(s => s._id === myStudentId)
-      const myRank = myItem ? myItem.rank : 0
+      if (res.result && res.result.success) {
+        const students = res.result.students
+        const maxExp = students[0]?.totalExp || 1
 
-      this.setData({ rankList, topThree, myRank, myStudent: myItem || null })
+        const rankList = students.map((s, i) => {
+          const levelInfo = calcLevel(s.totalExp)
+          const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
+          const title = this.calcTitle(s)
+          return {
+            ...s,
+            rank: i + 1,
+            level: levelInfo.level,
+            isMe: s._id === myStudentId,
+            expPercent: Math.round(s.totalExp / maxExp * 100),
+            avatarColor: avatarInfo.color,
+            avatarIcon: avatarInfo.icon,
+            title: title,
+          }
+        })
+
+        const topThree = rankList.slice(0, 3)
+        const myItem = rankList.find(s => s._id === myStudentId)
+        const myRank = myItem ? myItem.rank : 0
+
+        this.setData({ rankList, topThree, myRank, myStudent: myItem || null })
+      }
     } catch (e) {
       console.error(e)
     } finally {

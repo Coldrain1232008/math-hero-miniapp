@@ -124,10 +124,48 @@
 .s-key-text.no-key { color: #ccc; font-size: 24rpx; }
 .btn-copy { font-size: 22rpx; padding: 6rpx 20rpx; background: #6c63ff; color: #fff; border-radius: 20rpx; border: none; margin: 0; line-height: 1.6; }
 
-.s-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8rpx; }
+.s-footer { display: flex; justify-content: space-between; align-items: center; }
 .s-exp { font-size: 24rpx; color: #999; }
 .s-actions { display: flex; gap: 12rpx; }
-.btn-sm { font-size: 22rpx; padding: 10rpx 20rpx; border-radius: 30rpx; margin: 0; border: none; white-space: nowrap; line-height: 1.4; }
+
+/* 经验值显示行 */
+.s-exp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16rpx 20rpx;
+  background: linear-gradient(135deg, #f0f4ff, #f8f8fc);
+  border-radius: 12rpx;
+  margin-bottom: 16rpx;
+}
+.s-exp-label {
+  font-size: 22rpx;
+  color: #888;
+}
+.s-exp-value {
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #6c63ff;
+  font-family: 'Menlo', 'Consolas', monospace;
+}
+
+/* 操作按钮行 */
+.s-actions-row {
+  display: flex;
+  gap: 16rpx;
+}
+.s-actions-row .btn-sm {
+  flex: 1;
+  font-size: 24rpx;
+  padding: 14rpx 0;
+  border-radius: 30rpx;
+  margin: 0;
+  border: none;
+  white-space: nowrap;
+  line-height: 1.4;
+  text-align: center;
+}
+.btn-sm { font-size: 22rpx; padding: 10rpx 16rpx; border-radius: 30rpx; margin: 0; border: none; white-space: nowrap; line-height: 1.4; }
 .btn-reroll { background: #fef3c7; color: #b45309; }
 .btn-delete { background: #ef4444; color: #fff; }
 
@@ -141,7 +179,8 @@
 .modal-title { font-size: 34rpx; font-weight: bold; color: #333; display: block; margin-bottom: 12rpx; }
 .modal-desc { font-size: 24rpx; color: #999; display: block; margin-bottom: 28rpx; }
 .name-textarea { width: 100%; height: 200rpx; background: #f8f8fc; border-radius: 12rpx; padding: 20rpx; font-size: 28rpx; color: #333; box-sizing: border-box; }
-.modal-btns { display: flex; gap: 20rpx; margin-top: 32rpx; justify-content: flex-end; }
+.modal-btns { display: flex; gap: 20rpx; margin-top: 32rpx; }
+.modal-btns button { flex: 1; }
 .btn-secondary { background: transparent; color: #6c63ff; border: 2rpx solid #6c63ff; border-radius: 40rpx; font-size: 28rpx; padding: 14rpx 36rpx; }
 .btn-primary { background: #6c63ff; color: #fff; border-radius: 40rpx; font-size: 28rpx; padding: 14rpx 36rpx; border: none; }
 
@@ -174,95 +213,130 @@
   padding: 60rpx 0;
 }
 
-.task-item {
+/* 任务卡片 */
+.task-card {
+  background: #f8f8fc;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+}
+
+.task-card:last-child {
+  margin-bottom: 0;
+}
+
+/* 头部：学生信息 */
+.task-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 24rpx 0;
-  border-bottom: 1rpx solid #f0f0f0;
+  align-items: center;
+  margin-bottom: 16rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #e8e8f0;
 }
 
-.task-item:last-child {
-  border-bottom: none;
-}
-
-.task-info {
-  flex: 1;
-  margin-right: 20rpx;
-}
-
-.task-student {
+.task-student-info {
   display: flex;
   align-items: center;
-  gap: 12rpx;
-  margin-bottom: 8rpx;
+  gap: 16rpx;
 }
 
-.student-name {
-  font-size: 28rpx;
+.task-student-name {
+  font-size: 30rpx;
   font-weight: bold;
   color: #333;
 }
 
-.student-id {
+.task-student-id {
+  font-size: 22rpx;
+  color: #6c63ff;
+  background: #e8e5ff;
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.task-submit-time {
   font-size: 22rpx;
   color: #999;
+}
+
+/* 中部：任务内容 */
+.task-body {
+  margin-bottom: 20rpx;
 }
 
 .task-title {
   font-size: 28rpx;
   color: #333;
-  display: block;
-  margin-bottom: 4rpx;
-}
-
-.task-desc {
-  font-size: 24rpx;
-  color: #666;
+  font-weight: 600;
   display: block;
   margin-bottom: 8rpx;
 }
 
-.task-meta {
+.task-desc {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  line-height: 1.5;
+}
+
+/* 底部：经验值和操作 */
+.task-footer {
   display: flex;
-  gap: 16rpx;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #e8e8f0;
 }
 
-.task-exp {
-  font-size: 22rpx;
-  color: #10b981;
-  font-weight: 600;
+.task-reward {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
 }
 
-.task-time {
+.reward-label {
   font-size: 22rpx;
   color: #999;
 }
 
-.task-actions {
-  display: flex;
-  gap: 12rpx;
+.reward-value {
+  font-size: 28rpx;
+  color: #10b981;
+  font-weight: bold;
 }
 
-.btn-reject, .btn-confirm {
-  width: 56rpx;
-  height: 56rpx;
-  border-radius: 50%;
-  font-size: 28rpx;
+.task-actions {
+  display: flex;
+  gap: 16rpx;
+}
+
+.btn-task-reject, .btn-task-confirm {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0;
-  margin: 0;
+  gap: 8rpx;
+  padding: 16rpx 32rpx;
+  border-radius: 30rpx;
   border: none;
+  margin: 0;
+  min-width: 140rpx;
 }
 
-.btn-reject {
+.btn-task-reject {
   background: #fee2e2;
   color: #ef4444;
 }
 
-.btn-confirm {
-  background: #d1fae5;
-  color: #10b981;
+.btn-task-confirm {
+  background: #6c63ff;
+  color: #fff;
+}
+
+.btn-icon {
+  font-size: 24rpx;
+}
+
+.btn-text {
+  font-size: 26rpx;
 }

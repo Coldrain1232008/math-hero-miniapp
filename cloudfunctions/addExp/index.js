@@ -100,12 +100,13 @@ exports.main = async (event) => {
         data: {
           studentId,
           classId,
-          exp: totalExp,
+          amount: totalExp,
           baseExp: expVal,
           bonusExp: bonusExp,
           type: type || 'class',
-          desc: (desc || '') + bonusDesc,
+          description: (desc || '') + bonusDesc,
           createdAt: db.serverDate(),
+          undone: false,
         },
       })
       

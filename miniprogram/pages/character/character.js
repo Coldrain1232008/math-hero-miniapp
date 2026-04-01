@@ -42,9 +42,14 @@ Page({
 
     // 从数据库刷新最新数据
     try {
-      const res = await db.collection('students').doc(student._id).get()
-      student = res.data
-      app.globalData.studentInfo = student
+      const res = await wx.cloud.callFunction({
+        name: 'getStudentData',
+        data: { studentId: student._id }
+      })
+      if (res.result && res.result.success) {
+        student = res.result.student
+        app.globalData.studentInfo = student
+      }
     } catch (e) { console.error(e) }
 
     const levelInfo = calcLevel(student.totalExp)
@@ -155,21 +160,29 @@ Page({
       success: async (res) => {
         if (!res.confirm) return
         
+        wx.showLoading({ title: '提交中...' })
         try {
-          await db.collection('dailyTasks').doc(dailyTask.id).update({
+          const result = await wx.cloud.callFunction({
+            name: 'submitTask',
             data: {
-              status: 'submitted',
-              submitTime: new Date()
+              taskId: dailyTask.id,
+              studentId: student._id
             }
           })
           
-          // 更新本地状态
-          this.setData({
-            'dailyTask.status': 'submitted'
-          })
+          wx.hideLoading()
           
-          wx.showToast({ title: '已提交，等待老师确认', icon: 'success' })
+          if (result.result && result.result.success) {
+            // 更新本地状态
+            this.setData({
+              'dailyTask.status': 'submitted'
+            })
+            wx.showToast({ title: '已提交，等待老师确认', icon: 'success' })
+          } else {
+            wx.showToast({ title: result.result?.error || '提交失败', icon: 'none' })
+          }
         } catch (e) {
+          wx.hideLoading()
           console.error('提交任务失败:', e)
           wx.showToast({ title: '提交失败', icon: 'none' })
         }

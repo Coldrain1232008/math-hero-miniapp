@@ -1,0 +1,9 @@
+{
+  "name": "submitTask",
+  "version": "1.0.0",
+  "description": "学生提交任务完成，等待老师确认",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

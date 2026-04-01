@@ -78,7 +78,8 @@ exports.main = async (event, context) => {
           amount: task.expReward,
           description: `完成任务：${task.title}`,
           taskId: taskId,
-          createTime: now
+          createdAt: now,
+          undone: false
         }
       })
       

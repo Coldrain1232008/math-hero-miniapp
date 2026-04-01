@@ -1,7 +1,6 @@
 // pages/teacher-score/teacher-score.js
 const { calcLevel } = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
-const db = wx.cloud.database()
 
 Page({
   data: {
@@ -21,20 +20,22 @@ Page({
   async loadStudents() {
     const app = getApp()
     try {
-      const res = await db.collection('students')
-        .where({ classId: app.globalData.classId })
-        .orderBy('heroName', 'asc')
-        .get()
-      const students = res.data.map(s => {
-        const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
-        return {
-          ...s,
-          level: calcLevel(s.totalExp).level,
-          avatarColor: avatarInfo.color,
-          avatarIcon: avatarInfo.icon,
-        }
+      const res = await wx.cloud.callFunction({
+        name: 'getClassData',
+        data: { classId: app.globalData.classId, action: 'studentsByName' }
       })
-      this.setData({ allStudents: students, filteredList: students })
+      if (res.result && res.result.success) {
+        const students = res.result.students.map(s => {
+          const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
+          return {
+            ...s,
+            level: calcLevel(s.totalExp).level,
+            avatarColor: avatarInfo.color,
+            avatarIcon: avatarInfo.icon,
+          }
+        })
+        this.setData({ allStudents: students, filteredList: students })
+      }
     } catch (e) { console.error(e) }
   },
 

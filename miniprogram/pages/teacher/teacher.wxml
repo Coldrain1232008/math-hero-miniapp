@@ -55,10 +55,54 @@
   <view class="card log-section">
     <view class="card-title">近期操作</view>
     <view wx:if="{{recentLogs.length === 0}}" class="empty-log">暂无记录</view>
-    <view wx:for="{{recentLogs}}" wx:key="_id" class="log-row">
-      <text class="log-type-tag">{{item.typeLabel}}</text>
-      <text class="log-text">{{item.desc}}</text>
-      <text class="log-time">{{item.timeStr}}</text>
+    <view wx:for="{{recentLogs}}" wx:key="_id" class="log-item {{item.undone ? 'log-undone' : ''}}" bindtap="showLogDetail" data-index="{{index}}">
+      <view class="log-main">
+        <text class="log-type-tag">{{item.typeLabel}}</text>
+        <text class="log-summary">{{item.studentName || '学生'}} {{item.amount > 0 ? '+' : ''}}{{item.amount}} EXP</text>
+      </view>
+      <view class="log-meta">
+        <text class="log-time">{{item.timeStr}}</text>
+        <text wx:if="{{item.undone}}" class="undone-badge">已撤回</text>
+        <text wx:else class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 操作详情弹窗 -->
+  <view wx:if="{{showLogDetail}}" class="modal-mask" bindtap="hideLogDetail">
+    <view class="modal-box log-detail-modal" catchtap="preventBubble">
+      <view class="detail-header">
+        <text class="detail-type">{{selectedLog.typeLabel}}</text>
+        <text class="detail-time">{{selectedLog.timeStr}}</text>
+      </view>
+      
+      <view class="detail-body">
+        <view class="detail-row">
+          <text class="detail-label">学生</text>
+          <text class="detail-value">{{selectedLog.studentName || '未知'}}</text>
+        </view>
+        <view class="detail-row">
+          <text class="detail-label">经验值</text>
+          <text class="detail-value {{selectedLog.amount > 0 ? 'exp-positive' : 'exp-negative'}}">{{selectedLog.amount > 0 ? '+' : ''}}{{selectedLog.amount}} EXP</text>
+        </view>
+        <view class="detail-row" wx:if="{{selectedLog.baseExp}}">
+          <text class="detail-label">基础奖励</text>
+          <text class="detail-value">+{{selectedLog.baseExp}} EXP</text>
+        </view>
+        <view class="detail-row" wx:if="{{selectedLog.bonusExp}}">
+          <text class="detail-label">天赋加成</text>
+          <text class="detail-value exp-positive">+{{selectedLog.bonusExp}} EXP</text>
+        </view>
+        <view class="detail-desc">
+          <text class="detail-label">说明</text>
+          <text class="detail-desc-text">{{selectedLog.description || selectedLog.desc || '-'}}</text>
+        </view>
+      </view>
+      
+      <view class="detail-footer">
+        <button class="btn-secondary" bindtap="hideLogDetail">返回</button>
+        <button wx:if="{{selectedLog.canUndo}}" class="btn-danger" bindtap="undoSelectedLog">撤回</button>
+      </view>
     </view>
   </view>
 </view>

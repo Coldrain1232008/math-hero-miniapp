@@ -1,6 +1,5 @@
 // pages/teacher-upload/teacher-upload.js
 const { calcScoreExpCustom } = require('../../utils/gameData')
-const db = wx.cloud.database()
 
 // 递减规则选项
 const DECAY_RULES = [
@@ -37,10 +36,13 @@ Page({
   async loadStudents() {
     const app = getApp()
     try {
-      const res = await db.collection('students')
-        .where({ classId: app.globalData.classId })
-        .get()
-      this.data._students = res.data
+      const res = await wx.cloud.callFunction({
+        name: 'getClassData',
+        data: { classId: app.globalData.classId, action: 'students' }
+      })
+      if (res.result && res.result.success) {
+        this.data._students = res.result.students
+      }
     } catch (e) { console.error(e) }
   },
 
