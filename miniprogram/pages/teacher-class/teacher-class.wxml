@@ -1,0 +1,57 @@
+<!-- pages/teacher-class/teacher-class.wxml -->
+<view class="page-bg">
+  <view class="header-bar">
+    <text class="total-label">共 {{students.length}} 名学生</text>
+    <button class="btn-add" bindtap="showAddDialog">+ 导入名单</button>
+  </view>
+
+  <view class="student-list">
+    <view wx:for="{{students}}" wx:key="_id" class="s-card">
+      <view class="s-top">
+        <view class="s-avatar-circle" style="background-color: {{item.avatarColor || '#999'}}">
+          <text class="s-avatar-icon">{{item.avatarIcon || '🧙'}}</text>
+        </view>
+        <view class="s-main">
+          <text class="s-hero-name">{{item.heroName}}</text>
+          <view class="s-talent-tag" style="color:{{item.talentColor}}">{{item.talentName}}</view>
+        </view>
+        <view class="s-level-badge">Lv.{{item.level}}</view>
+      </view>
+
+      <view class="s-attrs">
+        <view wx:for="{{item.attrDisplay}}" wx:for-item="attr" wx:key="name" class="mini-attr">
+          <text style="color:{{attr.color}}">{{attr.name}}</text>
+          <text class="mini-val">{{attr.val}}</text>
+        </view>
+      </view>
+
+      <view class="s-footer">
+        <text class="s-exp">{{item.totalExp}} EXP</text>
+        <view class="s-actions">
+          <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.heroName}}">
+            🎲 给重置机会
+          </button>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 导入名单弹窗 -->
+  <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddDialog">
+    <view class="modal-box" catchtap="">
+      <text class="modal-title">批量导入学生</text>
+      <text class="modal-desc">每行一个名字，系统自动创建账号</text>
+      <textarea
+        class="name-textarea"
+        placeholder="张三&#10;李四&#10;王五"
+        value="{{nameInput}}"
+        bindinput="onNameInput"
+        maxlength="500"
+      />
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="hideAddDialog">取消</button>
+        <button class="btn-primary" bindtap="importNames" loading="{{addLoading}}">导入</button>
+      </view>
+    </view>
+  </view>
+</view>

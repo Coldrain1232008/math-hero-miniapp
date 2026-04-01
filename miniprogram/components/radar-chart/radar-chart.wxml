@@ -1,0 +1,21 @@
+<!-- components/radar-chart/radar-chart.wxml -->
+<view class="radar-wrap">
+  <canvas
+    type="2d"
+    id="radarCanvas"
+    class="radar-canvas"
+    style="width:{{size}}px;height:{{size}}px"
+  ></canvas>
+  <!-- 属性标签 -->
+  <view class="label-wrap" style="width:{{size}}px;height:{{size}}px">
+    <view
+      wx:for="{{labels}}"
+      wx:key="name"
+      class="label-item"
+      style="left:{{item.x}}px;top:{{item.y}}px;color:{{item.color}}"
+    >
+      <text class="label-name">{{item.name}}</text>
+      <text class="label-val">{{item.val}}</text>
+    </view>
+  </view>
+</view>

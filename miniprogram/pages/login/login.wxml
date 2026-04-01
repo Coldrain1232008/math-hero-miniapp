@@ -1,0 +1,32 @@
+<!-- pages/login/login.wxml -->
+<view class="login-container gradient-bg">
+  <view class="logo-area">
+    <view class="logo-circle">
+      <text class="logo-icon">⚔️</text>
+    </view>
+    <text class="app-title">数学英雄</text>
+    <text class="app-subtitle">记录你的每一步成长</text>
+  </view>
+
+  <view class="form-area">
+    <view class="input-group">
+      <text class="input-label">密钥</text>
+      <input
+        class="input-field"
+        placeholder="输入班级密钥"
+        value="{{secretKey}}"
+        bindinput="onKeyInput"
+        password
+      />
+    </view>
+
+    <view class="role-switch">
+      <view class="role-btn {{role === 'student' ? 'active' : ''}}" bindtap="setStudent">学生</view>
+      <view class="role-btn {{role === 'teacher' ? 'active' : ''}}" bindtap="setTeacher">教师</view>
+    </view>
+
+    <button class="btn-primary login-btn" bindtap="onLogin" loading="{{loading}}">进入</button>
+  </view>
+
+  <text class="hint">由班主任提供班级密钥</text>
+</view>

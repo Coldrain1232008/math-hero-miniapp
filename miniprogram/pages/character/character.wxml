@@ -1,0 +1,101 @@
+<!-- pages/character/character.wxml -->
+<view class="page-bg">
+
+  <!-- 顶部英雄卡片 -->
+  <view class="hero-card gradient-bg">
+    <view class="hero-header">
+      <view class="hero-avatar-wrap">
+        <view class="hero-avatar-circle" style="background-color: {{avatarInfo.color}}">
+          <text class="hero-avatar-icon">{{avatarInfo.icon}}</text>
+        </view>
+        <view class="level-badge">Lv.{{levelInfo.level}}</view>
+      </view>
+      <view class="hero-info">
+        <text class="hero-name">{{student.heroName}}</text>
+        <view class="talent-tag" style="border-color:{{student.talentColor}};color:{{student.talentColor}}">
+          {{student.talentName}}
+        </view>
+        <text class="hero-exp">累计经验：{{student.totalExp}} EXP</text>
+      </view>
+    </view>
+
+    <!-- 经验条 -->
+    <view wx:if="{{levelInfo.level < 20}}" class="exp-bar-wrap">
+      <view class="exp-bar-label">
+        <text>距离 Lv.{{levelInfo.level + 1}}</text>
+        <text>{{levelInfo.progressExp}} / {{levelInfo.needExp}}</text>
+      </view>
+      <view class="exp-bar-bg">
+        <view class="exp-bar-fill" style="width:{{levelInfo.percent}}%"></view>
+      </view>
+    </view>
+    <view wx:else class="exp-bar-wrap">
+      <text class="max-level-text">🏆 满级英雄</text>
+    </view>
+  </view>
+
+  <!-- 雷达图 + 属性 -->
+  <view class="card attrs-card">
+    <view class="card-title">属性面板</view>
+    <view class="radar-container">
+      <radar-chart
+        attrs="{{attrs}}"
+        maxVal="{{maxAttrVal}}"
+        size="{{260}}"
+        mainColor="{{student.talentColor || '#6c63ff'}}"
+      />
+    </view>
+
+    <!-- 六属性详细 -->
+    <view class="attr-list">
+      <view wx:for="{{attrDetail}}" wx:key="name" class="attr-item">
+        <text class="attr-dot" style="background:{{item.color}}"></text>
+        <text class="attr-name">{{item.name}}</text>
+        <view class="attr-bar-bg">
+          <view class="attr-bar" style="width:{{item.percent}}%;background:{{item.color}}"></view>
+        </view>
+        <text class="attr-num">{{item.val}}</text>
+      </view>
+    </view>
+
+    <!-- 天赋成长率提示 -->
+    <view class="growth-hint">
+      <text class="growth-title">天赋成长率（每升一级）</text>
+      <view class="growth-list">
+        <view wx:for="{{growthDetail}}" wx:key="name" class="growth-item">
+          <text style="color:{{item.color}}">{{item.name}}</text>
+          <text class="growth-val">+{{item.val}}/级</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 重置天赋（如果有机会） -->
+  <view wx:if="{{student.rerollChances > 0}}" class="card reroll-card" bindtap="onReroll">
+    <text class="reroll-icon">🎲</text>
+    <view class="reroll-info">
+      <text class="reroll-title">重置天赋机会</text>
+      <text class="reroll-desc">你还有 {{student.rerollChances}} 次重置机会，点击重新随机天赋</text>
+    </view>
+    <text class="reroll-arrow">›</text>
+  </view>
+
+  <!-- 经验记录 -->
+  <view class="card log-card">
+    <view class="card-title">最近经验记录</view>
+    <view wx:if="{{expLogs.length === 0}}" class="empty-log">
+      <text>暂无记录，等老师给你打第一分 ⚡</text>
+    </view>
+    <view wx:for="{{expLogs}}" wx:key="_id" class="log-item">
+      <view class="log-left">
+        <text class="log-type">{{item.typeLabel}}</text>
+        <text class="log-desc">{{item.desc}}</text>
+      </view>
+      <view class="log-right">
+        <text class="log-exp">+{{item.exp}} EXP</text>
+        <text class="log-time">{{item.timeStr}}</text>
+      </view>
+    </view>
+  </view>
+
+</view>

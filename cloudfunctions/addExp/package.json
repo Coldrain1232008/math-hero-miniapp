@@ -1,0 +1,9 @@
+{
+  "name": "addExp",
+  "version": "1.0.0",
+  "description": "给学生添加经验值（支持单个/批量）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

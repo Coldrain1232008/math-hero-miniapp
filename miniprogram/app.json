@@ -1,0 +1,49 @@
+{
+  "pages": [
+    "pages/login/login",
+    "pages/create-character/create-character",
+    "pages/character/character",
+    "pages/ranking/ranking",
+    "pages/teacher/teacher",
+    "pages/teacher-class/teacher-class",
+    "pages/teacher-score/teacher-score",
+    "pages/teacher-upload/teacher-upload"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#1a1a2e",
+    "navigationBarTitleText": "数学英雄",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#f5f5f5"
+  },
+  "tabBar": {
+    "color": "#999",
+    "selectedColor": "#6c63ff",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/character/character",
+        "text": "我的角色",
+        "iconPath": "images/tab_character.png",
+        "selectedIconPath": "images/tab_character_active.png"
+      },
+      {
+        "pagePath": "pages/ranking/ranking",
+        "text": "排行榜",
+        "iconPath": "images/tab_rank.png",
+        "selectedIconPath": "images/tab_rank_active.png"
+      },
+      {
+        "pagePath": "pages/teacher/teacher",
+        "text": "教师",
+        "iconPath": "images/tab_teacher.png",
+        "selectedIconPath": "images/tab_teacher_active.png"
+      }
+    ]
+  },
+  "cloud": true,
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

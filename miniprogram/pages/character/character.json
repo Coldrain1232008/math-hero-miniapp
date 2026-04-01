@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "我的英雄",
+  "usingComponents": {
+    "radar-chart": "/components/radar-chart/radar-chart"
+  }
+}

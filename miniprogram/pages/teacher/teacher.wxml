@@ -1,0 +1,64 @@
+<!-- pages/teacher/teacher.wxml -->
+<view class="page-bg">
+  <view class="teacher-header gradient-bg">
+    <text class="teacher-title">教师管理台</text>
+    <text class="teacher-class">{{className}}</text>
+  </view>
+
+  <!-- 班级统计 -->
+  <view class="stats-row">
+    <view class="stat-card">
+      <text class="stat-num">{{stats.total}}</text>
+      <text class="stat-label">学生总数</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{stats.avgLevel}}</text>
+      <text class="stat-label">平均等级</text>
+    </view>
+    <view class="stat-card">
+      <text class="stat-num">{{stats.maxLevel}}</text>
+      <text class="stat-label">最高等级</text>
+    </view>
+  </view>
+
+  <!-- 功能入口 -->
+  <view class="menu-list">
+    <view class="menu-item" bindtap="goScore">
+      <view class="menu-icon" style="background:#e0e7ff">⚡</view>
+      <view class="menu-info">
+        <text class="menu-title">课堂打分</text>
+        <text class="menu-desc">给学生+1经验值，记录课堂表现</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goUpload">
+      <view class="menu-icon" style="background:#dcfce7">📊</view>
+      <view class="menu-info">
+        <text class="menu-title">导入成绩</text>
+        <text class="menu-desc">上传 Excel，批量发放考试经验</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goClass">
+      <view class="menu-icon" style="background:#fef3c7">👥</view>
+      <view class="menu-info">
+        <text class="menu-title">班级管理</text>
+        <text class="menu-desc">查看学生列表，管理角色信息</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 近期操作日志 -->
+  <view class="card log-section">
+    <view class="card-title">近期操作</view>
+    <view wx:if="{{recentLogs.length === 0}}" class="empty-log">暂无记录</view>
+    <view wx:for="{{recentLogs}}" wx:key="_id" class="log-row">
+      <text class="log-type-tag">{{item.typeLabel}}</text>
+      <text class="log-text">{{item.desc}}</text>
+      <text class="log-time">{{item.timeStr}}</text>
+    </view>
+  </view>
+</view>

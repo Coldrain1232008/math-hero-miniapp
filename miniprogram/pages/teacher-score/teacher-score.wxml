@@ -1,0 +1,52 @@
+<!-- pages/teacher-score/teacher-score.wxml -->
+<view class="page-bg">
+  <view class="search-bar">
+    <input
+      class="search-input"
+      placeholder="搜索学生名字..."
+      value="{{keyword}}"
+      bindinput="onSearch"
+    />
+  </view>
+
+  <!-- 批量操作 -->
+  <view class="batch-bar" wx:if="{{selected.length > 0}}">
+    <text>已选 {{selected.length}} 人</text>
+    <button class="btn-batch" bindtap="batchAddExp" loading="{{submitting}}">
+      一键 +1 经验
+    </button>
+    <text class="clear-btn" bindtap="clearSelect">取消</text>
+  </view>
+
+  <!-- 学生列表 -->
+  <view class="student-list">
+    <view
+      wx:for="{{filteredList}}"
+      wx:key="_id"
+      class="student-item {{selectedMap[item._id] ? 'selected' : ''}}"
+      bindtap="toggleSelect"
+      data-id="{{item._id}}"
+    >
+      <view class="s-left">
+        <view class="s-avatar-circle" style="background-color: {{item.avatarColor || '#999'}}">
+          <text class="s-avatar-icon">{{item.avatarIcon || '🧙'}}</text>
+        </view>
+        <view class="s-info">
+          <text class="s-name">{{item.heroName}}</text>
+          <text class="s-talent" style="color:{{item.talentColor}}">{{item.talentName}}</text>
+        </view>
+      </view>
+      <view class="s-right">
+        <view class="s-lv">Lv.{{item.level}}</view>
+        <!-- 单独加分按钮 -->
+        <button
+          class="add-btn"
+          catchtap="addSingle"
+          data-id="{{item._id}}"
+          data-name="{{item.heroName}}"
+          loading="{{loadingMap[item._id]}}"
+        >+1</button>
+      </view>
+    </view>
+  </view>
+</view>

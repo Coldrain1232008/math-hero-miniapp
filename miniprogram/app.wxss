@@ -1,0 +1,55 @@
+/* app.wxss */
+page {
+  background: #f5f5f5;
+  font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  color: #333;
+}
+
+/* card */
+.card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 32rpx;
+  margin: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06);
+}
+
+/* primary color */
+.primary-color { color: #6c63ff; }
+.primary-bg { background: #6c63ff; }
+
+/* gradient bg */
+.gradient-bg {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+
+/* btn primary */
+.btn-primary {
+  background: linear-gradient(135deg, #6c63ff, #8b5cf6);
+  color: #fff;
+  border-radius: 50rpx;
+  border: none;
+  padding: 20rpx 60rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  box-shadow: 0 8rpx 24rpx rgba(108,99,255,0.35);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: #6c63ff;
+  border: 2rpx solid #6c63ff;
+  border-radius: 50rpx;
+  padding: 18rpx 56rpx;
+  font-size: 28rpx;
+}
+
+/* level badge */
+.level-badge {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  color: #fff;
+  font-size: 22rpx;
+  font-weight: bold;
+  padding: 4rpx 16rpx;
+  border-radius: 20rpx;
+}

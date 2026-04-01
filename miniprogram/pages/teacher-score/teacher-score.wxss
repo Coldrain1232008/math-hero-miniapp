@@ -1,0 +1,82 @@
+/* pages/teacher-score/teacher-score.wxss */
+.page-bg { background: #f0f0f8; min-height: 100vh; padding-bottom: 80rpx; }
+
+.search-bar { padding: 20rpx 24rpx; }
+.search-input {
+  background: #fff;
+  border-radius: 50rpx;
+  padding: 18rpx 32rpx;
+  font-size: 28rpx;
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.06);
+}
+
+/* 批量操作栏 */
+.batch-bar {
+  display: flex;
+  align-items: center;
+  background: #6c63ff;
+  padding: 20rpx 28rpx;
+  color: #fff;
+  font-size: 26rpx;
+  gap: 16rpx;
+}
+.btn-batch {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 24rpx;
+  padding: 10rpx 28rpx;
+  margin: 0;
+  border: none;
+  flex-shrink: 0;
+}
+.clear-btn { margin-left: auto; font-size: 24rpx; opacity: 0.7; }
+
+/* 学生列表 */
+.student-list { padding: 0 24rpx; }
+
+.student-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx 24rpx;
+  margin-bottom: 14rpx;
+  box-shadow: 0 2rpx 8rpx rgba(0,0,0,0.04);
+  border: 2rpx solid transparent;
+  transition: all 0.15s;
+}
+
+.student-item.selected {
+  border-color: #6c63ff;
+  background: #f5f3ff;
+}
+
+.s-left { display: flex; align-items: center; gap: 20rpx; }
+.s-avatar { font-size: 60rpx; }
+.s-info { }
+.s-name { font-size: 30rpx; font-weight: 600; color: #333; display: block; margin-bottom: 6rpx; }
+.s-talent { font-size: 22rpx; display: block; }
+
+.s-right { display: flex; align-items: center; gap: 16rpx; }
+.s-lv {
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: bold;
+  padding: 4rpx 12rpx;
+  border-radius: 14rpx;
+}
+
+.add-btn {
+  background: #6c63ff;
+  color: #fff;
+  border-radius: 40rpx;
+  font-size: 26rpx;
+  font-weight: bold;
+  padding: 10rpx 28rpx;
+  margin: 0;
+  border: none;
+  box-shadow: 0 4rpx 12rpx rgba(108,99,255,0.35);
+}

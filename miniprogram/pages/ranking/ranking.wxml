@@ -1,0 +1,81 @@
+<!-- pages/ranking/ranking.wxml -->
+<view class="page-bg">
+
+  <!-- 前三名领奖台 -->
+  <view class="podium-area gradient-bg">
+    <view class="podium-title">班级英雄榜</view>
+    <view class="podium-row" wx:if="{{topThree.length > 0}}">
+
+      <!-- 第2名 -->
+      <view class="podium-item podium-2" wx:if="{{topThree[1]}}">
+        <view class="podium-avatar-circle" style="background-color: {{topThree[1].avatarColor || '#999'}}">
+          <text class="podium-avatar-icon">{{topThree[1].avatarIcon || '🧙'}}</text>
+        </view>
+        <text class="podium-name">{{topThree[1].heroName}}</text>
+        <view class="podium-level">Lv.{{topThree[1].level}}</view>
+        <view class="podium-stand stand-2">2</view>
+      </view>
+
+      <!-- 第1名 -->
+      <view class="podium-item podium-1" wx:if="{{topThree[0]}}">
+        <text class="podium-crown">👑</text>
+        <view class="podium-avatar-circle" style="background-color: {{topThree[0].avatarColor || '#999'}}">
+          <text class="podium-avatar-icon">{{topThree[0].avatarIcon || '🧙'}}</text>
+        </view>
+        <text class="podium-name">{{topThree[0].heroName}}</text>
+        <view class="podium-level">Lv.{{topThree[0].level}}</view>
+        <view class="podium-stand stand-1">1</view>
+      </view>
+
+      <!-- 第3名 -->
+      <view class="podium-item podium-3" wx:if="{{topThree[2]}}">
+        <view class="podium-avatar-circle" style="background-color: {{topThree[2].avatarColor || '#999'}}">
+          <text class="podium-avatar-icon">{{topThree[2].avatarIcon || '🧙'}}</text>
+        </view>
+        <text class="podium-name">{{topThree[2].heroName}}</text>
+        <view class="podium-level">Lv.{{topThree[2].level}}</view>
+        <view class="podium-stand stand-3">3</view>
+      </view>
+
+    </view>
+  </view>
+
+  <!-- 我的排名 -->
+  <view class="my-rank-bar" wx:if="{{myRank > 3}}">
+    <text class="my-rank-label">我的排名</text>
+    <text class="my-rank-num"># {{myRank}}</text>
+    <text class="my-rank-name">{{myStudent.heroName}}</text>
+    <text class="my-rank-lv">Lv.{{myStudent.level}}</text>
+    <text class="my-rank-exp">{{myStudent.totalExp}} EXP</text>
+  </view>
+
+  <!-- 完整榜单 -->
+  <view class="rank-list">
+    <view
+      wx:for="{{rankList}}"
+      wx:key="_id"
+      class="rank-item {{item.isMe ? 'is-me' : ''}}"
+    >
+      <text class="rank-no {{item.rank <= 3 ? 'top3' : ''}}">
+        {{item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank}}
+      </text>
+      <view class="rank-avatar-circle" style="background-color: {{item.avatarColor || '#999'}}">
+        <text class="rank-avatar-icon">{{item.avatarIcon || '🧙'}}</text>
+      </view>
+      <view class="rank-info">
+        <view class="rank-name-row">
+          <text class="rank-name">{{item.heroName}}</text>
+          <view class="rank-talent-tag" style="color:{{item.talentColor}}">{{item.talentName}}</view>
+        </view>
+        <view class="rank-bar-bg">
+          <view class="rank-bar-fill" style="width:{{item.expPercent}}%;background:{{item.talentColor || '#6c63ff'}}"></view>
+        </view>
+      </view>
+      <view class="rank-right">
+        <view class="rank-lv-badge">Lv.{{item.level}}</view>
+        <text class="rank-exp">{{item.totalExp}}</text>
+      </view>
+    </view>
+  </view>
+
+</view>

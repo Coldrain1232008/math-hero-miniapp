@@ -1,0 +1,235 @@
+/* pages/character/character.wxss */
+.page-bg { background: #f0f0f8; min-height: 100vh; padding-bottom: 120rpx; }
+
+/* 英雄卡片 */
+.hero-card {
+  padding: 60rpx 40rpx 48rpx;
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.hero-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.hero-avatar-wrap {
+  position: relative;
+  margin-right: 32rpx;
+}
+
+.hero-avatar-circle {
+  width: 130rpx;
+  height: 130rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4rpx 12rpx rgba(0,0,0,0.15);
+}
+
+.hero-avatar-icon {
+  font-size: 64rpx;
+}
+
+.level-badge {
+  position: absolute;
+  bottom: -8rpx;
+  right: -8rpx;
+  background: linear-gradient(135deg, #f6d365, #fda085);
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: bold;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+}
+
+.hero-info {
+  flex: 1;
+}
+
+.hero-name {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #fff;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.talent-tag {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 4rpx 16rpx;
+  border: 1.5rpx solid;
+  border-radius: 20rpx;
+  margin-bottom: 12rpx;
+}
+
+.hero-exp {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.55);
+  display: block;
+}
+
+/* 经验条 */
+.exp-bar-wrap { }
+.exp-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.5);
+  margin-bottom: 10rpx;
+}
+
+.exp-bar-bg {
+  height: 14rpx;
+  background: rgba(255,255,255,0.15);
+  border-radius: 7rpx;
+  overflow: hidden;
+}
+
+.exp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a78bfa, #6c63ff);
+  border-radius: 7rpx;
+  transition: width 0.6s ease;
+}
+
+.max-level-text {
+  font-size: 28rpx;
+  color: #fda085;
+  font-weight: bold;
+}
+
+/* 属性卡片 */
+.card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 36rpx;
+  margin: 24rpx 24rpx 0;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.05);
+}
+
+.card-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 32rpx;
+}
+
+.radar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40rpx;
+}
+
+/* 属性列表 */
+.attr-list { }
+.attr-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18rpx;
+}
+
+.attr-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.attr-name {
+  width: 72rpx;
+  font-size: 26rpx;
+  color: #555;
+  flex-shrink: 0;
+}
+
+.attr-bar-bg {
+  flex: 1;
+  height: 14rpx;
+  background: #f0f0f0;
+  border-radius: 7rpx;
+  margin: 0 16rpx;
+  overflow: hidden;
+}
+
+.attr-bar {
+  height: 100%;
+  border-radius: 7rpx;
+  transition: width 0.6s ease;
+}
+
+.attr-num {
+  width: 52rpx;
+  text-align: right;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+/* 天赋成长率 */
+.growth-hint {
+  margin-top: 32rpx;
+  padding-top: 28rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.growth-title {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+.growth-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+
+.growth-item {
+  background: #f8f8fc;
+  border-radius: 10rpx;
+  padding: 10rpx 20rpx;
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 22rpx;
+}
+
+.growth-val { color: #999; }
+
+/* 重置天赋 */
+.reroll-card {
+  display: flex;
+  align-items: center;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+}
+
+.reroll-icon { font-size: 56rpx; margin-right: 24rpx; }
+.reroll-info { flex: 1; }
+.reroll-title { font-size: 30rpx; font-weight: bold; color: #92400e; display: block; margin-bottom: 8rpx; }
+.reroll-desc { font-size: 24rpx; color: #b45309; }
+.reroll-arrow { font-size: 48rpx; color: #b45309; }
+
+/* 经验日志 */
+.log-card { }
+.empty-log { text-align: center; color: #bbb; font-size: 26rpx; padding: 40rpx 0; }
+
+.log-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+}
+
+.log-item:last-child { border-bottom: none; }
+.log-left { flex: 1; }
+.log-type { font-size: 22rpx; color: #6c63ff; background: #f0eeff; padding: 4rpx 12rpx; border-radius: 8rpx; margin-bottom: 8rpx; display: inline-block; }
+.log-desc { font-size: 26rpx; color: #555; display: block; margin-top: 6rpx; }
+.log-right { text-align: right; }
+.log-exp { font-size: 30rpx; font-weight: bold; color: #10b981; display: block; }
+.log-time { font-size: 22rpx; color: #bbb; margin-top: 6rpx; display: block; }

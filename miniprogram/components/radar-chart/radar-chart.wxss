@@ -1,0 +1,38 @@
+/* components/radar-chart/radar-chart.wxss */
+.radar-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.radar-canvas {
+  display: block;
+}
+
+.label-wrap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.label-item {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60rpx;
+  transform: translate(-50%, -50%);
+}
+
+.label-name {
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-bottom: 4rpx;
+}
+
+.label-val {
+  font-size: 20rpx;
+  opacity: 0.8;
+}

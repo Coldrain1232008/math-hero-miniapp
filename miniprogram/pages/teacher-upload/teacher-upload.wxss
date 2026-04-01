@@ -1,0 +1,44 @@
+/* pages/teacher-upload/teacher-upload.wxss */
+.page-bg { background: #f0f0f8; min-height: 100vh; padding-bottom: 80rpx; }
+.card { background: #fff; border-radius: 24rpx; padding: 36rpx; margin: 24rpx 24rpx 0; box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.04); }
+
+/* 说明卡片 */
+.intro-card { text-align: center; }
+.intro-icon { font-size: 80rpx; display: block; margin-bottom: 16rpx; }
+.intro-title { font-size: 36rpx; font-weight: bold; color: #333; display: block; margin-bottom: 12rpx; }
+.intro-desc { font-size: 26rpx; color: #888; display: block; margin-bottom: 32rpx; }
+
+.exp-rule { background: #f8f8fc; border-radius: 16rpx; padding: 24rpx; }
+.rule-title { font-size: 24rpx; color: #888; display: block; margin-bottom: 16rpx; }
+.rule-list { }
+.rule-item { display: flex; justify-content: space-between; padding: 8rpx 0; font-size: 26rpx; color: #555; }
+.rule-exp { font-weight: bold; color: #10b981; }
+
+/* 格式说明 */
+.format-title { font-size: 28rpx; font-weight: 600; color: #333; display: block; margin-bottom: 20rpx; }
+.format-row { display: flex; gap: 40rpx; padding: 12rpx 0; border-bottom: 1rpx solid #f5f5f5; font-size: 26rpx; }
+.header-row { font-weight: bold; color: #6c63ff; }
+.gray { color: #999; }
+.format-hint { font-size: 22rpx; color: #bbb; margin-top: 16rpx; display: block; }
+
+/* 上传 */
+.upload-card { text-align: center; }
+.pick-btn { width: 80%; margin: 0 auto; }
+.file-preview { display: flex; align-items: center; justify-content: center; margin-top: 28rpx; gap: 12rpx; }
+.file-icon { font-size: 44rpx; }
+.file-name { font-size: 26rpx; color: #555; }
+
+/* 预览 */
+.preview-title { font-size: 28rpx; font-weight: 600; color: #333; display: block; margin-bottom: 20rpx; }
+.preview-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #f5f5f5;
+  font-size: 24rpx;
+  color: #555;
+}
+.preview-row.header { font-weight: bold; color: #333; }
+.preview-row.unmatched { opacity: 0.5; }
+.exp-num { color: #10b981; font-weight: bold; }
+.confirm-btn { margin-top: 32rpx; width: 100%; }
