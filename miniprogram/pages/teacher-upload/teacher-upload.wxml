@@ -6,12 +6,17 @@
     <view class="intro-icon">📊</view>
     <text class="intro-title">导入考试成绩</text>
     <text class="intro-desc">上传 Excel 文件，系统自动按排名发放经验值</text>
-    <view class="exp-rule">
-      <text class="rule-title">经验值规则（按班级排名）</text>
+    
+    <!-- 当前规则展示 -->
+    <view class="exp-rule" bindtap="showRuleDialog">
+      <view class="rule-header">
+        <text class="rule-title">经验值规则（按班级排名）</text>
+        <text class="rule-edit">⚙️ 修改</text>
+      </view>
       <view class="rule-list">
-        <view class="rule-item"><text>第 1 名</text><text class="rule-exp">150 EXP</text></view>
-        <view class="rule-item"><text>中间</text><text class="rule-exp">线性递减</text></view>
-        <view class="rule-item"><text>末名</text><text class="rule-exp">50 EXP</text></view>
+        <view class="rule-item"><text>第 1 名</text><text class="rule-exp">{{maxExp}} EXP</text></view>
+        <view class="rule-item"><text>中间</text><text class="rule-exp">{{selectedRuleName}}</text></view>
+        <view class="rule-item"><text>末名</text><text class="rule-exp">{{minExp}} EXP</text></view>
       </view>
     </view>
   </view>
@@ -20,15 +25,15 @@
   <view class="card format-card">
     <text class="format-title">📋 Excel 格式要求</text>
     <view class="format-row header-row">
-      <text>学生姓名</text><text>分数</text>
+      <text>学号</text><text>姓名</text><text>分数</text>
     </view>
     <view class="format-row">
-      <text class="gray">张三</text><text class="gray">92</text>
+      <text class="gray">20240101</text><text class="gray">张三</text><text class="gray">92</text>
     </view>
     <view class="format-row">
-      <text class="gray">李四</text><text class="gray">85</text>
+      <text class="gray">20240102</text><text class="gray">李四</text><text class="gray">85</text>
     </view>
-    <text class="format-hint">第一行为表头，姓名需与系统中的学生姓名完全一致</text>
+    <text class="format-hint">第一行为表头，支持「学号+姓名」或「姓名」匹配，学号匹配优先级更高</text>
   </view>
 
   <!-- 选择文件 -->
@@ -46,19 +51,36 @@
   <!-- 预览匹配结果 -->
   <view wx:if="{{preview.length > 0}}" class="card preview-card">
     <text class="preview-title">匹配预览（共 {{preview.length}} 条）</text>
+    
+    <!-- 匹配统计 -->
+    <view class="match-stats">
+      <text class="stat-item matched">✅ 匹配成功 {{matchedCount}} 人</text>
+      <text wx:if="{{unmatchedCount > 0}}" class="stat-item unmatched">❌ 未匹配 {{unmatchedCount}} 人</text>
+    </view>
+    
+    <!-- 未匹配列表提示 -->
+    <view wx:if="{{unmatchedList.length > 0}}" class="unmatched-section">
+      <text class="unmatched-title">以下学生未在系统中找到：</text>
+      <view class="unmatched-list">
+        <text wx:for="{{unmatchedList}}" wx:key="index" class="unmatched-item">{{item}}</text>
+      </view>
+      <text class="unmatched-hint">请检查学号/姓名是否正确，或先在班级管理中导入学生名单</text>
+    </view>
+
     <view class="preview-row header">
-      <text>学生</text><text>分数</text><text>排名</text><text>经验</text><text>状态</text>
+      <text>学号</text><text>姓名</text><text>分数</text><text>排名</text><text>经验</text><text>状态</text>
     </view>
     <view
       wx:for="{{preview}}"
-      wx:key="name"
+      wx:key="index"
       class="preview-row {{item.matched ? '' : 'unmatched'}}"
     >
+      <text>{{item.studentId || '-'}}</text>
       <text>{{item.name}}</text>
       <text>{{item.score}}</text>
       <text>{{item.matched ? '#' + item.rank : '-'}}</text>
       <text class="exp-num">{{item.matched ? '+' + item.exp : '-'}}</text>
-      <text>{{item.matched ? '✅' : '❌未找到'}}</text>
+      <text>{{item.matched ? '✅' : '❌'}}</text>
     </view>
 
     <button
@@ -69,6 +91,52 @@
     >
       确认导入（{{matchedCount}} 人）
     </button>
+  </view>
+
+  <!-- 规则配置弹窗 -->
+  <view wx:if="{{showRuleConfig}}" class="modal-mask" bindtap="hideRuleDialog">
+    <view class="modal-box" catchtap="preventBubble">
+      <text class="modal-title">配置经验值规则</text>
+      
+      <!-- 最大/最小经验值 -->
+      <view class="config-section">
+        <text class="config-label">经验值范围</text>
+        <view class="exp-range-row">
+          <view class="exp-input-group">
+            <text class="exp-input-label">第1名</text>
+            <input type="number" class="exp-input" value="{{maxExp}}" bindinput="onMaxExpInput" />
+            <text class="exp-unit">EXP</text>
+          </view>
+          <text class="exp-arrow">→</text>
+          <view class="exp-input-group">
+            <text class="exp-input-label">末名</text>
+            <input type="number" class="exp-input" value="{{minExp}}" bindinput="onMinExpInput" />
+            <text class="exp-unit">EXP</text>
+          </view>
+        </view>
+      </view>
+      
+      <!-- 递减规则选择 -->
+      <view class="config-section">
+        <text class="config-label">递减规则</text>
+        <view class="rule-options">
+          <view 
+            wx:for="{{decayRules}}" 
+            wx:key="id"
+            class="rule-option {{selectedRule === item.id ? 'selected' : ''}}"
+            data-rule="{{item.id}}"
+            bindtap="selectRule"
+          >
+            <text class="rule-option-name">{{item.name}}</text>
+            <text class="rule-option-desc">{{item.desc}}</text>
+          </view>
+        </view>
+      </view>
+      
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="hideRuleDialog">关闭</button>
+      </view>
+    </view>
   </view>
 
 </view>

@@ -108,11 +108,10 @@
 
 .s-footer { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8rpx; }
 .s-exp { font-size: 24rpx; color: #999; }
-.s-actions { display: flex; gap: 10rpx; }
-.btn-sm { font-size: 22rpx; padding: 8rpx 16rpx; border-radius: 30rpx; margin: 0; border: none; white-space: nowrap; }
+.s-actions { display: flex; gap: 12rpx; }
+.btn-sm { font-size: 22rpx; padding: 10rpx 20rpx; border-radius: 30rpx; margin: 0; border: none; white-space: nowrap; line-height: 1.4; }
 .btn-reroll { background: #fef3c7; color: #b45309; }
-.btn-remove { background: #fee2e2; color: #dc2626; }
-.btn-delete { background: #fca5a5; color: #fff; }
+.btn-delete { background: #ef4444; color: #fff; }
 
 /* 弹窗 */
 .modal-mask {

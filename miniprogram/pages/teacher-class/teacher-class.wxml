@@ -75,8 +75,7 @@
         <text class="s-exp">{{item.totalExp}} EXP</text>
         <view class="s-actions">
           <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.realName}}">🎲 重置</button>
-          <button class="btn-sm btn-remove" catchtap="removeStudent" data-id="{{item._id}}" data-name="{{item.realName}}">移出</button>
-          <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.realName}}">永久删除</button>
+          <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.realName}}">🗑️ 删除</button>
         </view>
       </view>
     </view>

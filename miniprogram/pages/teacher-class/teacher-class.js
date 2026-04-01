@@ -244,20 +244,22 @@ Page({
           confirmText: '确认删除',
           success: async (res2) => {
             if (!res2.confirm) return
+            wx.showLoading({ title: '删除中...' })
             try {
-              // 删除学生记录
-              await db.collection('students').doc(id).remove()
-              // 删除该学生的经验日志
-              const logs = await db.collection('expLogs')
-                .where({ studentId: id })
-                .limit(100)
-                .get()
-              for (const log of logs.data) {
-                await db.collection('expLogs').doc(log._id).remove()
+              // 调用云函数删除（前端受数据库权限限制）
+              const result = await wx.cloud.callFunction({
+                name: 'deleteStudent',
+                data: { studentId: id }
+              })
+              wx.hideLoading()
+              if (result.result?.success) {
+                wx.showToast({ title: `已永久删除 ${name}`, icon: 'success' })
+                this.loadStudents()
+              } else {
+                wx.showToast({ title: result.result?.message || '删除失败', icon: 'none' })
               }
-              wx.showToast({ title: `已永久删除 ${name}`, icon: 'success' })
-              this.loadStudents()
             } catch (e) {
+              wx.hideLoading()
               console.error(e)
               wx.showToast({ title: '删除失败', icon: 'none' })
             }

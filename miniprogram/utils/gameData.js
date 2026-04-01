@@ -272,6 +272,48 @@ function calcScoreExp(rank, total) {
 }
 
 /**
+ * 自定义经验值计算
+ * @param {number} rank - 排名（从1开始）
+ * @param {number} total - 总人数
+ * @param {number} maxExp - 第一名经验值
+ * @param {number} minExp - 最后一名经验值
+ * @param {string} rule - 递减规则：linear|exponential|logarithmic|normal
+ */
+function calcScoreExpCustom(rank, total, maxExp = 150, minExp = 50, rule = 'linear') {
+  if (total <= 1) return maxExp
+  const ratio = (rank - 1) / (total - 1) // 0(第一) ~ 1(最后)
+  const range = maxExp - minExp
+  
+  let factor
+  switch (rule) {
+    case 'exponential':
+      // 指数递减：前几名差距大，后面差距小
+      // 使用指数曲线：e^(x*ln(0.1))，从1降到0.1
+      factor = Math.exp(ratio * Math.log(0.1))
+      break
+    case 'logarithmic':
+      // 对数递减：前几名差距小，后面差距大
+      // 使用对数曲线：1 - ln(1+x*(e-1))/1
+      factor = 1 - Math.log(1 + ratio * (Math.E - 1))
+      break
+    case 'normal':
+      // 正态递减：中间变化平缓，两端变化大
+      // 使用正态分布的累积分布函数近似
+      // 将ratio映射到[-2, 2]区间，然后计算erf近似
+      const x = (ratio - 0.5) * 4
+      factor = 0.5 * (1 - Math.tanh(x))
+      break
+    case 'linear':
+    default:
+      // 线性递减
+      factor = 1 - ratio
+      break
+  }
+  
+  return Math.round(minExp + range * factor)
+}
+
+/**
  * 根据累计经验值计算当前等级和本级进度
  */
 function calcLevel(totalExp) {
@@ -345,6 +387,7 @@ module.exports = {
   MAX_LEVEL,
   ATTR_NAMES,
   calcScoreExp,
+  calcScoreExpCustom,
   calcLevel,
   calcAttributes,
   randomTalent,

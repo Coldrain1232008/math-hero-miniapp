@@ -1,0 +1,9 @@
+{
+  "name": "deleteStudent",
+  "version": "1.0.0",
+  "description": "永久删除学生数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "latest"
+  }
+}

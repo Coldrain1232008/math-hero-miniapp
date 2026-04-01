@@ -28,8 +28,26 @@
 .file-icon { font-size: 44rpx; }
 .file-name { font-size: 26rpx; color: #555; }
 
+/* 规则头部 */
+.rule-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16rpx; }
+.rule-edit { font-size: 24rpx; color: #6c63ff; }
+
 /* 预览 */
 .preview-title { font-size: 28rpx; font-weight: 600; color: #333; display: block; margin-bottom: 20rpx; }
+
+/* 匹配统计 */
+.match-stats { display: flex; gap: 24rpx; margin-bottom: 20rpx; padding: 16rpx; background: #f8f8fc; border-radius: 12rpx; }
+.stat-item { font-size: 24rpx; }
+.stat-item.matched { color: #10b981; }
+.stat-item.unmatched { color: #ef4444; }
+
+/* 未匹配提示 */
+.unmatched-section { background: #fef2f2; border-radius: 12rpx; padding: 20rpx; margin-bottom: 20rpx; }
+.unmatched-title { font-size: 24rpx; color: #dc2626; display: block; margin-bottom: 12rpx; }
+.unmatched-list { display: flex; flex-wrap: wrap; gap: 12rpx; margin-bottom: 12rpx; }
+.unmatched-item { font-size: 22rpx; color: #7f1d1d; background: #fee2e2; padding: 6rpx 14rpx; border-radius: 20rpx; }
+.unmatched-hint { font-size: 20rpx; color: #991b1b; display: block; }
+
 .preview-row {
   display: flex;
   justify-content: space-between;
@@ -42,3 +60,33 @@
 .preview-row.unmatched { opacity: 0.5; }
 .exp-num { color: #10b981; font-weight: bold; }
 .confirm-btn { margin-top: 32rpx; width: 100%; }
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5); z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+}
+.modal-box { background: #fff; border-radius: 24rpx; padding: 48rpx 40rpx; width: 80%; max-height: 80vh; overflow-y: auto; }
+.modal-title { font-size: 34rpx; font-weight: bold; color: #333; display: block; margin-bottom: 32rpx; }
+.modal-btns { display: flex; gap: 20rpx; margin-top: 32rpx; justify-content: flex-end; }
+.btn-secondary { background: transparent; color: #6c63ff; border: 2rpx solid #6c63ff; border-radius: 40rpx; font-size: 28rpx; padding: 14rpx 36rpx; }
+
+/* 配置区域 */
+.config-section { margin-bottom: 32rpx; }
+.config-label { font-size: 28rpx; font-weight: 600; color: #333; display: block; margin-bottom: 16rpx; }
+
+/* 经验值范围输入 */
+.exp-range-row { display: flex; align-items: center; justify-content: center; gap: 20rpx; }
+.exp-input-group { display: flex; flex-direction: column; align-items: center; gap: 8rpx; }
+.exp-input-label { font-size: 22rpx; color: #888; }
+.exp-input { width: 120rpx; height: 64rpx; background: #f8f8fc; border-radius: 12rpx; text-align: center; font-size: 32rpx; font-weight: bold; color: #6c63ff; }
+.exp-unit { font-size: 20rpx; color: #999; }
+.exp-arrow { font-size: 32rpx; color: #ccc; }
+
+/* 规则选项 */
+.rule-options { display: flex; flex-direction: column; gap: 16rpx; }
+.rule-option { background: #f8f8fc; border-radius: 16rpx; padding: 20rpx; border: 2rpx solid transparent; }
+.rule-option.selected { background: #f0f4ff; border-color: #6c63ff; }
+.rule-option-name { font-size: 28rpx; font-weight: 600; color: #333; display: block; margin-bottom: 8rpx; }
+.rule-option-desc { font-size: 22rpx; color: #888; display: block; }
