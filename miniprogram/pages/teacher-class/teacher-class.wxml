@@ -78,7 +78,7 @@
 
   <!-- 导入名单弹窗 -->
   <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddDialog">
-    <view class="modal-box" catchtap="">
+    <view class="modal-box" catchtap="preventBubble">
       <text class="modal-title">批量导入学生</text>
       <text class="modal-desc">每行一个名字，系统自动创建账号和个人密钥</text>
       <textarea

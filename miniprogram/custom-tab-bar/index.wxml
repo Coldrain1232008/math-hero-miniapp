@@ -7,12 +7,7 @@
     data-index="{{index}}"
     bindtap="switchTab"
   >
-    <!-- Hide teacher tab for students -->
-    <block wx:if="{{item.pagePath === '/pages/teacher/teacher' && !isTeacher}}">
-    </block>
-    <block wx:else>
-      <image src="{{selected === index ? item.selectedIconPath : item.iconPath}}" class="tab-icon" />
-      <text class="tab-text">{{item.text}}</text>
-    </block>
+    <image src="{{selected === index ? item.selectedIconPath : item.iconPath}}" class="tab-icon" />
+    <text class="tab-text">{{item.text}}</text>
   </view>
 </view>

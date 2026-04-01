@@ -259,6 +259,11 @@ Page({
     })
   },
 
+  // 阻止冒泡（用于弹窗内部点击）
+  preventBubble() {
+    // 什么都不做，只是阻止事件冒泡
+  },
+
   // ========== 赠送重置天赋机会 ==========
   async grantReroll(e) {
     const { id, name } = e.currentTarget.dataset
