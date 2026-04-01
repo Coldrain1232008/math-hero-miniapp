@@ -1,0 +1,9 @@
+{
+  "name": "assignDailyTask",
+  "version": "1.0.0",
+  "description": "每日自动分配任务",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~3.0.1"
+  }
+}

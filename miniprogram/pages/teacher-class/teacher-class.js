@@ -13,15 +13,21 @@ Page({
     showAdd: false,
     nameInput: '',
     addLoading: false,
+    // 任务确认
+    showTaskConfirm: false,
+    pendingTasks: [],
+    pendingTaskCount: 0,
   },
 
   onLoad() {
     this.loadClassInfo()
     this.loadStudents()
+    this.loadPendingTasks()
   },
   onShow() {
     this.loadClassInfo()
     this.loadStudents()
+    this.loadPendingTasks()
   },
 
   // ========== 加载班级信息 ==========
@@ -272,6 +278,159 @@ Page({
   // 阻止冒泡（用于弹窗内部点击）
   preventBubble() {
     // 什么都不做，只是阻止事件冒泡
+  },
+
+  // ========== 任务确认功能 ==========
+  async loadPendingTasks() {
+    const app = getApp()
+    try {
+      // 获取班级所有学生的待确认任务
+      const studentRes = await db.collection('students')
+        .where({ classId: app.globalData.classId })
+        .get()
+      
+      const studentIds = studentRes.data.map(s => s._id)
+      const studentMap = {}
+      studentRes.data.forEach(s => {
+        studentMap[s._id] = s
+      })
+      
+      if (studentIds.length === 0) {
+        this.setData({ pendingTasks: [], pendingTaskCount: 0 })
+        return
+      }
+      
+      const taskRes = await db.collection('dailyTasks')
+        .where({
+          studentId: db.command.in(studentIds),
+          status: 'submitted'
+        })
+        .orderBy('submitTime', 'asc')
+        .get()
+      
+      const pendingTasks = taskRes.data.map(task => {
+        const student = studentMap[task.studentId] || {}
+        return {
+          ...task,
+          studentName: student.realName || student.heroName || '未知',
+          studentId: student.studentId || '',
+          submitTimeStr: this._formatTime(task.submitTime)
+        }
+      })
+      
+      this.setData({ 
+        pendingTasks, 
+        pendingTaskCount: pendingTasks.length 
+      })
+    } catch (e) {
+      console.error('加载待确认任务失败:', e)
+    }
+  },
+
+  _formatTime(date) {
+    if (!date) return ''
+    const d = new Date(date)
+    return `${d.getMonth() + 1}/${d.getDate()} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+  },
+
+  showTaskDialog() {
+    this.loadPendingTasks()
+    this.setData({ showTaskConfirm: true })
+  },
+
+  hideTaskDialog() {
+    this.setData({ showTaskConfirm: false })
+  },
+
+  async confirmTask(e) {
+    const taskId = e.currentTarget.dataset.id
+    wx.showLoading({ title: '确认中...' })
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'confirmTask',
+        data: { taskId, action: 'confirm' }
+      })
+      wx.hideLoading()
+      if (res.result && res.result.success) {
+        wx.showToast({ title: '已确认', icon: 'success' })
+        this.loadPendingTasks()
+      } else {
+        wx.showToast({ title: res.result.error || '确认失败', icon: 'none' })
+      }
+    } catch (e) {
+      wx.hideLoading()
+      console.error('确认任务失败:', e)
+      wx.showToast({ title: '确认失败', icon: 'none' })
+    }
+  },
+
+  async rejectTask(e) {
+    const taskId = e.currentTarget.dataset.id
+    wx.showModal({
+      title: '驳回任务',
+      content: '确定驳回该任务吗？学生可以重新完成并提交。',
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '驳回中...' })
+        try {
+          const result = await wx.cloud.callFunction({
+            name: 'confirmTask',
+            data: { taskId, action: 'reject' }
+          })
+          wx.hideLoading()
+          if (result.result && result.result.success) {
+            wx.showToast({ title: '已驳回', icon: 'success' })
+            this.loadPendingTasks()
+          } else {
+            wx.showToast({ title: result.result.error || '驳回失败', icon: 'none' })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          console.error('驳回任务失败:', e)
+          wx.showToast({ title: '驳回失败', icon: 'none' })
+        }
+      }
+    })
+  },
+
+  async confirmAllTasks() {
+    const { pendingTasks } = this.data
+    if (pendingTasks.length === 0) return
+    
+    wx.showModal({
+      title: '一键确认',
+      content: `确定确认全部 ${pendingTasks.length} 个任务吗？`,
+      success: async (res) => {
+        if (!res.confirm) return
+        wx.showLoading({ title: '确认中...' })
+        
+        let successCount = 0
+        let failCount = 0
+        
+        for (const task of pendingTasks) {
+          try {
+            const result = await wx.cloud.callFunction({
+              name: 'confirmTask',
+              data: { taskId: task._id, action: 'confirm' }
+            })
+            if (result.result && result.result.success) {
+              successCount++
+            } else {
+              failCount++
+            }
+          } catch (e) {
+            failCount++
+          }
+        }
+        
+        wx.hideLoading()
+        wx.showToast({ 
+          title: `成功 ${successCount} 个${failCount > 0 ? `，失败 ${failCount} 个` : ''}`, 
+          icon: 'none' 
+        })
+        this.loadPendingTasks()
+      }
+    })
   },
 
   // ========== 赠送重置天赋机会 ==========

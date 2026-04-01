@@ -113,12 +113,19 @@
 
 .rank-name { font-size: 28rpx; font-weight: 600; color: #333; }
 
-.rank-talent-tag {
+.rank-title {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
   font-size: 20rpx;
-  padding: 2rpx 10rpx;
-  border-radius: 8rpx;
-  background: rgba(0,0,0,0.04);
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
 }
+
+.title-icon { font-size: 22rpx; }
+.title-name { font-size: 20rpx; font-weight: 600; }
 
 .rank-bar-bg {
   height: 8rpx;

@@ -70,6 +70,63 @@
     </view>
   </view>
 
+  <!-- 每日任务卡片 -->
+  <view class="card task-card">
+    <view class="card-title">
+      <text>今日任务</text>
+      <text class="task-refresh-count" wx:if="{{dailyTask && dailyTask.refreshCount < 3}}">可刷新 {{3 - dailyTask.refreshCount}} 次</text>
+    </view>
+    
+    <view wx:if="{{taskLoading}}" class="task-loading">
+      <text>加载中...</text>
+    </view>
+    
+    <view wx:elif="{{!dailyTask}}" class="task-empty">
+      <text>暂无任务</text>
+    </view>
+    
+    <view wx:else class="task-content">
+      <view class="task-header">
+        <text class="task-title">{{dailyTask.title}}</text>
+        <view class="task-tags">
+          <text class="task-tag preference" wx:if="{{dailyTask.isPreference}}">偏好任务 +5</text>
+          <text class="task-tag exp">+{{dailyTask.expReward}} EXP</text>
+        </view>
+      </view>
+      <text class="task-desc">{{dailyTask.desc}}</text>
+      
+      <view class="task-actions">
+        <button 
+          class="task-btn refresh" 
+          bindtap="refreshTask" 
+          disabled="{{dailyTask.refreshCount >= 3 || dailyTask.status !== 'pending'}}"
+          wx:if="{{dailyTask.status === 'pending'}}"
+        >
+          🔄 刷新
+        </button>
+        <button 
+          class="task-btn submit {{dailyTask.status !== 'pending' ? 'disabled' : ''}}" 
+          bindtap="submitTask"
+          disabled="{{dailyTask.status !== 'pending'}}"
+        >
+          {{dailyTask.status === 'pending' ? '✅ 完成任务' : dailyTask.status === 'submitted' ? '⏳ 等待确认' : '✓ 已完成'}}
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 徽章展示 -->
+  <view class="card badge-card" wx:if="{{badges.length > 0}}">
+    <view class="card-title">我的徽章</view>
+    <view class="badge-list">
+      <view wx:for="{{badges}}" wx:key="badgeId" class="badge-item">
+        <view class="badge-icon">{{item.icon}}</view>
+        <text class="badge-name">{{item.levelName}}</text>
+        <text class="badge-streak">{{item.currentStreak}}天</text>
+      </view>
+    </view>
+  </view>
+
   <!-- 重置天赋（如果有机会） -->
   <view wx:if="{{student.rerollChances > 0}}" class="card reroll-card" bindtap="onReroll">
     <text class="reroll-icon">🎲</text>

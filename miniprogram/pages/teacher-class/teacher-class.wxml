@@ -25,6 +25,10 @@
     <view class="action-row">
       <button class="btn-action" bindtap="fixKeys">🔑 补发密钥</button>
       <button class="btn-action" bindtap="exportKeys">📋 导出密钥</button>
+      <button class="btn-action task-btn" bindtap="showTaskDialog">
+        📋 任务确认
+        <text class="task-badge" wx:if="{{pendingTaskCount > 0}}">{{pendingTaskCount}}</text>
+      </button>
     </view>
   </view>
 
@@ -96,6 +100,48 @@
       <view class="modal-btns">
         <button class="btn-secondary" bindtap="hideAddDialog">取消</button>
         <button class="btn-primary" bindtap="importNames" loading="{{addLoading}}">导入</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 任务确认弹窗 -->
+  <view wx:if="{{showTaskConfirm}}" class="modal-mask" bindtap="hideTaskDialog">
+    <view class="modal-box task-modal" catchtap="preventBubble">
+      <view class="modal-header">
+        <text class="modal-title">任务确认</text>
+        <text class="modal-subtitle">待确认 {{pendingTasks.length}} 个任务</text>
+      </view>
+      
+      <scroll-view scroll-y class="task-list">
+        <view wx:if="{{pendingTasks.length === 0}}" class="task-empty">
+          <text>暂无待确认任务</text>
+        </view>
+        <view wx:for="{{pendingTasks}}" wx:key="_id" class="task-item">
+          <view class="task-info">
+            <view class="task-student">
+              <text class="student-name">{{item.studentName}}</text>
+              <text class="student-id" wx:if="{{item.studentId}}">({{item.studentId}})</text>
+            </view>
+            <text class="task-title">{{item.title}}</text>
+            <text class="task-desc">{{item.desc}}</text>
+            <view class="task-meta">
+              <text class="task-exp">+{{item.expReward}} EXP</text>
+              <text class="task-time">{{item.submitTimeStr}}</text>
+            </view>
+          </view>
+          <view class="task-actions">
+            <button class="btn-reject" catchtap="rejectTask" data-id="{{item._id}}">✕</button>
+            <button class="btn-confirm" catchtap="confirmTask" data-id="{{item._id}}">✓</button>
+          </view>
+        </view>
+      </scroll-view>
+      
+      <view class="modal-btns" wx:if="{{pendingTasks.length > 0}}">
+        <button class="btn-secondary" bindtap="hideTaskDialog">关闭</button>
+        <button class="btn-primary" bindtap="confirmAllTasks">一键确认全部</button>
+      </view>
+      <view class="modal-btns" wx:else>
+        <button class="btn-secondary" bindtap="hideTaskDialog">关闭</button>
       </view>
     </view>
   </view>

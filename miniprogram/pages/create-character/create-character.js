@@ -1,5 +1,5 @@
 // pages/create-character/create-character.js
-const { randomTalent, ATTR_NAMES } = require('../../utils/gameData')
+const { TALENT_DATA, randomTalent, ATTR_NAMES } = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
 const db = wx.cloud.database()
 
@@ -10,6 +10,8 @@ Page({
     gender: 'male',
     selectedAvatar: null,
     avatarList: [],
+    selectedCategory: null, // 选中的天赋大类
+    talentCategories: [],   // 天赋大类列表
     talent: null,
     revealed: false,
     rolling: false,
@@ -22,10 +24,15 @@ Page({
   onLoad() {
     // 加载头像列表
     const avatarList = AvatarManager.getAvatars()
-    // 默认选中第一个
+    // 加载天赋大类
+    const categories = Object.keys(TALENT_DATA).map(key => ({
+      id: key,
+      ...TALENT_DATA[key]
+    }))
     this.setData({
       avatarList,
-      selectedAvatar: avatarList[0].id
+      selectedAvatar: avatarList[0].id,
+      talentCategories: categories
     })
   },
 
@@ -43,11 +50,36 @@ Page({
     this.setData({ step: 2 })
   },
 
+  // 选择天赋大类
+  selectCategory(e) {
+    const categoryId = e.currentTarget.dataset.id
+    this.setData({ selectedCategory: categoryId })
+  },
+
+  // 从选中大类随机天赋
+  toStep3() {
+    if (!this.data.selectedCategory) {
+      wx.showToast({ title: '请先选择一个天赋方向', icon: 'none' })
+      return
+    }
+    this.setData({ step: 3 })
+  },
+
   revealTalent() {
     if (this.data.rolling) return
     this.setData({ rolling: true })
     setTimeout(() => {
-      const talent = randomTalent()
+      // 从选中大类随机
+      const { selectedCategory } = this.data
+      const category = TALENT_DATA[selectedCategory]
+      const subtypes = category.subtypes
+      const randomSubtype = subtypes[Math.floor(Math.random() * subtypes.length)]
+      const talent = {
+        categoryId: selectedCategory,
+        categoryName: category.name,
+        color: category.color,
+        ...randomSubtype
+      }
       this.setData({ talent, revealed: true, rolling: false })
       wx.vibrateShort()
     }, 800)
@@ -56,7 +88,16 @@ Page({
   reroll() {
     const count = this.data.rerollCount
     if (count <= 0) return
-    const talent = randomTalent()
+    const { selectedCategory } = this.data
+    const category = TALENT_DATA[selectedCategory]
+    const subtypes = category.subtypes
+    const randomSubtype = subtypes[Math.floor(Math.random() * subtypes.length)]
+    const talent = {
+      categoryId: selectedCategory,
+      categoryName: category.name,
+      color: category.color,
+      ...randomSubtype
+    }
     this.setData({ talent, rerollCount: count - 1 })
     wx.vibrateShort()
   },
