@@ -1,5 +1,34 @@
 <!-- pages/teacher-class/teacher-class.wxml -->
 <view class="page-bg">
+
+  <!-- 班级信息区 -->
+  <view class="class-info-card">
+    <view class="class-name">{{classInfo.name || '我的班级'}}</view>
+
+    <view class="key-row">
+      <view class="key-item">
+        <text class="key-label">班级密钥（给学生）</text>
+        <view class="key-value-box">
+          <text class="key-value">{{classInfo.studentKey || '-'}}</text>
+          <button class="btn-copy-sm" catchtap="copyText" data-text="{{classInfo.studentKey}}" data-label="班级密钥">复制</button>
+        </view>
+      </view>
+      <view class="key-item">
+        <text class="key-label">教师密钥</text>
+        <view class="key-value-box">
+          <text class="key-value teacher-key">{{classInfo.teacherKey || '-'}}</text>
+          <button class="btn-copy-sm" catchtap="copyText" data-text="{{classInfo.teacherKey}}" data-label="教师密钥">复制</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="action-row">
+      <button class="btn-action" bindtap="fixKeys">🔑 补发密钥</button>
+      <button class="btn-action" bindtap="exportKeys">📋 导出密钥</button>
+    </view>
+  </view>
+
+  <!-- 学生列表 -->
   <view class="header-bar">
     <text class="total-label">共 {{students.length}} 名学生</text>
     <button class="btn-add" bindtap="showAddDialog">+ 导入名单</button>
@@ -25,21 +54,23 @@
         </view>
       </view>
 
-      <!-- 个人密钥显示 -->
+      <!-- 个人密钥 -->
       <view class="s-key-section">
         <view class="s-key-label">个人密钥：</view>
         <view class="s-key-box">
-          <text class="s-key-text">{{item.studentKey || '-'}}</text>
+          <text class="s-key-text" wx:if="{{item.studentKey}}">{{item.studentKey}}</text>
+          <text class="s-key-text no-key" wx:else>未生成</text>
           <button wx:if="{{item.studentKey}}" class="btn-copy" catchtap="copyKey" data-key="{{item.studentKey}}" data-name="{{item.heroName}}">复制</button>
         </view>
       </view>
 
+      <!-- 操作区 -->
       <view class="s-footer">
         <text class="s-exp">{{item.totalExp}} EXP</text>
         <view class="s-actions">
-          <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.heroName}}">
-            🎲 给重置机会
-          </button>
+          <button class="btn-sm btn-reroll" catchtap="grantReroll" data-id="{{item._id}}" data-name="{{item.heroName}}">🎲 重置</button>
+          <button class="btn-sm btn-remove" catchtap="removeStudent" data-id="{{item._id}}" data-name="{{item.heroName}}">移出</button>
+          <button class="btn-sm btn-delete" catchtap="permanentDelete" data-id="{{item._id}}" data-name="{{item.heroName}}">永久删除</button>
         </view>
       </view>
     </view>
