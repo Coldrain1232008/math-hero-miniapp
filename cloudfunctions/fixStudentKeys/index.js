@@ -3,7 +3,6 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
-const _ = db.command
 
 function genKey(len = 6) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -19,20 +18,19 @@ exports.main = async (event) => {
   if (!classId) return { success: false, message: '缺少 classId' }
 
   try {
-    // 查找所有没有 studentKey 或 studentKey 为空的学生
+    // 先查出该班级所有学生，再在代码中筛选没有密钥的
+    // 避免云数据库 $or + exists 复合查询的兼容性问题
     const res = await db.collection('students')
-      .where({
-        classId: classId,
-        $or: [
-          { studentKey: '' },
-          { studentKey: _.exists(false) }
-        ]
-      })
+      .where({ classId: classId })
       .get()
 
-    const noKeyStudents = res.data
+    const allStudents = res.data
+    const noKeyStudents = allStudents.filter(
+      s => !s.studentKey || s.studentKey === '' || s.studentKey === undefined || s.studentKey === null
+    )
+
     if (noKeyStudents.length === 0) {
-      return { success: true, count: 0, message: '所有学生都有密钥' }
+      return { success: true, count: 0, total: allStudents.length, message: '所有学生都有密钥' }
     }
 
     let successCount = 0
@@ -46,7 +44,7 @@ exports.main = async (event) => {
           }
         })
         successCount++
-        console.log(`[fixStudentKeys] 为 ${student._id} 补发密钥: ${newKey}`)
+        console.log(`[fixStudentKeys] 为 ${student.heroName || student._id} 补发密钥: ${newKey}`)
       } catch (e) {
         console.error(`[fixStudentKeys] 更新失败 ${student._id}:`, e)
       }
