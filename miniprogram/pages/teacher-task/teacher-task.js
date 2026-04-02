@@ -55,33 +55,33 @@ Page({
     if (!classId) return
 
     this.setData({ loading: true })
-    try {
-      // 并行加载数据
-      await Promise.all([
-        this.loadSpecialTask(),
-        this.loadTaskPool(),
-        this.loadPendingTasks(),
-      ])
-    } catch (e) {
-      console.error('加载数据失败:', e)
-    } finally {
-      this.setData({ loading: false })
-    }
+    
+    // 分别加载，每个函数内部处理自己的错误
+    await this.loadSpecialTask()
+    await this.loadTaskPool()
+    await this.loadPendingTasks()
+    
+    this.setData({ loading: false })
   },
 
   // ========== 特殊任务 ==========
   async loadSpecialTask() {
     const app = getApp()
     try {
+      console.log('加载特殊任务, classId:', app.globalData.classId)
       const res = await wx.cloud.callFunction({
         name: 'manageSpecialTask',
         data: { action: 'get', classId: app.globalData.classId }
       })
+      console.log('特殊任务返回:', res.result)
       if (res.result && res.result.success) {
-        this.setData({ specialTask: res.result.task })
+        this.setData({ specialTask: res.result.task || null })
+      } else {
+        this.setData({ specialTask: null })
       }
     } catch (e) {
       console.error('加载特殊任务失败:', e)
+      this.setData({ specialTask: null })
     }
   },
 
@@ -223,18 +223,25 @@ Page({
   async loadTaskPool() {
     const app = getApp()
     try {
+      console.log('加载任务池, classId:', app.globalData.classId)
       const res = await wx.cloud.callFunction({
         name: 'manageTaskPool',
         data: { action: 'getPool', classId: app.globalData.classId }
       })
+      console.log('任务池返回:', res.result)
       if (res.result && res.result.success) {
         this.setData({
-          builtinTasks: res.result.builtinTasks,
+          builtinTasks: res.result.builtinTasks || [],
           customTasks: res.result.customTasks || []
         })
+      } else {
+        // 云函数返回失败，显示空列表
+        console.warn('任务池加载失败')
+        this.setData({ builtinTasks: [], customTasks: [] })
       }
     } catch (e) {
       console.error('加载任务池失败:', e)
+      this.setData({ builtinTasks: [], customTasks: [] })
     }
   },
 
@@ -375,17 +382,20 @@ Page({
   async loadPendingTasks() {
     const app = getApp()
     try {
+      console.log('加载待确认任务, classId:', app.globalData.classId)
       const res = await wx.cloud.callFunction({
         name: 'getPendingTasks',
         data: { classId: app.globalData.classId }
       })
+      console.log('待确认任务返回:', res.result)
       if (res.result && res.result.success) {
-        this.setData({
-          pendingTasks: res.result.pendingTasks || []
-        })
+        this.setData({ pendingTasks: res.result.pendingTasks || [] })
+      } else {
+        this.setData({ pendingTasks: [] })
       }
     } catch (e) {
       console.error('加载待确认任务失败:', e)
+      this.setData({ pendingTasks: [] })
     }
   },
 

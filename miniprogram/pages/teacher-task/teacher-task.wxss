@@ -1,5 +1,28 @@
 /* pages/teacher-task/teacher-task.wxss */
 
+/* 加载状态 */
+.loading-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  z-index: 99;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading-content {
+  text-align: center;
+}
+
+.loading-text {
+  font-size: 28rpx;
+  color: #666;
+}
+
 /* Tab导航 */
 .tab-bar {
   display: flex;
