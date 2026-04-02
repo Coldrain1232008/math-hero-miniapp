@@ -1,0 +1,9 @@
+{
+  "name": "getStudentTasksStatus",
+  "version": "1.0.0",
+  "description": "获取全班学生的任务状态",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

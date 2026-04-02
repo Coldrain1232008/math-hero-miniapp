@@ -12,9 +12,8 @@
       <text class="tab-text">任务池</text>
     </view>
     <view class="tab-item {{currentTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">
-      <text class="tab-icon">📝</text>
-      <text class="tab-text">待确认</text>
-      <text class="tab-badge" wx:if="{{pendingTasks.length > 0}}">{{pendingTasks.length}}</text>
+      <text class="tab-icon">👥</text>
+      <text class="tab-text">学生任务</text>
     </view>
   </view>
 
@@ -93,48 +92,36 @@
     </view>
   </view>
 
-  <!-- ========== Tab 2: 待确认任务 ========== -->
+  <!-- ========== Tab 2: 学生任务 ========== -->
   <view class="tab-content" wx:if="{{currentTab === 2}}">
     <view class="section-title">
-      <text>待确认任务</text>
-      <view class="task-count">{{pendingTasks.length}} 个</view>
+      <text>学生任务状态</text>
+      <view class="task-count">{{studentList.length}} 人</view>
     </view>
 
-    <view wx:if="{{pendingTasks.length === 0}}" class="empty-section">
-      <text>暂无待确认任务</text>
+    <view wx:if="{{studentList.length === 0}}" class="empty-section">
+      <text>暂无学生数据</text>
     </view>
 
-    <view wx:for="{{pendingTasks}}" wx:key="_id" class="pending-card {{item.isSpecial ? 'special' : ''}}">
-      <view class="pending-header">
-        <view class="pending-student">
+    <view wx:for="{{studentList}}" wx:key="studentId" class="student-card">
+      <view class="student-info">
+        <view class="student-name-row">
           <text class="student-name">{{item.studentName}}</text>
-          <text class="student-id" wx:if="{{item.studentId}}">{{item.studentId}}</text>
+          <text class="student-code" wx:if="{{item.studentCode}}">{{item.studentCode}}</text>
         </view>
-        <text class="pending-time">{{item.submitTimeStr}}</text>
-      </view>
-      <view class="pending-body">
-        <text class="task-title">{{item.title}}</text>
-        <text class="task-desc">{{item.desc}}</text>
-        <view class="task-badges">
-          <text class="task-badge special" wx:if="{{item.isSpecial}}">⭐特殊</text>
-          <text class="task-badge preference" wx:if="{{item.isPreference}}">偏好+5</text>
-          <text class="task-badge exp">+{{item.expReward}} EXP</text>
+        <view class="student-status-row">
+          <text class="status-tag {{item.statusClass}}">{{item.statusText}}</text>
+          <text class="task-preview" wx:if="{{item.taskTitle}}">{{item.taskTitle}}</text>
+          <text class="task-preview none" wx:else>暂无任务</text>
         </view>
       </view>
-      <view class="pending-actions">
+      <view class="student-actions">
         <button class="btn-reset" bindtap="resetStudentTask" data-studentid="{{item.studentId}}" data-name="{{item.studentName}}">重置</button>
-        <button class="btn-reject" bindtap="rejectTask" data-id="{{item._id}}">拒绝</button>
-        <button class="btn-confirm" bindtap="confirmTask" data-id="{{item._id}}">确认</button>
       </view>
     </view>
 
-    <view class="action-buttons" wx:if="{{pendingTasks.length > 0}}">
-      <view class="btn-confirm-all" bindtap="confirmAllTasks">
-        一键确认全部
-      </view>
-      <view class="btn-reset-all" bindtap="resetAllTasks">
-        重置全班任务
-      </view>
+    <view class="btn-reset-all" wx:if="{{studentList.length > 0}}" bindtap="resetAllTasks">
+      重置全班任务
     </view>
   </view>
 

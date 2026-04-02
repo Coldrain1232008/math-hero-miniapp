@@ -390,58 +390,117 @@
   color: #fa8c16;
 }
 
-.pending-actions {
+/* ========== 学生任务卡片 ========== */
+.student-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
   display: flex;
-  gap: 16rpx;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
 }
 
-.btn-reject, .btn-confirm, .btn-reset {
+.student-info {
   flex: 1;
-  padding: 18rpx 12rpx;
-  border-radius: 12rpx;
-  font-size: 24rpx;
-  border: none;
   min-width: 0;
 }
 
+.student-name-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-bottom: 12rpx;
+}
+
+.student-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.student-code {
+  font-size: 22rpx;
+  color: #999;
+  background: #f5f5f5;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+}
+
+.student-status-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+}
+
+.status-tag {
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 20rpx;
+}
+
+.status-tag.completed {
+  background: #f6ffed;
+  color: #52c41a;
+  border: 1rpx solid #b7eb8f;
+}
+
+.status-tag.pending {
+  background: #fff7e6;
+  color: #fa8c16;
+  border: 1rpx solid #ffd591;
+}
+
+.status-tag.active {
+  background: #e6f7ff;
+  color: #1890ff;
+  border: 1rpx solid #91d5ff;
+}
+
+.status-tag.none {
+  background: #f5f5f5;
+  color: #999;
+  border: 1rpx solid #d9d9d9;
+}
+
+.task-preview {
+  font-size: 24rpx;
+  color: #666;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300rpx;
+}
+
+.task-preview.none {
+  color: #ccc;
+}
+
+.student-actions {
+  flex-shrink: 0;
+  margin-left: 20rpx;
+}
+
+/* ========== 重置按钮 ========== */
 .btn-reset {
   background: #fff7e6;
   color: #fa8c16;
-}
-
-.btn-reject {
-  background: #f5f5f5;
-  color: #666;
-}
-
-.btn-confirm {
-  background: #52c41a;
-  color: #fff;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 20rpx;
-  margin-top: 30rpx;
-}
-
-.btn-confirm-all, .btn-reset-all {
-  flex: 1;
-  text-align: center;
-  padding: 28rpx;
-  border-radius: 16rpx;
-  font-size: 28rpx;
-}
-
-.btn-confirm-all {
-  background: #6c63ff;
-  color: #fff;
+  border: none;
+  padding: 16rpx 28rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
 }
 
 .btn-reset-all {
   background: #fff7e6;
   color: #fa8c16;
   border: 1rpx solid #ffc53d;
+  text-align: center;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  margin-top: 30rpx;
 }
 
 /* 弹窗 */

@@ -3,8 +3,8 @@ const { calcLevel, ATTR_NAMES } = require('../../utils/gameData')
 
 Page({
   data: {
-    // tab切换
-    currentTab: 0, // 0-特殊任务 1-普通任务池 2-待确认
+    // Tab切换
+    currentTab: 0, // 0-特殊任务 1-普通任务池 2-学生任务
 
     // 特殊任务
     specialTask: null,
@@ -19,21 +19,8 @@ Page({
     customForm: { title: '', desc: '', category: 'common', categoryIndex: 6 },
     editingCustomId: null,
 
-    // 待确认任务
-    pendingTasks: [],
-    showTaskConfirm: false,
-
-    // 天赋分类选项
-    categoryOptions: [
-      { id: 'explorer', name: '探索者' },
-      { id: 'forger', name: '铸造者' },
-      { id: 'weaver', name: '编织者' },
-      { id: 'guardian', name: '守护者' },
-      { id: 'guide', name: '引导者' },
-      { id: 'breaker', name: '突破者' },
-      { id: 'common', name: '通用' },
-    ],
-
+    // 学生任务
+    studentList: [],
     loading: false,
   },
 
@@ -71,7 +58,7 @@ Page({
     // 分别加载，每个函数内部处理自己的错误
     await this.loadSpecialTask()
     await this.loadTaskPool()
-    await this.loadPendingTasks()
+    await this.loadStudentTasks()
     
     this.setData({ loading: false })
   },
@@ -390,127 +377,25 @@ Page({
     })
   },
 
-  // ========== 待确认任务 ==========
-  async loadPendingTasks() {
+  // ========== 学生任务 ==========
+  async loadStudentTasks() {
     const app = getApp()
     try {
-      console.log('加载待确认任务, classId:', app.globalData.classId)
+      console.log('加载学生任务, classId:', app.globalData.classId)
       const res = await wx.cloud.callFunction({
-        name: 'getPendingTasks',
+        name: 'getStudentTasksStatus',
         data: { classId: app.globalData.classId }
       })
-      console.log('待确认任务返回:', res.result)
+      console.log('学生任务返回:', res.result)
       if (res.result && res.result.success) {
-        this.setData({ pendingTasks: res.result.pendingTasks || [] })
+        this.setData({ studentList: res.result.students || [] })
       } else {
-        this.setData({ pendingTasks: [] })
+        this.setData({ studentList: [] })
       }
     } catch (e) {
-      console.error('加载待确认任务失败:', e)
-      this.setData({ pendingTasks: [] })
+      console.error('加载学生任务失败:', e)
+      this.setData({ studentList: [] })
     }
-  },
-
-  showTaskDialog() {
-    this.loadPendingTasks()
-    this.setData({ showTaskConfirm: true })
-  },
-
-  hideTaskDialog() {
-    this.setData({ showTaskConfirm: false })
-  },
-
-  async confirmTask(e) {
-    const taskId = e.currentTarget.dataset.id
-    wx.showLoading({ title: '确认中...' })
-    try {
-      const res = await wx.cloud.callFunction({
-        name: 'confirmTask',
-        data: { taskId, action: 'confirm' }
-      })
-      wx.hideLoading()
-      console.log('confirmTask 返回:', res)
-      
-      // 兼容多种返回格式
-      const success = res.result?.success || res.success || res.errMsg?.includes('ok')
-      
-      if (success) {
-        wx.showToast({ title: '已确认', icon: 'success' })
-        this.loadPendingTasks()
-      } else {
-        wx.showToast({ title: res.result?.error || '确认失败', icon: 'none' })
-      }
-    } catch (e) {
-      wx.hideLoading()
-      console.error('确认任务失败:', e)
-      wx.showToast({ title: '确认失败', icon: 'none' })
-    }
-  },
-
-  async rejectTask(e) {
-    const taskId = e.currentTarget.dataset.id
-    wx.showModal({
-      title: '驳回任务',
-      content: '确定驳回该任务吗？',
-      success: async (res) => {
-        if (!res.confirm) return
-        wx.showLoading({ title: '驳回中...' })
-        try {
-          const result = await wx.cloud.callFunction({
-            name: 'confirmTask',
-            data: { taskId, action: 'reject' }
-          })
-          wx.hideLoading()
-          console.log('rejectTask 返回:', result)
-          
-          const success = result.result?.success || result.success || result.errMsg?.includes('ok')
-          if (success) {
-            wx.showToast({ title: '已驳回', icon: 'success' })
-            this.loadPendingTasks()
-          } else {
-            wx.showToast({ title: result.result?.error || '驳回失败', icon: 'none' })
-          }
-        } catch (e) {
-          wx.hideLoading()
-          wx.showToast({ title: '驳回失败', icon: 'none' })
-        }
-      }
-    })
-  },
-
-  async confirmAllTasks() {
-    const { pendingTasks } = this.data
-    if (pendingTasks.length === 0) return
-
-    wx.showModal({
-      title: '一键确认',
-      content: `确定确认全部 ${pendingTasks.length} 个任务吗？`,
-      success: async (res) => {
-        if (!res.confirm) return
-        wx.showLoading({ title: '确认中...' })
-
-        let successCount = 0
-        for (const task of pendingTasks) {
-          try {
-            const result = await wx.cloud.callFunction({
-              name: 'confirmTask',
-              data: { taskId: task._id, action: 'confirm' }
-            })
-            const success = result.result?.success || result.success || result.errMsg?.includes('ok')
-            if (success) {
-              successCount++
-            }
-          } catch (e) {}
-        }
-
-        wx.hideLoading()
-        wx.showToast({
-          title: `成功 ${successCount} 个`,
-          icon: 'none'
-        })
-        this.loadPendingTasks()
-      }
-    })
   },
 
   // ========== Tab切换 ==========
@@ -544,7 +429,7 @@ Page({
               title: result.result.message || '已重置', 
               icon: 'success' 
             })
-            this.loadPendingTasks()
+            this.loadStudentTasks()
           } else {
             wx.showToast({ 
               title: result.result?.error || '重置失败', 
@@ -584,7 +469,7 @@ Page({
               title: '已重置', 
               icon: 'success' 
             })
-            this.loadPendingTasks()
+            this.loadStudentTasks()
           } else {
             wx.showToast({ 
               title: result.result?.error || '重置失败', 
