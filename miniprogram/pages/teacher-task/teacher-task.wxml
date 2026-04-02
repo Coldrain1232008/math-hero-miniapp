@@ -67,15 +67,17 @@
       <text>暂无自定义任务</text>
     </view>
 
-    <view wx:for="{{customTasks}}" wx:key="_id" class="task-item custom">
-      <view class="task-info">
-        <view class="task-title">{{item.title}}</view>
-        <view class="task-desc">{{item.desc}}</view>
-        <view class="task-category">{{item.category}}</view>
+    <view wx:for="{{customTasks}}" wx:key="_id" class="custom-task-card">
+      <view class="custom-task-content">
+        <view class="custom-task-header">
+          <view class="custom-task-title">{{item.title}}</view>
+          <view class="custom-task-tag {{item.category}}">{{item.categoryName || '通用'}}</view>
+        </view>
+        <view class="custom-task-desc">{{item.desc}}</view>
       </view>
-      <view class="task-actions-bottom">
-        <button class="btn-action edit" bindtap="showEditCustom" data-id="{{item._id}}">✏️ 编辑</button>
-        <button class="btn-action delete" bindtap="deleteCustom" data-id="{{item._id}}">🗑️ 删除</button>
+      <view class="custom-task-actions">
+        <view class="action-btn edit" bindtap="showEditCustom" data-id="{{item._id}}">编辑</view>
+        <view class="action-btn delete" bindtap="deleteCustom" data-id="{{item._id}}">删除</view>
       </view>
     </view>
 
@@ -196,6 +198,21 @@
           bindinput="onCustomDescInput"
           maxlength="200"
         />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">职业分类</text>
+        <picker
+          mode="selector"
+          range="{{categoryOptions}}"
+          range-key="name"
+          value="{{customForm.categoryIndex}}"
+          bindchange="onCustomCategoryChange"
+        >
+          <view class="picker-value">
+            {{categoryOptions[customForm.categoryIndex >= 0 ? customForm.categoryIndex : 6].name}}
+          </view>
+        </picker>
       </view>
 
       <view class="modal-btns">

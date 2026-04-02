@@ -19,6 +19,17 @@ Page({
     customForm: { title: '', desc: '', category: 'common', categoryIndex: 6 },
     editingCustomId: null,
 
+    // 职业分类选项
+    categoryOptions: [
+      { id: 'explorer', name: '探索系' },
+      { id: 'forger', name: '锻造系' },
+      { id: 'weaver', name: '编织系' },
+      { id: 'guardian', name: '守护系' },
+      { id: 'guide', name: '引导系' },
+      { id: 'breaker', name: '突破系' },
+      { id: 'common', name: '通用' }
+    ],
+
     // 学生任务
     studentList: [],
     loading: false,
@@ -221,6 +232,7 @@ Page({
   // ========== 普通任务池 ==========
   async loadTaskPool() {
     const app = getApp()
+    const { categoryOptions } = this.data
     try {
       console.log('加载任务池, classId:', app.globalData.classId)
       const res = await wx.cloud.callFunction({
@@ -229,9 +241,14 @@ Page({
       })
       console.log('任务池返回:', res.result)
       if (res.result && res.result.success) {
+        // 为自定义任务添加中文分类名
+        const customTasks = (res.result.customTasks || []).map(task => {
+          const cat = categoryOptions.find(c => c.id === task.category)
+          return { ...task, categoryName: cat ? cat.name : '通用' }
+        })
         this.setData({
           builtinTasks: res.result.builtinTasks || [],
-          customTasks: res.result.customTasks || []
+          customTasks: customTasks
         })
       } else {
         // 云函数返回失败，显示空列表

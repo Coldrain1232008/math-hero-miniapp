@@ -118,19 +118,39 @@ Page({
   async refreshTask() {
     const { dailyTask, student } = this.data
     if (!dailyTask || !student) return
-    
-    // 特殊任务不可刷新
+
+    // 特殊任务需要确认弹窗
     if (dailyTask.isSpecial) {
-      wx.showToast({ title: '特殊任务不可刷新', icon: 'none' })
+      wx.showModal({
+        title: '刷新特殊任务',
+        content: '⚠️ 特殊任务奖励丰厚！\n刷新后将失去这次完成特殊任务的机会，变更为普通任务。\n确定要刷新吗？',
+        confirmText: '确定刷新',
+        cancelText: '继续完成',
+        success: async (res) => {
+          if (!res.confirm) return
+          await this._doRefreshTask()
+        }
+      })
       return
     }
-    
+
+    // 普通任务直接刷新
     const refreshCount = (dailyTask.refreshCount || 0) + 1
     if (refreshCount > 3) {
       wx.showToast({ title: '今日刷新次数已用完', icon: 'none' })
       return
     }
-    
+
+    await this._doRefreshTask()
+  },
+
+  // 执行刷新任务（内部方法）
+  async _doRefreshTask() {
+    const { dailyTask, student } = this.data
+    if (!dailyTask || !student) return
+
+    const refreshCount = (dailyTask.refreshCount || 0) + 1
+
     this.setData({ taskLoading: true })
     try {
       const res = await wx.cloud.callFunction({
@@ -139,7 +159,11 @@ Page({
       })
       if (res.result && res.result.success) {
         this.setData({ dailyTask: res.result.task })
-        wx.showToast({ title: '已刷新任务', icon: 'success' })
+        if (dailyTask.isSpecial) {
+          wx.showToast({ title: '已刷新为普通任务', icon: 'success' })
+        } else {
+          wx.showToast({ title: '已刷新任务', icon: 'success' })
+        }
       } else {
         wx.showToast({ title: res.result.error || '刷新失败', icon: 'none' })
       }

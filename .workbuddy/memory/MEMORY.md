@@ -39,6 +39,17 @@
 - 配置定时触发器: config.json (cron: 0 6 * * * *)
 - 逻辑: 未完成任务保留，已完成/已刷新任务重新分配
 
+### 学生端特殊任务刷新逻辑（2026-04-02 下午）
+- 学生刷新特殊任务时弹出确认弹窗，说明"奖励丰厚，刷新后将失去机会"
+- 确认后刷新成普通任务
+- 在 students 集合添加 completedSpecialTaskIds 字段
+- 学生完成/放弃特殊任务后，该任务ID记录到 completedSpecialTaskIds
+- 重置后不再分配已完成过的特殊任务
+
+### 职业分类选项
+- teacher-task 页面使用 categoryOptions 数组
+- 选项: explorer(探索系), forger(锻造系), weaver(编织系), guardian(守护系), guide(引导系), breaker(突破系), common(通用)
+
 ## 用户偏好
 - 教师端更喜欢在任务管理页面直接操作，不喜欢多层级弹窗
 - 反馈要及时清晰，用户想知道操作是否成功

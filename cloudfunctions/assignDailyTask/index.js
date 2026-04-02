@@ -159,59 +159,89 @@ exports.main = async (event, context) => {
       }
     }
     
-    // 检查刷新次数限制（普通任务才计算刷新次数）
+    // 检查刷新次数限制
+    let skipSpecialAssignment = false // 是否跳过特殊任务分配
     if (refreshCount > 0 && existingTask.data.length > 0) {
       const currentTask = existingTask.data[0]
-      // 如果当前任务是特殊任务，不允许刷新
+      // 如果当前任务是特殊任务
       if (currentTask.isSpecial) {
-        return { success: false, error: '特殊任务不可刷新' }
-      }
-      if ((currentTask.refreshCount || 0) >= 3) {
-        return { success: false, error: '今日刷新次数已用完' }
+        // 特殊任务只能刷新成普通任务，不检查刷新次数
+        // 标记跳过特殊任务分配
+        skipSpecialAssignment = true
+
+        // 将该特殊任务ID添加到学生的已完成列表（即使放弃也要记录）
+        if (currentTask.specialTaskId) {
+          const completedSpecialIds = student.completedSpecialTaskIds || []
+          if (!completedSpecialIds.includes(currentTask.specialTaskId)) {
+            completedSpecialIds.push(currentTask.specialTaskId)
+            await db.collection('students').doc(studentId).update({
+              data: {
+                completedSpecialTaskIds: completedSpecialIds
+              }
+            })
+          }
+        }
+      } else {
+        // 普通任务检查刷新次数
+        if ((currentTask.refreshCount || 0) >= 3) {
+          return { success: false, error: '今日刷新次数已用完' }
+        }
       }
     }
 
     // ========== 特殊任务优先逻辑 ==========
     // 检查班级是否有激活的特殊任务
     let specialTask = null
-    try {
-      const specialRes = await db.collection('specialTasks')
-        .where({
-          classId,
-          status: 'active'
-        })
-        .get()
-      
-      if (specialRes.data.length > 0) {
-        // 取最新的特殊任务
-        specialTask = specialRes.data.sort((a, b) => 
-          new Date(b.createTime) - new Date(a.createTime)
-        )[0]
-      }
-    } catch (e) {
-      // specialTasks 集合可能不存在，跳过
-      console.log('检查特殊任务失败:', e.message)
-    }
+    let todayCompletedSpecial = false // 标记今天是否已完成过特殊任务
 
-    // 检查学生今天是否已完成过特殊任务
-    let todayCompletedSpecial = false
-    if (specialTask) {
-      const completedRes = await db.collection('dailyTasks')
-        .where({
-          studentId,
-          isSpecial: true,
-          status: 'confirmed',
-          date: _.gte(today).and(_.lt(tomorrow))
-        })
-        .count()
-      
-      todayCompletedSpecial = completedRes.total > 0
+    // 只有首次分配（非刷新）或刷新普通任务时才检查特殊任务
+    if (!skipSpecialAssignment) {
+      try {
+        const specialRes = await db.collection('specialTasks')
+          .where({
+            classId,
+            status: 'active'
+          })
+          .get()
+
+        if (specialRes.data.length > 0) {
+          // 取最新的特殊任务
+          specialTask = specialRes.data.sort((a, b) =>
+            new Date(b.createTime) - new Date(a.createTime)
+          )[0]
+        }
+      } catch (e) {
+        // specialTasks 集合可能不存在，跳过
+        console.log('检查特殊任务失败:', e.message)
+      }
+
+      if (specialTask) {
+        // 检查今天是否已完成过
+        const completedRes = await db.collection('dailyTasks')
+          .where({
+            studentId,
+            isSpecial: true,
+            status: 'confirmed',
+            date: _.gte(today).and(_.lt(tomorrow))
+          })
+          .count()
+
+        todayCompletedSpecial = completedRes.total > 0
+
+        // 如果学生已经完成过这个特殊任务，不再分配
+        const completedSpecialIds = student.completedSpecialTaskIds || []
+        if (completedSpecialIds.includes(specialTask._id)) {
+          specialTask = null // 不再分配这个特殊任务
+        } else if (todayCompletedSpecial) {
+          specialTask = null // 今天已完成过特殊任务，不再分配
+        }
+      }
     }
 
     // 决定分配什么任务
     let shouldAssignSpecial = false
-    if (specialTask && !todayCompletedSpecial) {
-      // 有特殊任务且今天没完成过，优先分配特殊任务
+    if (specialTask && !skipSpecialAssignment) {
+      // 有特殊任务且不在跳过状态，分配特殊任务
       shouldAssignSpecial = true
     }
 
