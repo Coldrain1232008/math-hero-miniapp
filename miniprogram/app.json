@@ -7,7 +7,8 @@
     "pages/teacher/teacher",
     "pages/teacher-class/teacher-class",
     "pages/teacher-score/teacher-score",
-    "pages/teacher-upload/teacher-upload"
+    "pages/teacher-upload/teacher-upload",
+    "pages/teacher-task/teacher-task"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -40,6 +41,12 @@
         "text": "教师",
         "iconPath": "images/tab_teacher.png",
         "selectedIconPath": "images/tab_teacher_active.png"
+      },
+      {
+        "pagePath": "pages/teacher-task/teacher-task",
+        "text": "任务",
+        "iconPath": "images/tab_task.png",
+        "selectedIconPath": "images/tab_task_active.png"
       }
     ]
   },

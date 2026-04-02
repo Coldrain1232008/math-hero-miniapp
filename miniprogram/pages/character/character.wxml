@@ -71,10 +71,11 @@
   </view>
 
   <!-- 每日任务卡片 -->
-  <view class="card task-card">
+  <view class="card task-card {{dailyTask.isSpecial ? 'special' : ''}}">
     <view class="card-title">
-      <text>今日任务</text>
-      <text class="task-refresh-count" wx:if="{{dailyTask && dailyTask.refreshCount < 3}}">可刷新 {{3 - dailyTask.refreshCount}} 次</text>
+      <text>{{dailyTask.isSpecial ? '⭐ 特殊任务' : '今日任务'}}</text>
+      <text class="task-refresh-count" wx:if="{{dailyTask && !dailyTask.isSpecial && dailyTask.refreshCount < 3}}">可刷新 {{3 - dailyTask.refreshCount}} 次</text>
+      <text class="task-refresh-count special" wx:if="{{dailyTask && dailyTask.isSpecial}}">老师布置的特殊任务</text>
     </view>
     
     <view wx:if="{{taskLoading}}" class="task-loading">
@@ -89,7 +90,8 @@
       <view class="task-header">
         <text class="task-title">{{dailyTask.title}}</text>
         <view class="task-tags">
-          <text class="task-tag preference" wx:if="{{dailyTask.isPreference}}">偏好任务 +5</text>
+          <text class="task-tag special" wx:if="{{dailyTask.isSpecial}}">⭐特殊</text>
+          <text class="task-tag preference" wx:if="{{dailyTask.isPreference && !dailyTask.isSpecial}}">偏好任务 +5</text>
           <text class="task-tag exp">+{{dailyTask.expReward}} EXP</text>
         </view>
       </view>
@@ -105,7 +107,7 @@
           🔄 刷新
         </button>
         <button
-          class="task-btn submit {{dailyTask.status !== 'pending' && dailyTask.status !== 'rejected' ? 'disabled' : ''}}"
+          class="task-btn submit {{dailyTask.status !== 'pending' && dailyTask.status !== 'rejected' ? 'disabled' : ''}} {{dailyTask.isSpecial ? 'special' : ''}}"
           bindtap="submitTask"
           disabled="{{dailyTask.status !== 'pending' && dailyTask.status !== 'rejected'}}"
         >

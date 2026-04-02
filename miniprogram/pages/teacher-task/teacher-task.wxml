@@ -1,0 +1,215 @@
+<!-- pages/teacher-task/teacher-task.wxml -->
+<view class="page-bg">
+
+  <!-- Tab导航 -->
+  <view class="tab-bar">
+    <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+      <text class="tab-icon">⭐</text>
+      <text class="tab-text">特殊任务</text>
+    </view>
+    <view class="tab-item {{currentTab === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+      <text class="tab-icon">📋</text>
+      <text class="tab-text">任务池</text>
+    </view>
+    <view class="tab-item {{currentTab === 2 ? 'active' : ''}}" bindtap="switchTab" data-index="2">
+      <text class="tab-icon">📝</text>
+      <text class="tab-text">待确认</text>
+      <text class="tab-badge" wx:if="{{pendingTasks.length > 0}}">{{pendingTasks.length}}</text>
+    </view>
+  </view>
+
+  <!-- ========== Tab 0: 特殊任务 ========== -->
+  <view class="tab-content" wx:if="{{currentTab === 0}}">
+    <view class="section-title">当前特殊任务</view>
+
+    <view wx:if="{{specialTask}}" class="special-card">
+      <view class="special-badge">⭐ 特殊任务</view>
+      <view class="special-title">{{specialTask.title}}</view>
+      <view class="special-desc">{{specialTask.desc}}</view>
+      <view class="special-reward">
+        <text class="reward-icon">💎</text>
+        <text class="reward-value">+{{specialTask.expReward || 20}} EXP</text>
+      </view>
+      <view class="special-actions">
+        <button class="btn-edit" bindtap="showEditSpecial">编辑</button>
+        <button class="btn-delete" bindtap="deleteSpecial">删除</button>
+      </view>
+    </view>
+
+    <view wx:else class="empty-special">
+      <text class="empty-icon">🌟</text>
+      <text class="empty-text">暂无特殊任务</text>
+      <text class="empty-hint">发布一个特殊任务，所有学生会优先收到这个任务</text>
+    </view>
+
+    <view class="btn-add-special" bindtap="showAddSpecial">
+      <text wx:if="{{specialTask}}">✨ 更新特殊任务</text>
+      <text wx:else>✨ 发布特殊任务</text>
+    </view>
+
+    <view class="info-card">
+      <view class="info-title">特殊任务说明</view>
+      <view class="info-item">• 特殊任务会固定在学生任务列表第一位</view>
+      <view class="info-item">• 学生刷新普通任务时，特殊任务不会被刷新</view>
+      <view class="info-item">• 特殊任务奖励建议设置高于普通任务</view>
+      <view class="info-item">• 同时只能存在一个有效特殊任务</view>
+    </view>
+  </view>
+
+  <!-- ========== Tab 1: 普通任务池 ========== -->
+  <view class="tab-content" wx:if="{{currentTab === 1}}">
+    <!-- 自定义任务 -->
+    <view class="section-title">
+      <text>自定义任务</text>
+      <view class="btn-add-sm" bindtap="showAddCustom">+ 添加</view>
+    </view>
+
+    <view wx:if="{{customTasks.length === 0}}" class="empty-section">
+      <text>暂无自定义任务</text>
+    </view>
+
+    <view wx:for="{{customTasks}}" wx:key="_id" class="task-item custom">
+      <view class="task-info">
+        <view class="task-title">{{item.title}}</view>
+        <view class="task-desc">{{item.desc}}</view>
+        <view class="task-category">{{item.category}}</view>
+      </view>
+      <view class="task-actions">
+        <button class="btn-icon-sm" bindtap="showEditCustom" data-id="{{item._id}}">✏️</button>
+        <button class="btn-icon-sm delete" bindtap="deleteCustom" data-id="{{item._id}}">🗑️</button>
+      </view>
+    </view>
+
+    <!-- 内置任务（只读） -->
+    <view class="section-title mt30">内置任务（不可编辑）</view>
+    <view class="task-count">共 {{builtinTasks.length}} 个任务</view>
+
+    <view wx:for="{{builtinTasks}}" wx:key="id" class="task-item builtin">
+      <view class="task-info">
+        <view class="task-title">{{item.title}}</view>
+        <view class="task-desc">{{item.desc}}</view>
+        <view class="task-category {{item.category}}">{{item.category}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== Tab 2: 待确认任务 ========== -->
+  <view class="tab-content" wx:if="{{currentTab === 2}}">
+    <view class="section-title">
+      <text>待确认任务</text>
+      <view class="task-count">{{pendingTasks.length}} 个</view>
+    </view>
+
+    <view wx:if="{{pendingTasks.length === 0}}" class="empty-section">
+      <text>暂无待确认任务</text>
+    </view>
+
+    <view wx:for="{{pendingTasks}}" wx:key="_id" class="pending-card {{item.isSpecial ? 'special' : ''}}">
+      <view class="pending-header">
+        <view class="pending-student">
+          <text class="student-name">{{item.studentName}}</text>
+          <text class="student-id" wx:if="{{item.studentId}}">{{item.studentId}}</text>
+        </view>
+        <text class="pending-time">{{item.submitTimeStr}}</text>
+      </view>
+      <view class="pending-body">
+        <text class="task-title">{{item.title}}</text>
+        <text class="task-desc">{{item.desc}}</text>
+        <view class="task-badges">
+          <text class="task-badge special" wx:if="{{item.isSpecial}}">⭐特殊</text>
+          <text class="task-badge preference" wx:if="{{item.isPreference}}">偏好+5</text>
+          <text class="task-badge exp">+{{item.expReward}} EXP</text>
+        </view>
+      </view>
+      <view class="pending-actions">
+        <button class="btn-reject" bindtap="rejectTask" data-id="{{item._id}}">拒绝</button>
+        <button class="btn-confirm" bindtap="confirmTask" data-id="{{item._id}}">确认</button>
+      </view>
+    </view>
+
+    <view class="btn-confirm-all" wx:if="{{pendingTasks.length > 0}}" bindtap="confirmAllTasks">
+      一键确认全部
+    </view>
+  </view>
+
+  <!-- ========== 特殊任务编辑弹窗 ========== -->
+  <view wx:if="{{showSpecialEdit}}" class="modal-mask" bindtap="hideSpecialEdit">
+    <view class="modal-box" catchtap="preventBubble">
+      <text class="modal-title">{{editingSpecialId ? '编辑特殊任务' : '发布特殊任务'}}</text>
+      
+      <view class="form-item">
+        <text class="form-label">任务标题</text>
+        <input
+          class="form-input"
+          placeholder="例如：本周挑战：解答一道奥数题"
+          value="{{specialForm.title}}"
+          bindinput="onSpecialTitleInput"
+          maxlength="30"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">任务描述</text>
+        <textarea
+          class="form-textarea"
+          placeholder="详细描述学生需要完成的任务内容..."
+          value="{{specialForm.desc}}"
+          bindinput="onSpecialDescInput"
+          maxlength="200"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">奖励经验值</text>
+        <input
+          class="form-input"
+          type="number"
+          placeholder="默认20"
+          value="{{specialForm.expReward}}"
+          bindinput="onSpecialRewardChange"
+        />
+        <text class="form-hint">建议高于普通任务（10-15 EXP）</text>
+      </view>
+
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="hideSpecialEdit">取消</button>
+        <button class="btn-primary" bindtap="saveSpecial">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ========== 自定义任务编辑弹窗 ========== -->
+  <view wx:if="{{showCustomEdit}}" class="modal-mask" bindtap="hideCustomEdit">
+    <view class="modal-box" catchtap="preventBubble">
+      <text class="modal-title">{{editingCustomId ? '编辑任务' : '添加自定义任务'}}</text>
+      
+      <view class="form-item">
+        <text class="form-label">任务标题</text>
+        <input
+          class="form-input"
+          placeholder="简短的任务标题"
+          value="{{customForm.title}}"
+          bindinput="onCustomTitleInput"
+          maxlength="30"
+        />
+      </view>
+
+      <view class="form-item">
+        <text class="form-label">任务描述</text>
+        <textarea
+          class="form-textarea"
+          placeholder="详细描述任务内容..."
+          value="{{customForm.desc}}"
+          bindinput="onCustomDescInput"
+          maxlength="200"
+        />
+      </view>
+
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="hideCustomEdit">取消</button>
+        <button class="btn-primary" bindtap="saveCustom">保存</button>
+      </view>
+    </view>
+  </view>
+
+</view>

@@ -94,6 +94,7 @@ exports.main = async (event, context) => {
           date: today,
           expReward: task.expReward,
           isPreference: task.isPreference,
+          isSpecial: task.isSpecial || false,
           category: task.category,
           createTime: now
         }

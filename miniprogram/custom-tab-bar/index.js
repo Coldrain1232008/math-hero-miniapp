@@ -22,11 +22,16 @@ Component({
         iconPath: '/images/tab_teacher.png',
         selectedIconPath: '/images/tab_teacher_active.png',
       },
+      {
+        pagePath: '/pages/teacher-task/teacher-task',
+        text: '任务',
+        iconPath: '/images/tab_task.png',
+        selectedIconPath: '/images/tab_task_active.png',
+      },
     ],
   },
 
   attached() {
-    // attached 时 globalData 可能还没 ready，在 pageLifetimes.show 里再次更新
     this._updateRole()
   },
 
@@ -41,7 +46,7 @@ Component({
     _updateRole() {
       const app = getApp()
       const isTeacher = app.globalData.isTeacher || false
-      // 根据角色动态过滤 list，学生不显示教师 tab
+      // 根据角色动态过滤 list，学生不显示教师相关 tab
       const allList = [
         {
           pagePath: '/pages/character/character',
@@ -61,8 +66,18 @@ Component({
           iconPath: '/images/tab_teacher.png',
           selectedIconPath: '/images/tab_teacher_active.png',
         },
+        {
+          pagePath: '/pages/teacher-task/teacher-task',
+          text: '任务',
+          iconPath: '/images/tab_task.png',
+          selectedIconPath: '/images/tab_task_active.png',
+        },
       ]
-      const list = isTeacher ? allList : allList.filter(item => item.pagePath !== '/pages/teacher/teacher')
+      // 教师显示全部4个tab，学生只显示前2个
+      const list = isTeacher ? allList : allList.filter(item => 
+        item.pagePath !== '/pages/teacher/teacher' && 
+        item.pagePath !== '/pages/teacher-task/teacher-task'
+      )
       this.setData({ isTeacher, list })
     },
 

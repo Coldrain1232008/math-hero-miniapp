@@ -119,6 +119,12 @@ Page({
     const { dailyTask, student } = this.data
     if (!dailyTask || !student) return
     
+    // 特殊任务不可刷新
+    if (dailyTask.isSpecial) {
+      wx.showToast({ title: '特殊任务不可刷新', icon: 'none' })
+      return
+    }
+    
     const refreshCount = (dailyTask.refreshCount || 0) + 1
     if (refreshCount > 3) {
       wx.showToast({ title: '今日刷新次数已用完', icon: 'none' })

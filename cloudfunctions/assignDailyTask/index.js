@@ -1,9 +1,10 @@
 // 云函数：assignDailyTask
-// 为学生分配每日任务（考虑天赋偏好）
+// 为学生分配每日任务（特殊任务优先 + 天赋偏好）
 
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+const _ = db.command
 
 // 任务池 - 按天赋类型分类
 const TASK_POOL = {
@@ -61,25 +62,25 @@ const COMMON_TASKS = [
 
 // 天赋大类映射
 const TALENT_MAP = {
-  'A': 'explorer',    // 探索者
-  'B': 'forger',      // 铸造者
-  'C': 'weaver',      // 编织者
-  'D': 'guardian',    // 守护者
-  'E': 'guide',       // 引导者
-  'F': 'breaker',     // 突破者
+  'A': 'explorer',
+  'B': 'forger',
+  'C': 'weaver',
+  'D': 'guardian',
+  'E': 'guide',
+  'F': 'breaker',
 }
 
 /**
  * 根据天赋获取任务池
  */
 function getTaskPoolByTalent(talentId) {
-  const category = talentId.charAt(0).toUpperCase()
-  const preferenceKey = TALENT_MAP[category]
+  const category = talentId?.charAt(0)?.toUpperCase() || 'A'
+  const preferenceKey = TALENT_MAP[category] || 'explorer'
   
   // 70%概率获得偏好任务，30%概率获得通用任务
   const isPreference = Math.random() < 0.7
   
-  if (isPreference && preferenceKey) {
+  if (isPreference && preferenceKey && TASK_POOL[preferenceKey]) {
     return {
       tasks: TASK_POOL[preferenceKey],
       isPreference: true,
@@ -101,6 +102,17 @@ function randomTask(tasks) {
   return tasks[Math.floor(Math.random() * tasks.length)]
 }
 
+/**
+ * 获取今天的开始和结束时间
+ */
+function getTodayRange() {
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  const tomorrow = new Date(today)
+  tomorrow.setDate(tomorrow.getDate() + 1)
+  return { today, tomorrow }
+}
+
 exports.main = async (event, context) => {
   const { studentId, refreshCount = 0 } = event
   
@@ -116,17 +128,15 @@ exports.main = async (event, context) => {
     if (!student) {
       return { success: false, error: '学生不存在' }
     }
+
+    const classId = student.classId
+    const { today, tomorrow } = getTodayRange()
     
     // 检查今天是否已有任务
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const tomorrow = new Date(today)
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    
     const existingTask = await db.collection('dailyTasks')
       .where({
         studentId,
-        date: db.command.gte(today).and(db.command.lt(tomorrow))
+        date: _.gte(today).and(_.lt(tomorrow))
       })
       .get()
     
@@ -143,27 +153,119 @@ exports.main = async (event, context) => {
           category: task.category,
           status: task.status,
           refreshCount: task.refreshCount || 0,
-          expReward: task.expReward
+          expReward: task.expReward,
+          isSpecial: task.isSpecial || false,  // 特殊任务标识
         }
       }
     }
     
-    // 检查刷新次数限制
+    // 检查刷新次数限制（普通任务才计算刷新次数）
     if (refreshCount > 0 && existingTask.data.length > 0) {
       const currentTask = existingTask.data[0]
+      // 如果当前任务是特殊任务，不允许刷新
+      if (currentTask.isSpecial) {
+        return { success: false, error: '特殊任务不可刷新' }
+      }
       if ((currentTask.refreshCount || 0) >= 3) {
         return { success: false, error: '今日刷新次数已用完' }
       }
     }
-    
-    // 获取任务池
-    const { tasks, isPreference, category } = getTaskPoolByTalent(student.talentId)
-    const selectedTask = randomTask(tasks)
-    
-    // 计算奖励
-    const baseExp = 10
-    const bonusExp = isPreference ? 5 : 0
-    const totalExp = baseExp + bonusExp
+
+    // ========== 特殊任务优先逻辑 ==========
+    // 检查班级是否有激活的特殊任务
+    let specialTask = null
+    try {
+      const specialRes = await db.collection('specialTasks')
+        .where({
+          classId,
+          status: 'active'
+        })
+        .get()
+      
+      if (specialRes.data.length > 0) {
+        // 取最新的特殊任务
+        specialTask = specialRes.data.sort((a, b) => 
+          new Date(b.createTime) - new Date(a.createTime)
+        )[0]
+      }
+    } catch (e) {
+      // specialTasks 集合可能不存在，跳过
+      console.log('检查特殊任务失败:', e.message)
+    }
+
+    // 检查学生今天是否已完成过特殊任务
+    let todayCompletedSpecial = false
+    if (specialTask) {
+      const completedRes = await db.collection('dailyTasks')
+        .where({
+          studentId,
+          isSpecial: true,
+          status: 'confirmed',
+          date: _.gte(today).and(_.lt(tomorrow))
+        })
+        .count()
+      
+      todayCompletedSpecial = completedRes.total > 0
+    }
+
+    // 决定分配什么任务
+    let shouldAssignSpecial = false
+    if (specialTask && !todayCompletedSpecial) {
+      // 有特殊任务且今天没完成过，优先分配特殊任务
+      shouldAssignSpecial = true
+    }
+
+    let newTask
+    let isSpecial = false
+    let expReward = 10
+
+    if (shouldAssignSpecial) {
+      // 分配特殊任务
+      isSpecial = true
+      expReward = specialTask.expReward || 20
+      newTask = {
+        studentId,
+        title: specialTask.title,
+        desc: specialTask.desc,
+        taskId: `special_${specialTask._id}`,
+        isPreference: false,
+        category: 'special',
+        status: 'pending',
+        expReward,
+        refreshCount: 0,
+        date: today,
+        createTime: new Date(),
+        submitTime: null,
+        confirmTime: null,
+        isSpecial: true,
+        specialTaskId: specialTask._id,
+      }
+    } else {
+      // 分配普通任务
+      const { tasks, isPreference, category } = getTaskPoolByTalent(student.talentId)
+      const selectedTask = randomTask(tasks)
+      
+      const baseExp = 10
+      const bonusExp = isPreference ? 5 : 0
+      expReward = baseExp + bonusExp
+
+      newTask = {
+        studentId,
+        title: selectedTask.title,
+        desc: selectedTask.desc,
+        taskId: selectedTask.id,
+        isPreference,
+        category,
+        status: 'pending',
+        expReward,
+        refreshCount: refreshCount,
+        date: today,
+        createTime: new Date(),
+        submitTime: null,
+        confirmTime: null,
+        isSpecial: false,
+      }
+    }
     
     // 删除旧任务（如果有）
     if (existingTask.data.length > 0) {
@@ -171,22 +273,6 @@ exports.main = async (event, context) => {
     }
     
     // 创建新任务
-    const newTask = {
-      studentId,
-      title: selectedTask.title,
-      desc: selectedTask.desc,
-      taskId: selectedTask.id,
-      isPreference,
-      category,
-      status: 'pending', // pending, submitted, confirmed, expired
-      expReward: totalExp,
-      refreshCount: refreshCount,
-      date: today,
-      createTime: new Date(),
-      submitTime: null,
-      confirmTime: null,
-    }
-    
     const addRes = await db.collection('dailyTasks').add({ data: newTask })
     
     return {
@@ -199,7 +285,8 @@ exports.main = async (event, context) => {
         category: newTask.category,
         status: newTask.status,
         refreshCount: newTask.refreshCount,
-        expReward: newTask.expReward
+        expReward: newTask.expReward,
+        isSpecial: newTask.isSpecial,
       }
     }
     

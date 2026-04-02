@@ -1,0 +1,503 @@
+/* pages/teacher-task/teacher-task.wxss */
+
+/* Tab导航 */
+.tab-bar {
+  display: flex;
+  background: #fff;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid #eee;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 26rpx;
+  color: #999;
+  position: relative;
+  padding: 10rpx 0;
+}
+
+.tab-item.active {
+  color: #6c63ff;
+}
+
+.tab-icon {
+  font-size: 36rpx;
+  margin-bottom: 6rpx;
+}
+
+.tab-text {
+  font-size: 24rpx;
+}
+
+.tab-badge {
+  position: absolute;
+  top: 0;
+  right: 20%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 20rpx;
+  transform: translateX(50%);
+}
+
+/* Tab内容 */
+.tab-content {
+  padding: 30rpx;
+}
+
+.section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 24rpx;
+}
+
+.mt30 {
+  margin-top: 60rpx;
+}
+
+/* 特殊任务卡片 */
+.special-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 24rpx;
+  padding: 36rpx;
+  color: #fff;
+  margin-bottom: 30rpx;
+  box-shadow: 0 10rpx 30rpx rgba(102, 126, 234, 0.3);
+}
+
+.special-badge {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 8rpx 20rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  margin-bottom: 20rpx;
+}
+
+.special-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  margin-bottom: 16rpx;
+}
+
+.special-desc {
+  font-size: 26rpx;
+  opacity: 0.9;
+  line-height: 1.6;
+  margin-bottom: 24rpx;
+}
+
+.special-reward {
+  display: flex;
+  align-items: center;
+  gap: 10rpx;
+  margin-bottom: 24rpx;
+}
+
+.reward-icon {
+  font-size: 32rpx;
+}
+
+.reward-value {
+  font-size: 32rpx;
+  font-weight: 600;
+}
+
+.special-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.btn-edit, .btn-delete {
+  flex: 1;
+  padding: 20rpx;
+  border-radius: 16rpx;
+  font-size: 26rpx;
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  border: none;
+}
+
+.btn-delete {
+  background: rgba(239, 68, 68, 0.3);
+}
+
+/* 空状态 */
+.empty-special {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 60rpx 0;
+  background: #f8f8f8;
+  border-radius: 24rpx;
+  margin-bottom: 30rpx;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.empty-hint {
+  font-size: 24rpx;
+  color: #999;
+  text-align: center;
+  padding: 0 40rpx;
+}
+
+.empty-section {
+  text-align: center;
+  padding: 40rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 发布按钮 */
+.btn-add-special {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+  text-align: center;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 30rpx;
+  box-shadow: 0 8rpx 20rpx rgba(245, 87, 108, 0.3);
+}
+
+.btn-add-sm {
+  background: #6c63ff;
+  color: #fff;
+  padding: 10rpx 24rpx;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+}
+
+/* 说明卡片 */
+.info-card {
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  padding: 30rpx;
+}
+
+.info-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 20rpx;
+}
+
+.info-item {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 2;
+}
+
+/* 任务项 */
+.task-count {
+  font-size: 24rpx;
+  color: #999;
+  margin-bottom: 20rpx;
+}
+
+.task-item {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border: 1rpx solid #eee;
+}
+
+.task-item.custom {
+  border-left: 6rpx solid #6c63ff;
+}
+
+.task-item.builtin {
+  opacity: 0.7;
+  border-left: 6rpx solid #ccc;
+}
+
+.task-info {
+  flex: 1;
+}
+
+.task-title {
+  font-size: 28rpx;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 10rpx;
+}
+
+.task-desc {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 10rpx;
+}
+
+.task-category {
+  display: inline-block;
+  font-size: 20rpx;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+  background: #f5f5f5;
+  color: #666;
+}
+
+.task-category.explorer { background: #e8f4ff; color: #1890ff; }
+.task-category.forger { background: #fff7e6; color: #fa8c16; }
+.task-category.weaver { background: #fff1f0; color: #ff4d4f; }
+.task-category.guardian { background: #f6ffed; color: #52c41a; }
+.task-category.guide { background: #f9f0ff; color: #722ed1; }
+.task-category.breaker { background: #fff2e8; color: #fa541c; }
+.task-category.common { background: #f5f5f5; color: #666; }
+
+.task-actions {
+  display: flex;
+  gap: 10rpx;
+  margin-left: 20rpx;
+}
+
+.btn-icon-sm {
+  padding: 10rpx 16rpx;
+  font-size: 24rpx;
+  background: #f5f5f5;
+  border: none;
+  border-radius: 8rpx;
+}
+
+.btn-icon-sm.delete {
+  background: #fff1f0;
+}
+
+/* 待确认任务卡片 */
+.pending-card {
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 20rpx;
+  border: 1rpx solid #eee;
+}
+
+.pending-card.special {
+  border: 2rpx solid #f5576c;
+  background: linear-gradient(135deg, rgba(245, 87, 108, 0.05) 0%, rgba(246, 125, 135, 0.05) 100%);
+}
+
+.pending-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.pending-student {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.student-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.student-id {
+  font-size: 22rpx;
+  color: #999;
+  background: #f5f5f5;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.pending-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.pending-body {
+  margin-bottom: 20rpx;
+}
+
+.task-badges {
+  display: flex;
+  gap: 10rpx;
+  margin-top: 12rpx;
+}
+
+.task-badge {
+  font-size: 20rpx;
+  padding: 6rpx 14rpx;
+  border-radius: 12rpx;
+}
+
+.task-badge.special {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: #fff;
+}
+
+.task-badge.preference {
+  background: #e8f4ff;
+  color: #1890ff;
+}
+
+.task-badge.exp {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.pending-actions {
+  display: flex;
+  gap: 20rpx;
+}
+
+.btn-reject, .btn-confirm {
+  flex: 1;
+  padding: 20rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  border: none;
+}
+
+.btn-reject {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-confirm {
+  background: #52c41a;
+  color: #fff;
+}
+
+.btn-confirm-all {
+  background: #6c63ff;
+  color: #fff;
+  text-align: center;
+  padding: 28rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  margin-top: 30rpx;
+}
+
+/* 弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  width: 90%;
+  max-width: 600rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-title {
+  display: block;
+  font-size: 34rpx;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.form-item {
+  margin-bottom: 30rpx;
+}
+
+.form-label {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 12rpx;
+}
+
+.form-input {
+  width: 100%;
+  padding: 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  box-sizing: border-box;
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  min-height: 150rpx;
+  box-sizing: border-box;
+}
+
+.form-hint {
+  display: block;
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+}
+
+.modal-btns {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 40rpx;
+}
+
+.btn-secondary, .btn-primary {
+  flex: 1;
+  padding: 24rpx;
+  border-radius: 16rpx;
+  font-size: 28rpx;
+  border: none;
+}
+
+.btn-secondary {
+  background: #f5f5f5;
+  color: #666;
+}
+
+.btn-primary {
+  background: #6c63ff;
+  color: #fff;
+}
+
+.picker-value {
+  padding: 20rpx;
+  border: 1rpx solid #ddd;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  background: #fff;
+}
