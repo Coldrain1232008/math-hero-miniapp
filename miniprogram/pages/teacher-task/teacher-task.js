@@ -505,7 +505,7 @@ Page({
 
   // ========== Tab切换 ==========
   switchTab(e) {
-    const { index } = e.currentTarget.dataset
+    const index = parseInt(e.currentTarget.dataset.index)
     this.setData({ currentTab: index })
   },
 

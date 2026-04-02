@@ -1,13 +1,6 @@
 <!-- pages/teacher-task/teacher-task.wxml -->
 <view class="page-bg">
 
-  <!-- 加载状态 -->
-  <view class="loading-mask" wx:if="{{loading}}">
-    <view class="loading-content">
-      <text class="loading-text">加载中...</text>
-    </view>
-  </view>
-
   <!-- Tab导航 -->
   <view class="tab-bar">
     <view class="tab-item {{currentTab === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
