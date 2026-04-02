@@ -77,6 +77,7 @@ Page({
   goScore() { wx.navigateTo({ url: '/pages/teacher-score/teacher-score' }) },
   goUpload() { wx.navigateTo({ url: '/pages/teacher-upload/teacher-upload' }) },
   goClass() { wx.navigateTo({ url: '/pages/teacher-class/teacher-class' }) },
+  goTask() { wx.navigateTo({ url: '/pages/teacher-task/teacher-task' }) },
 
   _fmt(date) {
     if (!date) return ''

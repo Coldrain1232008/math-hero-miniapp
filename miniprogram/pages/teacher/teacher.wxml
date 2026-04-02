@@ -49,6 +49,15 @@
       </view>
       <text class="menu-arrow">›</text>
     </view>
+
+    <view class="menu-item" bindtap="goTask">
+      <view class="menu-icon" style="background:#fae8ff">⭐</view>
+      <view class="menu-info">
+        <text class="menu-title">任务管理</text>
+        <text class="menu-desc">发布特殊任务，管理任务池</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
   </view>
 
   <!-- 近期操作日志 -->

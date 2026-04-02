@@ -1,39 +1,47 @@
-/* custom-tab-bar/index.wxss */
 .tab-bar {
   display: flex;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100rpx;
-  background: #ffffff;
-  border-top: 1rpx solid #eee;
+  justify-content: space-around;
+  align-items: center;
+  height: 120rpx;
   padding-bottom: env(safe-area-inset-bottom);
-  z-index: 999;
+  background: #fff;
+  border-top: 1rpx solid #e5e5e5;
 }
 
-.tab-bar-item {
+.tab-item {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-top: 8rpx;
-  position: relative;
-}
-
-.tab-bar-item.active .tab-text {
-  color: #6c63ff;
-  font-weight: 600;
-}
-
-.tab-icon {
-  width: 44rpx;
-  height: 44rpx;
-  margin-bottom: 4rpx;
-}
-
-.tab-text {
-  font-size: 20rpx;
   color: #999;
+  font-size: 22rpx;
 }
+
+.tab-item.active {
+  color: #6c63ff;
+}
+
+.tab-item .icon {
+  font-size: 44rpx;
+  margin-bottom: 6rpx;
+}
+
+/* 图标样式 - 使用 Unicode 符号 */
+.tab-item .icon-user::before { content: '👤'; }
+.tab-item .icon-user-fill::before { content: '👤'; }
+.tab-item .icon-chart::before { content: '🏆'; }
+.tab-item .icon-chart-fill::before { content: '🏆'; }
+.tab-item .icon-calendar::before { content: '👨‍🏫'; }
+.tab-item .icon-calendar-fill::before { content: '👨‍🏫'; }
+
+.tab-item .icon::before {
+  font-size: 48rpx;
+}
+
+.tab-item .icon-user::before,
+.tab-item .icon-user-fill::before { content: '👤'; font-size: 42rpx; }
+.tab-item .icon-chart::before,
+.tab-item .icon-chart-fill::before { content: '🏆'; font-size: 42rpx; }
+.tab-item .icon-calendar::before,
+.tab-item .icon-calendar-fill::before { content: '👨‍🏫'; font-size: 42rpx; }

@@ -41,12 +41,6 @@
         "text": "教师",
         "iconPath": "images/tab_teacher.png",
         "selectedIconPath": "images/tab_teacher_active.png"
-      },
-      {
-        "pagePath": "pages/teacher-task/teacher-task",
-        "text": "任务",
-        "iconPath": "images/tab_task.png",
-        "selectedIconPath": "images/tab_task_active.png"
       }
     ]
   },

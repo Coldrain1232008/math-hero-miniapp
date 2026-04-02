@@ -1,13 +1,25 @@
-<!-- custom-tab-bar/index.wxml -->
-<view class="tab-bar">
+<view class="tab-bar" wx:if="{{role === 'student'}}">
   <view
     wx:for="{{list}}"
-    wx:key="pagePath"
-    class="tab-bar-item {{selected === index ? 'active' : ''}}"
+    wx:key="text"
+    class="tab-item {{selected === index ? 'active' : ''}}"
     data-index="{{index}}"
     bindtap="switchTab"
   >
-    <image src="{{selected === index ? item.selectedIconPath : item.iconPath}}" class="tab-icon" />
-    <text class="tab-text">{{item.text}}</text>
+    <text class="icon icon-{{item.iconName}}"></text>
+    <text class="text">{{item.text}}</text>
+  </view>
+</view>
+
+<view class="tab-bar" wx:if="{{role === 'teacher'}}">
+  <view
+    wx:for="{{list}}"
+    wx:key="text"
+    class="tab-item {{selected === index ? 'active' : ''}}"
+    data-index="{{index}}"
+    bindtap="switchTab"
+  >
+    <text class="icon icon-{{item.iconName}}"></text>
+    <text class="text">{{item.text}}</text>
   </view>
 </view>
