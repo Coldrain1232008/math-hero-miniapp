@@ -429,7 +429,12 @@ Page({
         data: { taskId, action: 'confirm' }
       })
       wx.hideLoading()
-      if (res.result && res.result.success) {
+      console.log('confirmTask 返回:', res)
+      
+      // 兼容多种返回格式
+      const success = res.result?.success || res.success || res.errMsg?.includes('ok')
+      
+      if (success) {
         wx.showToast({ title: '已确认', icon: 'success' })
         this.loadPendingTasks()
       } else {
@@ -437,6 +442,7 @@ Page({
       }
     } catch (e) {
       wx.hideLoading()
+      console.error('确认任务失败:', e)
       wx.showToast({ title: '确认失败', icon: 'none' })
     }
   },
@@ -455,11 +461,14 @@ Page({
             data: { taskId, action: 'reject' }
           })
           wx.hideLoading()
-          if (result.result && result.result.success) {
+          console.log('rejectTask 返回:', result)
+          
+          const success = result.result?.success || result.success || result.errMsg?.includes('ok')
+          if (success) {
             wx.showToast({ title: '已驳回', icon: 'success' })
             this.loadPendingTasks()
           } else {
-            wx.showToast({ title: '驳回失败', icon: 'none' })
+            wx.showToast({ title: result.result?.error || '驳回失败', icon: 'none' })
           }
         } catch (e) {
           wx.hideLoading()
@@ -487,7 +496,8 @@ Page({
               name: 'confirmTask',
               data: { taskId: task._id, action: 'confirm' }
             })
-            if (result.result && result.result.success) {
+            const success = result.result?.success || result.success || result.errMsg?.includes('ok')
+            if (success) {
               successCount++
             }
           } catch (e) {}
