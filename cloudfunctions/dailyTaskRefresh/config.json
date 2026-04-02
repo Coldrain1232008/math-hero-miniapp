@@ -1,0 +1,9 @@
+{
+  "triggers": [
+    {
+      "name": "dailyTaskRefreshTrigger",
+      "type": "timer",
+      "config": "0 6 * * * * *"
+    }
+  ]
+}
