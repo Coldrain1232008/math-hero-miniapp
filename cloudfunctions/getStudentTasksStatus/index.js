@@ -3,19 +3,16 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
-// 获取今天的时间范围
+// 获取今天的时间戳范围
 function getTodayRange() {
   const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-  const end = new Date(start.getTime() + 24 * 60 * 60 * 1000 - 1)
-  return {
-    startTime: start.getTime(),
-    endTime: end.getTime()
-  }
+  const start = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
+  const end = start + 24 * 60 * 60 * 1000 - 1
+  return { start, end }
 }
 
 // 获取状态显示文本
-function getStatusText(status, task) {
+function getStatusText(status) {
   switch (status) {
     case 'completed':
       return { text: '已完成', class: 'completed' }
@@ -31,76 +28,57 @@ function getStatusText(status, task) {
 exports.main = async (event, context) => {
   try {
     const { classId } = event
-    const { startTime, endTime } = getTodayRange()
+    const { start, end } = getTodayRange()
+
+    console.log('查询条件 - classId:', classId, 'date范围:', start, '-', end)
 
     // 获取班级学生
     const studentsRes = await db.collection('students')
       .where({ classId })
-      .field({ _id: true, name: true, studentId: true })
+      .field({ _id: true, name: true, heroName: true, studentId: true })
       .orderBy('name', 'asc')
       .get()
 
     const students = studentsRes.data || []
+    console.log('学生数量:', students.length)
 
-    // 获取今日任务记录
-    const tasksRes = await db.collection('studentTasks')
+    // 获取今日任务记录 (使用正确的集合名 dailyTasks)
+    const tasksRes = await db.collection('dailyTasks')
       .where({
-        date: db.command.gte(startTime).and(db.command.lte(endTime))
+        date: db.command.gte(start).and(db.command.lte(end))
       })
       .get()
 
+    console.log('任务记录:', tasksRes.data)
     const tasksMap = {}
     ;(tasksRes.data || []).forEach(task => {
-      tasksMap[task.studentId || task._openid] = task
+      tasksMap[task.studentId] = task
     })
-
-    // 获取特殊任务
-    const specialRes = await db.collection('specialTasks')
-      .where({ isActive: true })
-      .limit(1)
-      .get()
-    const specialTask = specialRes.data?.[0] || null
 
     // 组合学生数据
     const result = students.map(student => {
-      const task = tasksMap[student._id] || tasksMap[student.studentId] || {}
-      const status = getStatusText(task.status, task)
-
-      // 判断任务类型
-      let taskType = 'none'
-      if (task.status === 'completed' || task.status === 'submitted' || task.status === 'pending') {
-        if (task.isSpecial) {
-          taskType = 'special'
-        } else {
-          taskType = task.taskId ? 'custom' : 'builtin'
-        }
-      }
+      const task = tasksMap[student._id] || {}
+      const statusInfo = getStatusText(task.status)
 
       return {
         studentId: student._id,
-        studentName: student.name,
-        studentCode: student.studentId,
+        studentName: student.name || student.heroName || '未知',
+        studentCode: student.studentId || '',
         taskTitle: task.title || null,
         taskDesc: task.desc || null,
         expReward: task.expReward || 0,
         status: task.status || 'none',
-        statusText: status.text,
-        statusClass: status.class,
-        taskType: taskType,
+        statusText: statusInfo.text,
+        statusClass: statusInfo.class,
         isSpecial: task.isSpecial || false,
-        isPreference: task.isPreference || false,
-        submitTime: task.submitTime || null,
-        completedTime: task.completedTime || null
+        isPreference: task.isPreference || false
       }
     })
 
+    console.log('返回结果数量:', result.length)
     return {
       success: true,
-      students: result,
-      specialTask: specialTask ? {
-        title: specialTask.title,
-        desc: specialTask.desc
-      } : null
+      students: result
     }
 
   } catch (e) {
