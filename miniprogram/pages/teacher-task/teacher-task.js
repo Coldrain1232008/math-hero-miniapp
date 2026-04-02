@@ -60,10 +60,14 @@ Page({
   async loadData() {
     const app = getApp()
     const classId = app.globalData.classId
-    if (!classId) return
-
+    
     this.setData({ loading: true })
     
+    if (!classId) {
+      this.setData({ loading: false })
+      return
+    }
+
     // 分别加载，每个函数内部处理自己的错误
     await this.loadSpecialTask()
     await this.loadTaskPool()
@@ -502,16 +506,7 @@ Page({
   // ========== Tab切换 ==========
   switchTab(e) {
     const { index } = e.currentTarget.dataset
-    const currentTab = this.data.currentTab
-    
-    // 如果点击的是当前 tab，不做处理
-    if (index === currentTab) return
-    
-    // 切换 tab
     this.setData({ currentTab: index })
-    
-    // 如果切换到某个 tab，可以在这里加载对应数据
-    // 目前一次性加载了所有数据，不需要单独加载
   },
 
   // 阻止冒泡
