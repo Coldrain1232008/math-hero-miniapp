@@ -113,6 +113,13 @@
 
 .rank-name { font-size: 28rpx; font-weight: 600; color: #333; }
 
+.rank-title-text {
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  margin-left: 12rpx;
+}
+
 .rank-title {
   display: flex;
   align-items: center;

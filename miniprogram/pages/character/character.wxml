@@ -15,6 +15,9 @@
         <view class="talent-tag" style="border-color:{{student.talentColor}};color:{{student.talentColor}}">
           {{student.talentName}}
         </view>
+        <view class="title-tag" style="background:{{titleInfo.color}}20;color:{{titleInfo.color}};border-color:{{titleInfo.color}}40">
+          {{titleInfo.title}}
+        </view>
         <text class="hero-exp">累计经验：{{student.totalExp}} EXP</text>
       </view>
     </view>

@@ -65,6 +65,17 @@
   margin-bottom: 12rpx;
 }
 
+.title-tag {
+  display: inline-block;
+  font-size: 26rpx;
+  padding: 6rpx 18rpx;
+  border: 1.5rpx solid;
+  border-radius: 24rpx;
+  margin-bottom: 12rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+}
+
 .hero-exp {
   font-size: 24rpx;
   color: rgba(255,255,255,0.55);

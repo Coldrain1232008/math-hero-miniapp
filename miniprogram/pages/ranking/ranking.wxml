@@ -65,10 +65,9 @@
       <view class="rank-info">
         <view class="rank-name-row">
           <text class="rank-name">{{item.heroName}}</text>
-          <view class="rank-title" wx:if="{{item.title}}">
-            <text class="title-icon">{{item.title.icon}}</text>
-            <text class="title-name">{{item.title.name}}</text>
-          </view>
+          <text class="rank-title-text" wx:if="{{item.title}}" style="color:{{item.titleColor || '#6c63ff'}}">
+            {{item.title}}
+          </text>
         </view>
         <view class="rank-bar-bg">
           <view class="rank-bar-fill" style="width:{{item.expPercent}}%;background:{{item.talentColor || '#6c63ff'}}"></view>

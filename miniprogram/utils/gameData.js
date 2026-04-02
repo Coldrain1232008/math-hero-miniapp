@@ -377,19 +377,194 @@ function getTalentById(talentId) {
 }
 
 /**
- * 属性名称列表（顺序对应 growth 数组）
+ * 称号系统 v2.0 - 综合六维属性分布
+ * 
+ * 称号格式：[属性类型称号][档位名][档内等级]
+ * 示例：学神·启明·初阶、鬼才·洞察·精通、六边形·天算·大成
  */
+
+// ============ 档内等级配置（11档，与升级曲线互补） ============
+const TITLE_RANK_THRESHOLDS = [
+  { maxLevel: 20,  rank: 1, name: '初阶' },  // Lv.1-20, 20级
+  { maxLevel: 30,  rank: 2, name: '入门' },  // Lv.21-30, 10级
+  { maxLevel: 40,  rank: 3, name: '登堂' },  // Lv.31-40, 10级
+  { maxLevel: 55,  rank: 4, name: '小成' },  // Lv.41-55, 15级
+  { maxLevel: 70,  rank: 5, name: '精通' },  // Lv.56-70, 15级
+  { maxLevel: 85,  rank: 6, name: '大成' },  // Lv.71-85, 15级
+  { maxLevel: 100, rank: 7, name: '化境' },  // Lv.86-100, 15级
+]
+
+// ============ 档位配置（3档） ============
+const TITLE_TIER_THRESHOLDS = [
+  { maxLevel: 10,  tier: 1, suffix: '·启明', color: '#6c63ff' },  // Lv.1-10
+  { maxLevel: 25,  tier: 2, suffix: '·洞察', color: '#8b5cf6' },  // Lv.11-25
+  { maxLevel: Infinity, tier: 3, suffix: '·天算', color: '#a855f7' }, // Lv.26+
+]
+
+// ============ 属性类型定义 ============
 const ATTR_NAMES = ['智识', '专注', '毅力', '灵感', '表达', '心志']
+
+// 属性优先级（相同属性时用于决出胜者）
+const ATTR_PRIORITY = ['智识', '毅力', '心志', '专注', '灵感', '表达']
+
+// ============ 单峰型称号（6种属性） ============
+const SINGLE_PEAK_TITLES = {
+  '智识': { prefix: '学神', color: '#6c63ff' },
+  '专注': { prefix: '战神', color: '#f59e0b' },
+  '毅力': { prefix: '勇者', color: '#10b981' },
+  '灵感': { prefix: '天才', color: '#ec4899' },
+  '表达': { prefix: '名师', color: '#3b82f6' },
+  '心志': { prefix: '圣者', color: '#ef4444' },
+}
+
+// ============ 双峰型称号（6种组合） ============
+const DOUBLE_PEAK_TITLES = {
+  '智识_灵感': { prefix: '鬼才', color: '#a855f7' },
+  '智识_表达': { prefix: '博文', color: '#3b82f6' },
+  '专注_毅力': { prefix: '铁壁', color: '#f59e0b' },
+  '专注_心志': { prefix: '静心', color: '#ef4444' },
+  '毅力_心志': { prefix: '铁魂', color: '#10b981' },
+  '灵感_表达': { prefix: '妙语', color: '#ec4899' },
+}
+
+// ============ 专精型称号（6种弱势属性，正向措辞） ============
+const SPECIALIZED_TITLES = {
+  '智识': { prefix: '行动派', color: '#10b981' },
+  '专注': { prefix: '灵感派', color: '#ec4899' },
+  '毅力': { prefix: '速攻派', color: '#f59e0b' },
+  '灵感': { prefix: '实务派', color: '#3b82f6' },
+  '表达': { prefix: '沉思者', color: '#8b5cf6' },
+  '心志': { prefix: '热血派', color: '#ef4444' },
+}
+
+// ============ 均衡型称号 ============
+const BALANCED_TITLE = { prefix: '六边形', color: '#6366f1' }
+
+/**
+ * 根据六维属性和等级计算综合称号
+ * @param {number[]} attrs - 六维属性数组 [智识, 专注, 毅力, 灵感, 表达, 心志]
+ * @param {number} level - 当前等级
+ * @returns {Object} { title: '学神·启明·初阶', color: '#6c63ff', type: 'singlePeak', mainAttr: '智识' }
+ */
+function calcTitle(attrs, level) {
+  if (!attrs || attrs.length < 6) {
+    return { title: '无名', color: '#999', type: null, mainAttr: null }
+  }
+
+  // ============ 第1步：分析属性分布 ============
+  const sum = attrs.reduce((a, b) => a + b, 0)
+  const mean = sum / 6
+  const variance = attrs.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / 6
+  const std = Math.sqrt(variance)
+
+  // 找出排序后的属性
+  const sortedIndices = attrs
+    .map((val, idx) => ({ val, idx }))
+    .sort((a, b) => b.val - a.val)
+  
+  const maxVal = sortedIndices[0].val
+  const maxIdx = sortedIndices[0].idx
+  const maxAttr = ATTR_NAMES[maxIdx]
+  
+  const secondVal = sortedIndices[1].val
+  const secondIdx = sortedIndices[1].idx
+  const secondAttr = ATTR_NAMES[secondIdx]
+  
+  const thirdVal = sortedIndices[2].val
+  const minVal = sortedIndices[5].val
+  const minIdx = sortedIndices[5].idx
+  const minAttr = ATTR_NAMES[minIdx]
+
+  // ============ 第2步：判断分布类型 ============
+  let titleType = 'singlePeak'
+  let prefix = ''
+  let color = SINGLE_PEAK_TITLES[maxAttr].color
+
+  // 1. 均衡型：标准差 < 平均值×0.2
+  if (std < mean * 0.2) {
+    titleType = 'balanced'
+    prefix = BALANCED_TITLE.prefix
+    color = BALANCED_TITLE.color
+  }
+  // 2. 专精型：最低 < 平均值×0.7（且不是均衡型）
+  else if (minVal < mean * 0.7) {
+    titleType = 'specialized'
+    prefix = SPECIALIZED_TITLES[minAttr].prefix
+    color = SPECIALIZED_TITLES[minAttr].color
+  }
+  // 3. 双峰型：前二高 > 第三×1.3
+  else if (secondVal >= thirdVal * 1.3) {
+    titleType = 'doublePeak'
+    // 组合键：按字母排序确保一致性
+    const key = [maxAttr, secondAttr].sort().join('_')
+    const doublePeak = DOUBLE_PEAK_TITLES[key]
+    if (doublePeak) {
+      prefix = doublePeak.prefix
+      color = doublePeak.color
+    } else {
+      // 回退到单峰型
+      prefix = SINGLE_PEAK_TITLES[maxAttr].prefix
+      color = SINGLE_PEAK_TITLES[maxAttr].color
+    }
+  }
+  // 4. 单峰型：最高 > 次高×1.3
+  else if (maxVal >= secondVal * 1.3) {
+    titleType = 'singlePeak'
+    prefix = SINGLE_PEAK_TITLES[maxAttr].prefix
+    color = SINGLE_PEAK_TITLES[maxAttr].color
+  }
+  // 5. 默认：单峰型（最高属性）
+  else {
+    titleType = 'singlePeak'
+    prefix = SINGLE_PEAK_TITLES[maxAttr].prefix
+    color = SINGLE_PEAK_TITLES[maxAttr].color
+  }
+
+  // ============ 第3步：计算档位 ============
+  let tierSuffix = '·启明'
+  let tierColor = '#6c63ff'
+  for (const tier of TITLE_TIER_THRESHOLDS) {
+    if (level <= tier.maxLevel) {
+      tierSuffix = tier.suffix
+      tierColor = tier.color
+      break
+    }
+  }
+
+  // ============ 第4步：计算档内等级 ============
+  let rankName = '初阶'
+  for (const threshold of TITLE_RANK_THRESHOLDS) {
+    if (level <= threshold.maxLevel) {
+      rankName = threshold.name
+      break
+    }
+  }
+
+  return {
+    title: `${prefix}${tierSuffix}·${rankName}`,
+    color: color,
+    type: titleType,
+    mainAttr: titleType === 'balanced' ? null : (titleType === 'specialized' ? minAttr : maxAttr),
+  }
+}
 
 module.exports = {
   TALENT_DATA,
   LEVEL_EXP_TABLE,
   MAX_LEVEL,
   ATTR_NAMES,
+  ATTR_PRIORITY,
+  TITLE_RANK_THRESHOLDS,
+  TITLE_TIER_THRESHOLDS,
+  SINGLE_PEAK_TITLES,
+  DOUBLE_PEAK_TITLES,
+  SPECIALIZED_TITLES,
+  BALANCED_TITLE,
   calcScoreExp,
   calcScoreExpCustom,
   calcLevel,
   calcAttributes,
+  calcTitle,
   randomTalent,
   getTalentById,
 }

@@ -1,5 +1,5 @@
 // pages/character/character.js
-const { calcLevel, calcAttributes, getTalentById, ATTR_NAMES } = require('../../utils/gameData')
+const { calcLevel, calcAttributes, calcTitle, getTalentById, ATTR_NAMES } = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
 const db = wx.cloud.database()
 
@@ -16,6 +16,8 @@ Page({
     expLogs: [],
     avatarInfo: {},
     attrNames: ATTR_NAMES,
+    // 称号
+    titleInfo: null,
     // 每日任务
     dailyTask: null,
     taskLoading: false,
@@ -56,6 +58,9 @@ Page({
     const attrs = calcAttributes(student.talentId, levelInfo.level)
     const maxAttrVal = Math.max(...attrs, 50)
 
+    // 计算称号（优先使用数据库存储的，否则实时计算）
+    const titleInfo = calcTitle(attrs, levelInfo.level)
+
     const attrDetail = ATTR_NAMES.map((name, i) => ({
       name,
       val: attrs[i],
@@ -88,7 +93,7 @@ Page({
       }))
     } catch (e) { console.error(e) }
 
-    this.setData({ student, levelInfo, attrs, maxAttrVal, attrDetail, growthDetail, expLogs, avatarInfo })
+    this.setData({ student, levelInfo, attrs, maxAttrVal, attrDetail, growthDetail, expLogs, avatarInfo, titleInfo })
     
     // 加载每日任务
     this.loadDailyTask(student._id)
