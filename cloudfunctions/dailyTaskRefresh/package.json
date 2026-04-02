@@ -1,0 +1,9 @@
+{
+  "name": "dailyTaskRefresh",
+  "version": "1.0.0",
+  "description": "每日自动刷新任务（每天早上6点触发）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -519,6 +519,86 @@ Page({
     this.setData({ currentTab: index })
   },
 
+  // ========== 任务重置 ==========
+  async resetAllTasks() {
+    const app = getApp()
+    if (!app.globalData.classId) return
+
+    wx.showModal({
+      title: '重置全班任务',
+      content: '确定重置全班学生的今日任务吗？学生可以重新获取任务。',
+      confirmColor: '#f97316',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        wx.showLoading({ title: '重置中...' })
+        try {
+          const result = await wx.cloud.callFunction({
+            name: 'resetTaskProgress',
+            data: { classId: app.globalData.classId }
+          })
+          wx.hideLoading()
+          
+          if (result.result && result.result.success) {
+            wx.showToast({ 
+              title: result.result.message || '已重置', 
+              icon: 'success' 
+            })
+            this.loadPendingTasks()
+          } else {
+            wx.showToast({ 
+              title: result.result?.error || '重置失败', 
+              icon: 'none' 
+            })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          console.error('重置任务失败:', e)
+          wx.showToast({ title: '重置失败', icon: 'none' })
+        }
+      }
+    })
+  },
+
+  async resetStudentTask(e) {
+    const studentId = e.currentTarget.dataset.studentid
+    const studentName = e.currentTarget.dataset.name || '该学生'
+
+    wx.showModal({
+      title: '重置学生任务',
+      content: `确定重置 ${studentName} 的今日任务吗？`,
+      confirmColor: '#f97316',
+      success: async (res) => {
+        if (!res.confirm) return
+
+        wx.showLoading({ title: '重置中...' })
+        try {
+          const result = await wx.cloud.callFunction({
+            name: 'resetTaskProgress',
+            data: { studentId }
+          })
+          wx.hideLoading()
+          
+          if (result.result && result.result.success) {
+            wx.showToast({ 
+              title: '已重置', 
+              icon: 'success' 
+            })
+            this.loadPendingTasks()
+          } else {
+            wx.showToast({ 
+              title: result.result?.error || '重置失败', 
+              icon: 'none' 
+            })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: '重置失败', icon: 'none' })
+        }
+      }
+    })
+  },
+
   // 阻止冒泡
   preventBubble() {},
 })

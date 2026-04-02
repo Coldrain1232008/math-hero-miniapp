@@ -1,0 +1,9 @@
+{
+  "name": "resetTaskProgress",
+  "version": "1.0.0",
+  "description": "重置学生任务进度，让已完成的学生可以重新做任务",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

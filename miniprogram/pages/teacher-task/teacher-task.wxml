@@ -122,13 +122,19 @@
         </view>
       </view>
       <view class="pending-actions">
+        <button class="btn-reset" bindtap="resetStudentTask" data-studentid="{{item.studentId}}" data-name="{{item.studentName}}">重置</button>
         <button class="btn-reject" bindtap="rejectTask" data-id="{{item._id}}">拒绝</button>
         <button class="btn-confirm" bindtap="confirmTask" data-id="{{item._id}}">确认</button>
       </view>
     </view>
 
-    <view class="btn-confirm-all" wx:if="{{pendingTasks.length > 0}}" bindtap="confirmAllTasks">
-      一键确认全部
+    <view class="action-buttons" wx:if="{{pendingTasks.length > 0}}">
+      <view class="btn-confirm-all" bindtap="confirmAllTasks">
+        一键确认全部
+      </view>
+      <view class="btn-reset-all" bindtap="resetAllTasks">
+        重置全班任务
+      </view>
     </view>
   </view>
 
