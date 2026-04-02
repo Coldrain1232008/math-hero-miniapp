@@ -56,12 +56,15 @@ exports.main = async (event, context) => {
       
       let student = studentRes.data[0]
       
-      // 3. 绑定openid（首次登录）
-      if (!student.openid && openid) {
+      // 3. 绑定openid（首次登录）- 从云函数上下文自动获取
+      const wxContext = cloud.getWXContext()
+      const userOpenid = wxContext.OPENID
+      
+      if (!student.openid && userOpenid) {
         await db.collection('students').doc(student._id).update({
-          data: { openid }
+          data: { openid: userOpenid }
         })
-        student.openid = openid
+        student.openid = userOpenid
       }
       
       return {

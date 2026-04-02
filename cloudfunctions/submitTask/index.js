@@ -26,7 +26,8 @@ exports.main = async (event, context) => {
       return { success: false, error: '无权操作此任务' }
     }
     
-    if (task.status !== 'pending') {
+    // 允许 pending 或 rejected 状态提交
+    if (task.status !== 'pending' && task.status !== 'rejected') {
       return { success: false, error: '任务状态不正确，无法提交' }
     }
     

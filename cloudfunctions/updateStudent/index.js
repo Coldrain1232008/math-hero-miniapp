@@ -36,6 +36,25 @@ exports.main = async (event, context) => {
       return { success: true, message: '已赠予重置机会' }
     }
     
+    // 重置天赋（保留原有名字、头像、经验等，同时扣除一次机会）
+    if (action === 'rerollTalent') {
+      const { talentId, talentName, talentCategory, talentColor } = event
+      if (!talentId || !talentName) {
+        return { success: false, error: '缺少天赋信息' }
+      }
+      await db.collection('students').doc(studentId).update({
+        data: {
+          talentId,
+          talentName,
+          talentCategory,
+          talentColor,
+          rerollChances: _.inc(-1),  // 扣除一次重置机会
+          updatedAt: new Date()
+        }
+      })
+      return { success: true, message: '天赋已重置' }
+    }
+    
     // 通用更新
     if (action === 'update') {
       await db.collection('students').doc(studentId).update({

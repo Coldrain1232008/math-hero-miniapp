@@ -21,7 +21,7 @@ Page({
     attrColors: ['#6c63ff', '#f59e0b', '#10b981', '#ec4899', '#3b82f6', '#ef4444'],
   },
 
-  onLoad() {
+  onLoad(options) {
     // 加载头像列表
     const avatarList = AvatarManager.getAvatars()
     // 加载天赋大类
@@ -29,11 +29,30 @@ Page({
       id: key,
       ...TALENT_DATA[key]
     }))
-    this.setData({
-      avatarList,
-      selectedAvatar: avatarList[0].id,
-      talentCategories: categories
-    })
+
+    // 检查是否是重置天赋模式（教师触发）
+    const isReroll = options.reroll === '1'
+
+    if (isReroll) {
+      // 重置模式：直接跳到天赋选择（保留之前的名字和头像）
+      const app = getApp()
+      const student = app.globalData.studentInfo || {}
+      this.setData({
+        avatarList,
+        selectedAvatar: student.avatar || avatarList[0].id,
+        heroName: student.heroName || '',
+        talentCategories: categories,
+        step: 2,  // 直接到 step 2（选择天赋大类）
+        isRerollMode: true,
+      })
+    } else {
+      // 正常创建模式
+      this.setData({
+        avatarList,
+        selectedAvatar: avatarList[0].id,
+        talentCategories: categories,
+      })
+    }
   },
 
   setMale() { this.setData({ gender: 'male' }) },
@@ -106,11 +125,46 @@ Page({
     if (this.data.creating) return
     this.setData({ creating: true })
     const app = getApp()
-    const { heroName, gender, selectedAvatar, talent } = this.data
+    const { heroName, gender, selectedAvatar, talent, isRerollMode } = this.data
     // 预导入学生的 _id（通过登录时传入 globalData）
     const existingId = app.globalData.studentInfo?._id || ''
 
     try {
+      // 重置天赋模式：直接调用 updateStudent 更新天赋
+      if (isRerollMode) {
+        const res = await wx.cloud.callFunction({
+          name: 'updateStudent',
+          data: {
+            action: 'rerollTalent',
+            studentId: existingId,
+            talentId: talent.id,
+            talentName: talent.name,
+            talentCategory: talent.categoryId,
+            talentColor: talent.color,
+          },
+        })
+
+        if (res.result && res.result.success) {
+          // 更新 globalData 中的学生信息
+          app.globalData.studentInfo = {
+            ...app.globalData.studentInfo,
+            talentId: talent.id,
+            talentName: talent.name,
+            talentCategory: talent.categoryId,
+            talentColor: talent.color,
+          }
+          wx.showToast({ title: '天赋重置成功！', icon: 'success' })
+          setTimeout(() => {
+            wx.reLaunch({ url: '/pages/character/character' })
+          }, 1500)
+        } else {
+          throw new Error(res.result?.error || '重置失败')
+        }
+        this.setData({ creating: false })
+        return
+      }
+
+      // 正常创建模式：调用 createStudent
       const studentData = {
         classId: app.globalData.classId,
         studentId: existingId,  // 预导入学生传 _id，云函数据此更新

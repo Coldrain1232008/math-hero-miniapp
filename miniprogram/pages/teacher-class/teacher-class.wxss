@@ -282,17 +282,18 @@
 
 /* 底部：经验值和操作 */
 .task-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding-top: 16rpx;
   border-top: 1rpx solid #e8e8f0;
 }
 
 .task-reward {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 12rpx;
+  background: #f0f9f4;
+  padding: 8rpx 16rpx;
+  border-radius: 20rpx;
+  margin-bottom: 16rpx;
 }
 
 .reward-label {

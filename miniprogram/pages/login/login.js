@@ -76,26 +76,13 @@ Page({
 
     wx.showLoading({ title: '登录中...' })
     try {
-      // 获取当前 openid
-      let openid = ''
-      try {
-        const openidRes = await wx.cloud.callFunction({
-          name: 'login',
-          data: { action: 'getOpenId' }
-        })
-        openid = openidRes.result?.openid || ''
-      } catch (e) {
-        console.warn('获取openid失败', e)
-      }
-
-      // 调用登录云函数
+      // 调用登录云函数（云函数内部会自动获取 openid）
       const res = await wx.cloud.callFunction({
         name: 'login',
         data: {
           action: 'studentLogin',
           classKey,
-          studentKey: stuKey,
-          openid
+          studentKey: stuKey
         }
       })
 

@@ -149,14 +149,17 @@ Page({
   async submitTask() {
     const { dailyTask, student } = this.data
     if (!dailyTask || !student) return
-    if (dailyTask.status !== 'pending') {
+    
+    // 允许 pending 或 rejected 状态提交
+    if (dailyTask.status !== 'pending' && dailyTask.status !== 'rejected') {
       wx.showToast({ title: '任务已提交或已完成', icon: 'none' })
       return
     }
     
+    const isRetry = dailyTask.status === 'rejected'
     wx.showModal({
       title: '提交任务',
-      content: '提交后老师会收到确认通知，确定已完成任务吗？',
+      content: isRetry ? '重新提交后老师会收到确认通知，确定已完成任务吗？' : '提交后老师会收到确认通知，确定已完成任务吗？',
       success: async (res) => {
         if (!res.confirm) return
         
