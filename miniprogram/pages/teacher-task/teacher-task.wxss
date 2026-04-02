@@ -246,8 +246,7 @@
   padding: 24rpx;
   margin-bottom: 20rpx;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  flex-direction: row;
   border: 1rpx solid #eee;
 }
 
@@ -299,6 +298,8 @@
   display: flex;
   gap: 10rpx;
   margin-left: 20rpx;
+  align-items: center;
+  flex-shrink: 0;
 }
 
 .btn-icon-sm {
