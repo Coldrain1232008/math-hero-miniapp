@@ -44,7 +44,7 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar()._updateRole()
-      this.getTabBar().setData({ selected: 3 }) // 第4个tab
+      this.getTabBar().setData({ selected: 2 }) // 教师tab（第3个）
     }
     this.loadData()
   },
@@ -120,7 +120,13 @@ Page({
   },
 
   onSpecialRewardChange(e) {
-    this.setData({ 'specialForm.expReward': parseInt(e.detail.value) || 20 })
+    let value = e.detail.value
+    // 移除前导0（除了单独一个0）
+    if (value.length > 1 && value.startsWith('0')) {
+      value = value.replace(/^0+/, '') || '0'
+    }
+    const num = parseInt(value) || 0
+    this.setData({ 'specialForm.expReward': num })
   },
 
   async saveSpecial() {

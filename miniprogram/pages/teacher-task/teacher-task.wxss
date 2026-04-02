@@ -459,8 +459,9 @@
   border: 1rpx solid #ddd;
   border-radius: 12rpx;
   font-size: 28rpx;
-  min-height: 150rpx;
+  min-height: 200rpx;
   box-sizing: border-box;
+  line-height: 1.6;
 }
 
 .form-hint {
