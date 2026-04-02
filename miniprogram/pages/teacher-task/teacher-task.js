@@ -46,7 +46,15 @@ Page({
       this.getTabBar()._updateRole()
       this.getTabBar().setData({ selected: 2 }) // 教师tab（第3个）
     }
-    this.loadData()
+    // onShow 时不重新加载全部数据，只刷新当前 tab
+    // 如果需要刷新，可以在对应 tab 下拉刷新
+  },
+
+  // 下拉刷新
+  onPullDownRefresh() {
+    this.loadData().finally(() => {
+      wx.stopPullDownRefresh()
+    })
   },
 
   async loadData() {
@@ -494,7 +502,16 @@ Page({
   // ========== Tab切换 ==========
   switchTab(e) {
     const { index } = e.currentTarget.dataset
+    const currentTab = this.data.currentTab
+    
+    // 如果点击的是当前 tab，不做处理
+    if (index === currentTab) return
+    
+    // 切换 tab
     this.setData({ currentTab: index })
+    
+    // 如果切换到某个 tab，可以在这里加载对应数据
+    // 目前一次性加载了所有数据，不需要单独加载
   },
 
   // 阻止冒泡
