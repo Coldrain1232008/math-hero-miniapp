@@ -73,9 +73,9 @@
         <view class="task-desc">{{item.desc}}</view>
         <view class="task-category">{{item.category}}</view>
       </view>
-      <view class="task-actions">
-        <button class="btn-icon-sm" bindtap="showEditCustom" data-id="{{item._id}}">✏️</button>
-        <button class="btn-icon-sm delete" bindtap="deleteCustom" data-id="{{item._id}}">🗑️</button>
+      <view class="task-actions-bottom">
+        <button class="btn-action edit" bindtap="showEditCustom" data-id="{{item._id}}">✏️ 编辑</button>
+        <button class="btn-action delete" bindtap="deleteCustom" data-id="{{item._id}}">🗑️ 删除</button>
       </view>
     </view>
 

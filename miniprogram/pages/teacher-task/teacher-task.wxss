@@ -302,6 +302,34 @@
   flex-shrink: 0;
 }
 
+/* 底部操作按钮 */
+.task-actions-bottom {
+  display: flex;
+  gap: 20rpx;
+  margin-top: 20rpx;
+  padding-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.btn-action {
+  flex: 1;
+  padding: 16rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  border: none;
+  text-align: center;
+}
+
+.btn-action.edit {
+  background: #f0f5ff;
+  color: #1890ff;
+}
+
+.btn-action.delete {
+  background: #fff1f0;
+  color: #ff4d4f;
+}
+
 .btn-icon-sm {
   padding: 10rpx 16rpx;
   font-size: 24rpx;
