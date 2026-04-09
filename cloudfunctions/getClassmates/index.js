@@ -65,6 +65,7 @@ exports.main = async (event, context) => {
     const classmates = finalClassmates.map(s => {
       const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
       return {
+        _id: s._id,  // 用于挑战功能，必须返回
         openid: s.openid,
         name: s.realName || s.heroName || '未知',
         level: s.level || 1,

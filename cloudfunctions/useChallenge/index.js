@@ -80,13 +80,12 @@ exports.main = async (event, context) => {
       return { success: false, error: '没有挑战凭证了' }
     }
 
-    // 获取被挑战者信息（优先用 _id 查，openid 可能重复）
+    // 获取被挑战者信息（用 _id 查）
     const targetRes = await db.collection('students').doc(targetOpenid).get()
-    const opponent = targetRes.data
-    if (!targetRes.data || targetRes.data.length === 0) {
+    if (!targetRes.data) {
       return { success: false, error: '对手信息不存在' }
     }
-    const opponent = targetRes.data[0]
+    const opponent = targetRes.data
 
     // 确保同班
     if (opponent.classId !== me.classId) {
