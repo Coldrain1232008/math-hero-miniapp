@@ -250,13 +250,14 @@ exports.main = async (event, context) => {
       
       // 准备更新数据
       const drawBonus = task.isSpecial ? 5 : 3
+      const currentDrawLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
+        ? student.dailyDrawLeft : 0
+      const newDailyDrawLeft = currentDrawLeft + drawBonus
       const updateData = {
         totalExp: newTotalExp,
         lastTaskCompleteTime: now,
-        // 任务完成后增加抽卡次数（旧学生可能无此字段，先防御性赋值）
-        dailyDrawLeft: typeof student.dailyDrawLeft === 'number'
-          ? _.inc(drawBonus)
-          : drawBonus,
+        // 直接赋值，不使用 _.inc()（避免 null 值导致 NaN）
+        dailyDrawLeft: newDailyDrawLeft,
       }
       
       // 如果升级了，更新称号
@@ -270,10 +271,6 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(task.studentId).update({
         data: updateData
       })
-
-      // 计算新的抽卡次数（用于返回给前端）
-      const oldDrawLeft = typeof student.dailyDrawLeft === 'number' ? student.dailyDrawLeft : 0
-      const newDailyDrawLeft = oldDrawLeft + drawBonus
 
       // 记录经验日志
       await db.collection('expLogs').add({
