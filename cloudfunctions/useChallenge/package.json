@@ -1,0 +1,9 @@
+{
+  "name": "useChallenge",
+  "version": "1.0.0",
+  "description": "使用挑战凭证进行属性对决",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

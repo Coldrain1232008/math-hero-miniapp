@@ -1,0 +1,106 @@
+<!-- miniprogram/pages/challenge/challenge.wxml -->
+<view class="page-bg">
+  <!-- 对决结果弹窗 -->
+  <view class="battle-mask" wx:if="{{showBattle}}">
+    <view class="battle-card">
+      <!-- 结果标题 -->
+      <view class="battle-result-title {{battleResultClass}}">
+        {{battleResultText}}
+      </view>
+
+      <!-- EXP奖励 -->
+      <view class="battle-exp" wx:if="{{battleResult.winner === 'me'}}">
+        <text class="exp-badge">+5 EXP</text>
+      </view>
+      <view class="battle-exp" wx:elif="{{battleResult.winner === 'opponent'}}">
+        <text class="exp-badge neutral">无惩罚</text>
+      </view>
+
+      <!-- 对决详情 -->
+      <view class="battle-info">
+        <view class="battle-player me">
+          <view class="player-name">{{battleResult.myName}}</view>
+          <view class="player-icon">⚔️</view>
+        </view>
+        <view class="battle-vs">VS</view>
+        <view class="battle-player opponent">
+          <view class="player-icon">🛡️</view>
+          <view class="player-name">{{battleResult.opponentName}}</view>
+        </view>
+      </view>
+
+      <!-- 对决轮次 -->
+      <view class="rounds">
+        <view class="round-item {{r.winner === 'me' ? 'win' : (r.winner === 'opponent' ? 'lose' : '')}}"
+              wx:for="{{battleResult.rounds}}"
+              wx:for-item="r"
+              wx:key="index">
+          <text class="round-attr">{{r.attrName}}</text>
+          <view class="round-bar-wrap">
+            <view class="round-my-bar" style="width: {{r.myValue / 50 * 100}}%"></view>
+            <view class="round-op-bar" style="width: {{r.opponentValue / 50 * 100}}%"></view>
+          </view>
+          <text class="round-score">{{r.myValue}}</text>
+          <text class="round-divider">:</text>
+          <text class="round-score">{{r.opponentValue}}</text>
+          <view class="round-winner-icon">
+            <text wx:if="{{r.winner === 'me'}}">🏆</text>
+            <text wx:elif="{{r.winner === 'opponent'}}">🏆</text>
+            <text wx:else>🤝</text>
+          </view>
+        </view>
+      </view>
+
+      <view class="battle-score">
+        {{battleResult.myWins}} 胜 - {{battleResult.opponentWins}} 负
+      </view>
+
+      <button class="btn-back" bindtap="backToList">返回</button>
+    </view>
+  </view>
+
+  <!-- 页面标题 -->
+  <view class="header">
+    <view class="header-title">⚔️ 属性对决</view>
+    <view class="header-sub">选择一名同学发起挑战</view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 同学列表 -->
+  <view class="classmate-list" wx:else>
+    <view class="classmate-item"
+          wx:for="{{classmates}}"
+          wx:key="openid"
+          bindtap="selectOpponent"
+          data-idx="{{index}}">
+      <view class="classmate-left">
+        <view class="classmate-rank">{{index + 1}}</view>
+        <view class="classmate-info">
+          <view class="classmate-name">{{item.name}}</view>
+          <view class="classmate-level">Lv.{{item.level}}</view>
+        </view>
+      </view>
+      <view class="classmate-right">
+        <text class="classmate-exp">{{item.totalExp}} EXP</text>
+        <text class="classmate-arrow">›</text>
+      </view>
+    </view>
+
+    <view class="empty" wx:if="{{classmates.length === 0}}">
+      <text>暂无其他同学</text>
+    </view>
+  </view>
+
+  <!-- 规则说明 -->
+  <view class="rules">
+    <view class="rules-title">📖 挑战规则</view>
+    <view class="rules-text">系统随机抽取你的3个属性与对手的3个属性进行对比，共3轮，胜多负少者获胜。</view>
+    <view class="rules-text highlight">胜者获得 +5 EXP，负者无惩罚！</view>
+    <view class="rules-divider"></view>
+    <view class="rules-text">挑战凭证：{{vouchersLeft >= 0 ? vouchersLeft : '—'}} 张</view>
+  </view>
+</view>

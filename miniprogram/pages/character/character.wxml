@@ -73,6 +73,24 @@
     </view>
   </view>
 
+  <!-- 幸运转盘入口 -->
+  <view class="card gacha-card" bindtap="goGacha">
+    <view class="gacha-card-left">
+      <text class="gacha-card-icon">🎰</text>
+      <view class="gacha-card-info">
+        <view class="gacha-card-title">幸运转盘</view>
+        <view class="gacha-card-sub">每日{{dailyDrawLeft}}次 · 概率抽取奖励</view>
+      </view>
+    </view>
+    <view class="gacha-card-right">
+      <view class="gacha-vouchers" wx:if="{{challengeVouchers > 0}}">
+        <text class="voucher-dot">🏅</text>
+        <text class="voucher-num">{{challengeVouchers}}</text>
+      </view>
+      <text class="gacha-arrow">›</text>
+    </view>
+  </view>
+
   <!-- 每日任务卡片 -->
   <view class="card task-card {{dailyTask.isSpecial ? 'special' : ''}}">
     <view class="card-title">

@@ -1,0 +1,9 @@
+{
+  "name": "getClassmates",
+  "version": "1.0.0",
+  "description": "获取同班同学列表（用于挑战）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

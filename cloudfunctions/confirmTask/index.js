@@ -252,6 +252,8 @@ exports.main = async (event, context) => {
       const updateData = {
         totalExp: newTotalExp,
         lastTaskCompleteTime: now,
+        // 任务完成后增加抽卡次数
+        dailyDrawLeft: _.inc(task.isSpecial ? 5 : 3),
       }
       
       // 如果升级了，更新称号

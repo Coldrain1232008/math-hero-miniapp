@@ -1,0 +1,64 @@
+<!-- miniprogram/pages/gacha/gacha.wxml -->
+<view class="page-bg">
+  <!-- 顶部卡片 -->
+  <view class="top-card">
+    <view class="gacha-title">🎰 幸运转盘</view>
+    <view class="daily-info">
+      <text class="daily-label">今日剩余</text>
+      <text class="daily-num">{{dailyLeft}}</text>
+      <text class="daily-label">次</text>
+    </view>
+    <view class="items-hint" bindtap="showItems">
+      <text class="item-tag" wx:if="{{challengeVouchers > 0}}">🏅 挑战凭证 ×{{challengeVouchers}}</text>
+      <text class="item-tag accel" wx:if="{{growthAccelerants > 0}}">⚡ 成长加速剂 ×{{growthAccelerants}}</text>
+      <text class="item-hint" wx:if="{{challengeVouchers > 0 || growthAccelerants > 0}}">点击使用 →</text>
+    </view>
+  </view>
+
+  <!-- 转盘区域 -->
+  <view class="gacha-area">
+    <!-- 抽卡按钮 -->
+    <view class="gacha-btn-wrap {{isDrawing ? 'disabled' : ''}}" bindtap="drawTap">
+      <view class="gacha-btn {{isDrawing ? 'drawing' : ''}}">
+        <text class="gacha-btn-icon">🎲</text>
+        <text class="gacha-btn-text">{{isDrawing ? '抽取中...' : (dailyLeft > 0 ? '抽取奖励' : '今日已用完')}}</text>
+      </view>
+    </view>
+
+    <!-- 说明 -->
+    <view class="gacha-rules">
+      <view class="rule-title">📖 规则说明</view>
+      <view class="rule-item">• 每天免费抽取 <text class="highlight">3次</text></view>
+      <view class="rule-item">• 完成普通任务额外获得 <text class="highlight">3次</text></view>
+      <view class="rule-item">• 完成特殊任务额外获得 <text class="highlight">5次</text></view>
+      <view class="rule-divider"></view>
+      <view class="rule-item prize-item">
+        <text class="prize-dot exp"></text> 70% 获得 <text class="highlight">+1 EXP</text>
+      </view>
+      <view class="rule-item prize-item">
+        <text class="prize-dot voucher"></text> 15% 获得 <text class="highlight">挑战凭证</text> → 可挑战同学
+      </view>
+      <view class="rule-item prize-item">
+        <text class="prize-dot accel"></text> 15% 获得 <text class="highlight">成长加速剂</text> → 永久+0.1属性成长
+      </view>
+    </view>
+  </view>
+
+  <!-- 结果弹窗 -->
+  <view class="result-mask" wx:if="{{showResult}}" bindtap="closeResult">
+    <view class="result-card" catchtap="">
+      <view class="result-icon">
+        <text wx:if="{{result.type === 'exp'}}">✨</text>
+        <text wx:elif="{{result.type === 'challengeVoucher'}}">🏅</text>
+        <text wx:elif="{{result.type === 'growthAccelerant'}}">⚡</text>
+      </view>
+      <view class="result-title">{{result.desc}}</view>
+      <view class="result-sub">{{result.subDesc}}</view>
+      <view class="result-exp" wx:if="{{result.type === 'exp'}}">+1 EXP</view>
+      <view class="result-actions">
+        <button class="btn-primary" bindtap="goChallenge" wx:if="{{result.type === 'challengeVoucher'}}">立即挑战</button>
+        <button class="btn-secondary" bindtap="closeResult">继续抽取</button>
+      </view>
+    </view>
+  </view>
+</view>

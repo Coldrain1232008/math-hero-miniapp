@@ -212,6 +212,26 @@
 
 .growth-val { color: #999; }
 
+/* 幸运转盘入口 */
+.gacha-card {
+  margin: 24rpx 24rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(135deg, rgba(108,99,255,0.06), rgba(167,139,250,0.08));
+  border: 2rpx solid rgba(108,99,255,0.15);
+}
+
+.gacha-card-left { display: flex; align-items: center; gap: 20rpx; }
+.gacha-card-icon { font-size: 56rpx; }
+.gacha-card-title { font-size: 32rpx; font-weight: bold; color: #333; margin-bottom: 6rpx; }
+.gacha-card-sub { font-size: 24rpx; color: #888; }
+.gacha-card-right { display: flex; align-items: center; gap: 16rpx; }
+.gacha-vouchers { display: flex; align-items: center; gap: 6rpx; }
+.voucher-dot { font-size: 32rpx; }
+.voucher-num { font-size: 28rpx; font-weight: bold; color: #a78bfa; }
+.gacha-arrow { font-size: 48rpx; color: #ccc; }
+
 /* 每日任务卡片 */
 .task-card { }
 

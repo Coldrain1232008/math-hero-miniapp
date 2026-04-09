@@ -24,6 +24,10 @@ Page({
     // 徽章
     badges: [],
     badgesLoading: false,
+    // 抽卡
+    dailyDrawLeft: 3,
+    challengeVouchers: 0,
+    growthAccelerants: 0,
   },
 
   onShow() {
@@ -88,12 +92,25 @@ Page({
         .get()
       expLogs = logRes.data.map(log => ({
         ...log,
-        typeLabel: log.type === 'score' ? '📝考试' : '⚡课堂',
+        typeLabel: {
+          'score': '📝考试',
+          'task': '⭐任务',
+          'gacha': '🎰抽卡',
+          'challenge_win': '⚔️挑战',
+          'class': '⚡课堂',
+        }[log.type] || '⚡其他',
         timeStr: this._formatTime(log.createdAt),
       }))
     } catch (e) { console.error(e) }
 
-    this.setData({ student, levelInfo, attrs, maxAttrVal, attrDetail, growthDetail, expLogs, avatarInfo, titleInfo })
+    // 计算每日抽卡剩余次数
+    const today = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+    const lastDrawDate = student.lastDrawDate || ''
+    const dailyDrawLeft = lastDrawDate === today ? (student.dailyDrawLeft ?? 3) : 3
+    const challengeVouchers = student.challengeVouchers || 0
+    const growthAccelerants = student.growthAccelerants || 0
+
+    this.setData({ student, levelInfo, attrs, maxAttrVal, attrDetail, growthDetail, expLogs, avatarInfo, titleInfo, dailyDrawLeft, challengeVouchers, growthAccelerants })
     
     // 加载每日任务
     this.loadDailyTask(student._id)
@@ -258,6 +275,11 @@ Page({
         wx.navigateTo({ url: '/pages/create-character/create-character?reroll=1' })
       },
     })
+  },
+
+  // 跳转抽卡页面
+  goGacha() {
+    wx.navigateTo({ url: '/pages/gacha/gacha' })
   },
 
   _formatTime(date) {

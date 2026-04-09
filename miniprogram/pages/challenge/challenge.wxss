@@ -1,0 +1,160 @@
+/* miniprogram/pages/challenge/challenge.wxss */
+.page-bg { background: #f0f0f8; min-height: 100vh; padding-bottom: 60rpx; }
+
+/* 页面标题 */
+.header { padding: 60rpx 40rpx 32rpx; text-align: center; }
+.header-title { font-size: 48rpx; font-weight: bold; color: #333; }
+.header-sub { font-size: 26rpx; color: #999; margin-top: 8rpx; }
+
+/* 加载 */
+.loading { text-align: center; padding: 80rpx 0; color: #999; }
+
+/* 同学列表 */
+.classmate-list { padding: 0 24rpx; }
+
+.classmate-item {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
+.classmate-left { display: flex; align-items: center; gap: 20rpx; }
+
+.classmate-rank {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+  color: #666;
+  flex-shrink: 0;
+}
+
+.classmate-info {}
+.classmate-name { font-size: 32rpx; font-weight: bold; color: #333; }
+.classmate-level { font-size: 24rpx; color: #999; margin-top: 4rpx; }
+
+.classmate-right { display: flex; align-items: center; gap: 12rpx; }
+.classmate-exp { font-size: 24rpx; color: #10b981; font-weight: 600; }
+.classmate-arrow { font-size: 40rpx; color: #ccc; }
+
+.empty { text-align: center; padding: 80rpx 0; color: #bbb; font-size: 28rpx; }
+
+/* 规则说明 */
+.rules {
+  margin: 32rpx 24rpx 0;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 32rpx;
+}
+.rules-title { font-size: 28rpx; font-weight: bold; color: #333; margin-bottom: 16rpx; }
+.rules-text { font-size: 26rpx; color: #666; line-height: 1.6; margin-bottom: 8rpx; }
+.rules-text.highlight { color: #10b981; font-weight: 600; }
+.rules-divider { height: 1rpx; background: #f0f0f0; margin: 16rpx 0; }
+
+/* 对决弹窗 */
+.battle-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.battle-card {
+  width: 640rpx;
+  background: #fff;
+  border-radius: 32rpx;
+  padding: 48rpx 40rpx;
+  text-align: center;
+  animation: popIn 0.3s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.battle-result-title {
+  font-size: 52rpx;
+  font-weight: bold;
+  margin-bottom: 24rpx;
+}
+.battle-result-title.win { color: #10b981; }
+.battle-result-title.lose { color: #dc2626; }
+.battle-result-title.draw { color: #888; }
+
+.battle-exp { margin-bottom: 24rpx; }
+.exp-badge {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: bold;
+  padding: 12rpx 40rpx;
+  border-radius: 40rpx;
+}
+.exp-badge.neutral { background: #f3f4f6; color: #999; }
+
+/* 双方选手 */
+.battle-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 32rpx;
+  margin-bottom: 32rpx;
+}
+.battle-player { display: flex; flex-direction: column; align-items: center; gap: 8rpx; }
+.player-name { font-size: 28rpx; font-weight: bold; color: #333; }
+.player-icon { font-size: 56rpx; }
+.battle-vs { font-size: 40rpx; font-weight: bold; color: #ccc; }
+
+/* 对决轮次 */
+.rounds { margin-bottom: 24rpx; }
+.round-item {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  padding: 16rpx 20rpx;
+  border-radius: 12rpx;
+  margin-bottom: 8rpx;
+  background: #f8f8fc;
+}
+.round-item.win { background: #d1fae5; }
+.round-item.lose { background: #fef2f2; }
+
+.round-attr { width: 60rpx; font-size: 24rpx; color: #666; flex-shrink: 0; }
+.round-bar-wrap { flex: 1; height: 10rpx; border-radius: 5rpx; background: #fca5a5; position: relative; overflow: hidden; }
+.round-my-bar { position: absolute; left: 0; top: 0; height: 100%; background: #6c63ff; border-radius: 5rpx; }
+.round-op-bar { position: absolute; right: 0; top: 0; height: 100%; background: #f59e0b; border-radius: 5rpx; }
+.round-score { width: 36rpx; font-size: 24rpx; font-weight: bold; color: #333; text-align: center; flex-shrink: 0; }
+.round-divider { width: 20rpx; text-align: center; color: #999; flex-shrink: 0; }
+.round-winner-icon { width: 40rpx; text-align: center; font-size: 28rpx; flex-shrink: 0; }
+
+.battle-score { font-size: 28rpx; color: #999; margin-bottom: 32rpx; }
+
+.btn-back {
+  background: linear-gradient(135deg, #6c63ff, #a78bfa);
+  color: #fff;
+  border: none;
+  border-radius: 50rpx;
+  padding: 24rpx 0;
+  font-size: 30rpx;
+  font-weight: bold;
+}

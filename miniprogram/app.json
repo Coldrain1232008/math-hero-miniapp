@@ -8,7 +8,9 @@
     "pages/teacher-class/teacher-class",
     "pages/teacher-score/teacher-score",
     "pages/teacher-upload/teacher-upload",
-    "pages/teacher-task/teacher-task"
+    "pages/teacher-task/teacher-task",
+    "pages/gacha/gacha",
+    "pages/challenge/challenge"
   ],
   "window": {
     "backgroundTextStyle": "dark",
