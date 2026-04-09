@@ -28,7 +28,13 @@ Page({
         data: { openid: app.globalData.studentInfo.openid }
       })
       if (res.result.success) {
-        this.setData({ classmates: res.result.classmates, loading: false })
+        const classmates = res.result.classmates || []
+        if (classmates.length === 0 && res.result.debug) {
+          const d = res.result.debug
+          wx.showToast({ title: `班级ID:${d.myClassId} 无其他同学`, icon: 'none', duration: 3000 })
+          console.log('[getClassmates debug]', res.result.debug)
+        }
+        this.setData({ classmates, loading: false })
       } else {
         wx.showToast({ title: res.result.error || '加载失败', icon: 'none' })
       }

@@ -52,7 +52,11 @@ exports.main = async (event, context) => {
         talentId: true, totalExp: true, level: true
       })
       .orderBy('totalExp', 'desc')
+      .limit(50)  // 防止数据量过大
       .get()
+
+    // DEBUG: 返回原始数据用于排查
+    console.log('[getClassmates] raw classmatesRes:', JSON.stringify(classmatesRes))
 
     const classmates = (classmatesRes.data || []).map(s => {
       const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
@@ -67,7 +71,13 @@ exports.main = async (event, context) => {
 
     return {
       success: true,
-      classmates
+      classmates,
+      // DEBUG
+      debug: {
+        myClassId: my.classId,
+        rawCount: classmatesRes.data ? classmatesRes.data.length : 0,
+        query
+      }
     }
 
   } catch (e) {
