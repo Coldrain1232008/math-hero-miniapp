@@ -669,3 +669,78 @@
   font-size: 28rpx;
   background: #fff;
 }
+
+/* ========== 历史记录 ========== */
+.history-toggle {
+  text-align: center;
+  padding: 20rpx;
+  color: #6c63ff;
+  font-size: 26rpx;
+  margin-top: 10rpx;
+}
+
+.history-section {
+  margin-top: 20rpx;
+}
+
+.history-item {
+  background: #fff;
+  border-radius: 12rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  border: 1rpx solid #f0f0f0;
+}
+
+.history-badge {
+  display: inline-block;
+  font-size: 20rpx;
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+  margin-bottom: 12rpx;
+}
+
+.history-badge.active {
+  background: linear-gradient(135deg, #52c41a 0%, #73d13d 100%);
+  color: #fff;
+}
+
+.history-badge.expired {
+  background: #f5f5f5;
+  color: #999;
+}
+
+.history-badge.deleted {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+
+.history-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 8rpx;
+}
+
+.history-desc {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 12rpx;
+}
+
+.history-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.history-reward {
+  font-size: 22rpx;
+  color: #fa8c16;
+  font-weight: 500;
+}

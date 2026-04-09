@@ -235,6 +235,7 @@ async function assignNewTask(student, today) {
     isSpecial = true
     newTask = {
       studentId,
+      classId, // 添加 classId，便于教师端按班级查询任务记录
       title: specialTask.title,
       desc: specialTask.desc,
       taskId: `special_${specialTask._id}`,
@@ -269,6 +270,7 @@ async function assignNewTask(student, today) {
 
     newTask = {
       studentId,
+      classId, // 添加 classId，便于教师端按班级查询任务记录
       title: selectedTask.title,
       desc: selectedTask.desc,
       taskId: selectedTask.id,

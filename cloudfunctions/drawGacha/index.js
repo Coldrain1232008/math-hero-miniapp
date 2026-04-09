@@ -31,9 +31,15 @@ exports.main = async (event, context) => {
     // 检查每日重置
     const today = getTodayStr()
     const lastDrawDate = student.lastDrawDate || ''
-    const dailyLeft = lastDrawDate === today
-      ? (student.dailyDrawLeft ?? 3)
-      : 3 // 新的一天，重置为3次
+
+    // 关键：新账号（lastDrawDate为空）或新的一天，重置为3次
+    let dailyLeft
+    if (!lastDrawDate || lastDrawDate !== today) {
+      dailyLeft = 3
+    } else {
+      // 今天已有记录，用数据库中的值
+      dailyLeft = student.dailyDrawLeft ?? 0
+    }
 
     if (dailyLeft <= 0) {
       return { success: false, error: '今日抽卡次数已用完', dailyLeft: 0 }
@@ -53,7 +59,7 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(student._id).update({
         data: {
           growthAccelerants: _.inc(1),
-          dailyDrawLeft: _.inc(-1),
+          dailyDrawLeft: dailyLeft - 1,
           lastDrawDate: today
         }
       })
@@ -68,7 +74,7 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(student._id).update({
         data: {
           challengeVouchers: _.inc(1),
-          dailyDrawLeft: _.inc(-1),
+          dailyDrawLeft: dailyLeft - 1,
           lastDrawDate: today
         }
       })
@@ -79,7 +85,7 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(student._id).update({
         data: {
           totalExp: _.inc(1),
-          dailyDrawLeft: _.inc(-1),
+          dailyDrawLeft: dailyLeft - 1,
           lastDrawDate: today
         }
       })

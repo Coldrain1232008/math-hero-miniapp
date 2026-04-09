@@ -249,11 +249,14 @@ exports.main = async (event, context) => {
       const newLevel = calcLevel(newTotalExp)
       
       // 准备更新数据
+      const drawBonus = task.isSpecial ? 5 : 3
       const updateData = {
         totalExp: newTotalExp,
         lastTaskCompleteTime: now,
-        // 任务完成后增加抽卡次数
-        dailyDrawLeft: _.inc(task.isSpecial ? 5 : 3),
+        // 任务完成后增加抽卡次数（旧学生可能无此字段，先防御性赋值）
+        dailyDrawLeft: typeof student.dailyDrawLeft === 'number'
+          ? _.inc(drawBonus)
+          : drawBonus,
       }
       
       // 如果升级了，更新称号

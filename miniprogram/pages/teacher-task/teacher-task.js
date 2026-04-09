@@ -8,9 +8,11 @@ Page({
 
     // 特殊任务
     specialTask: null,
+    specialTaskHistory: [],
     showSpecialEdit: false,
     specialForm: { title: '', desc: '', expReward: 20 },
     editingSpecialId: null,
+    showHistory: false, // 是否显示历史记录
 
     // 普通任务池
     builtinTasks: [],
@@ -93,6 +95,41 @@ Page({
       console.error('加载特殊任务失败:', e)
       this.setData({ specialTask: null })
     }
+  },
+
+  // 加载特殊任务历史
+  async loadSpecialTaskHistory() {
+    const app = getApp()
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'manageSpecialTask',
+        data: { action: 'history', classId: app.globalData.classId }
+      })
+      if (res.result && res.result.success) {
+        const history = (res.result.tasks || []).map(task => ({
+          ...task,
+          createTimeStr: this._formatDate(task.createTime)
+        }))
+        this.setData({ specialTaskHistory: history })
+      }
+    } catch (e) {
+      console.error('加载历史失败:', e)
+    }
+  },
+
+  // 切换历史记录显示
+  toggleHistory() {
+    const showHistory = !this.data.showHistory
+    this.setData({ showHistory })
+    if (showHistory && this.data.specialTaskHistory.length === 0) {
+      this.loadSpecialTaskHistory()
+    }
+  },
+
+  _formatDate(date) {
+    if (!date) return ''
+    const d = new Date(date)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   },
 
   showAddSpecial() {

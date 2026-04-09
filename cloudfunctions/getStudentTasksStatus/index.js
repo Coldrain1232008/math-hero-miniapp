@@ -35,8 +35,8 @@ exports.main = async (event, context) => {
     // 获取班级学生
     const studentsRes = await db.collection('students')
       .where({ classId })
-      .field({ _id: true, name: true, heroName: true, studentId: true })
-      .orderBy('name', 'asc')
+      .field({ _id: true, realName: true, heroName: true, studentId: true })
+      .orderBy('realName', 'asc')
       .get()
 
     const students = studentsRes.data || []
@@ -63,7 +63,7 @@ exports.main = async (event, context) => {
 
       return {
         studentId: student._id,
-        studentName: student.name || student.heroName || '未知',
+        studentName: student.realName || student.heroName || '未知',
         studentCode: student.studentId || '',
         taskTitle: task.title || null,
         taskDesc: task.desc || null,

@@ -1,0 +1,45 @@
+// cloudfunctions/getDrawStatus/index.js
+// 获取抽卡状态，不依赖前端缓存
+const cloud = require('wx-server-sdk')
+cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+const db = cloud.database()
+
+function getTodayStr() {
+  const d = new Date()
+  return `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
+}
+
+exports.main = async (event, context) => {
+  try {
+    const { openid } = event
+    if (!openid) return { success: false, error: '缺少 openid' }
+
+    const studentRes = await db.collection('students').where({ openid }).get()
+    if (!studentRes.data || studentRes.data.length === 0) {
+      return { success: false, error: '学生信息不存在' }
+    }
+    const student = studentRes.data[0]
+
+    const today = getTodayStr()
+    const lastDrawDate = student.lastDrawDate || ''
+
+    let dailyLeft
+    if (!lastDrawDate || lastDrawDate !== today) {
+      // 新账号或新的一天
+      dailyLeft = 3
+    } else {
+      dailyLeft = typeof student.dailyDrawLeft === 'number' ? student.dailyDrawLeft : 0
+    }
+
+    return {
+      success: true,
+      dailyLeft,
+      lastDrawDate,
+      challengeVouchers: student.challengeVouchers || 0,
+      growthAccelerants: student.growthAccelerants || 0,
+      totalExp: student.totalExp || 0
+    }
+  } catch (e) {
+    return { success: false, error: e.message }
+  }
+}

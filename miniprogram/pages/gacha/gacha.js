@@ -20,21 +20,28 @@ Page({
     this.loadData()
   },
 
-  loadData() {
+  async loadData() {
     const info = app.globalData.studentInfo
     if (!info) {
       wx.redirectTo({ url: '/pages/login/login' })
       return
     }
-    const today = this._getTodayStr()
-    const lastDrawDate = info.lastDrawDate || ''
-    const dailyLeft = lastDrawDate === today ? (info.dailyDrawLeft ?? 3) : 3
-    this.setData({
-      studentInfo: info,
-      dailyLeft,
-      challengeVouchers: info.challengeVouchers || 0,
-      growthAccelerants: info.growthAccelerants || 0
-    })
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getDrawStatus',
+        data: { openid: info.openid }
+      })
+      if (res.result.success) {
+        this.setData({
+          studentInfo: info,
+          dailyLeft: res.result.dailyLeft,
+          challengeVouchers: res.result.challengeVouchers,
+          growthAccelerants: res.result.growthAccelerants
+        })
+      }
+    } catch (e) {
+      console.error('loadData error:', e)
+    }
   },
 
   _getTodayStr() {

@@ -46,6 +46,28 @@
       <text wx:else>✨ 发布特殊任务</text>
     </view>
 
+    <!-- 历史记录按钮 -->
+    <view class="history-toggle" bindtap="toggleHistory">
+      <text>📜 {{showHistory ? '收起历史' : '查看历史记录'}}</text>
+    </view>
+
+    <!-- 历史记录列表 -->
+    <view wx:if="{{showHistory}}" class="history-section">
+      <view class="section-title">发布历史</view>
+      <view wx:if="{{specialTaskHistory.length === 0}}" class="empty-section">
+        <text>暂无发布记录</text>
+      </view>
+      <view wx:for="{{specialTaskHistory}}" wx:key="_id" class="history-item">
+        <view class="history-badge {{item.status}}">{{item.status === 'active' ? '当前' : item.status === 'expired' ? '已过期' : '已删除'}}</view>
+        <view class="history-title">{{item.title}}</view>
+        <view class="history-desc">{{item.desc}}</view>
+        <view class="history-meta">
+          <text class="history-time">{{item.createTimeStr}}</text>
+          <text class="history-reward">+{{item.expReward || 20}} EXP</text>
+        </view>
+      </view>
+    </view>
+
     <view class="info-card">
       <view class="info-title">特殊任务说明</view>
       <view class="info-item">• 特殊任务会固定在学生任务列表第一位</view>
