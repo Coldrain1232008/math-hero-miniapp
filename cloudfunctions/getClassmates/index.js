@@ -48,7 +48,7 @@ exports.main = async (event, context) => {
     const classmatesRes = await db.collection('students')
       .where(query)
       .field({
-        _id: true, name: true, heroName: true, openid: true,
+        _id: true, realName: true, heroName: true, openid: true,
         talentId: true, totalExp: true, level: true
       })
       .orderBy('totalExp', 'desc')
@@ -58,7 +58,7 @@ exports.main = async (event, context) => {
       const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
       return {
         openid: s.openid,
-        name: s.name || s.heroName || '未知',
+        name: s.realName || s.heroName || '未知',
         level: s.level || 1,
         totalExp: s.totalExp || 0,
         attrs

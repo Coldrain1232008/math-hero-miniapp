@@ -114,7 +114,7 @@ Page({
             })
             if (updateRes.result.success) {
               wx.showToast({ title: `${attrs[attrIdx]}成长加速！`, icon: 'success' })
-              this.setData({ growthAccelerants: updateRes.result.left })
+              this.loadData()  // 刷新页面获取最新数据
             } else {
               wx.showToast({ title: updateRes.result.error || '使用失败', icon: 'none' })
             }
