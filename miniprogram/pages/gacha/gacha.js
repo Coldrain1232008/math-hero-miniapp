@@ -74,6 +74,9 @@ Page({
           growthAccelerants: app.globalData.studentInfo.growthAccelerants || 0
         })
       } else {
+        // 失败时也同步真实次数，避免前端显示与数据库不一致
+        const realLeft = typeof res.result.dailyLeft === 'number' ? res.result.dailyLeft : this.data.dailyLeft
+        this.setData({ dailyLeft: realLeft })
         wx.showToast({ title: res.result.error || '抽卡失败', icon: 'none' })
       }
     } catch (e) {
