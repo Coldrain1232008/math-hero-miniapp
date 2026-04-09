@@ -345,7 +345,7 @@ Page({
       console.error('【confirmTask 云函数返回】', JSON.stringify(res.result, null, 2))
       if (res.result && res.result.success) {
         const msg = res.result.dailyDrawLeft !== undefined
-          ? `已确认，抽卡次数+${task.isSpecial ? 5 : 3}（当前${res.result.dailyDrawLeft}）`
+          ? `已确认，当前抽卡次数${res.result.dailyDrawLeft}`
           : '已确认'
         wx.showToast({ title: msg, icon: 'success' })
         this.loadPendingTasks()
