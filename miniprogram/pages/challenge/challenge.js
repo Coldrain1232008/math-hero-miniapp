@@ -73,7 +73,8 @@ Page({
         name: 'useChallenge',
         data: {
           openid: app.globalData.studentInfo.openid,
-          targetOpenid: opponent.openid
+          myId: app.globalData.studentInfo._id,
+          targetOpenid: opponent._id  // 用 _id 查（开发环境 openid 可能重复）
         }
       })
       wx.hideLoading()

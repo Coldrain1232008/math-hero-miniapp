@@ -57,12 +57,9 @@ function doBattle(myAttrs, opponentAttrs) {
 
 exports.main = async (event, context) => {
   try {
-    const { openid, targetOpenid } = event
+    const { openid, targetOpenid, myId } = event
     if (!openid || !targetOpenid) {
       return { success: false, error: '缺少参数' }
-    }
-    if (openid === targetOpenid) {
-      return { success: false, error: '不能挑战自己' }
     }
 
     // 获取挑战者信息
@@ -72,14 +69,20 @@ exports.main = async (event, context) => {
     }
     const me = myRes.data[0]
 
+    // 用 _id 判断（开发测试环境 openid 可能重复）
+    if (me._id === targetOpenid || (myId && me._id === myId)) {
+      return { success: false, error: '不能挑战自己' }
+    }
+
     // 检查是否有挑战凭证
     const vouchers = me.challengeVouchers || 0
     if (vouchers <= 0) {
       return { success: false, error: '没有挑战凭证了' }
     }
 
-    // 获取被挑战者信息
-    const targetRes = await db.collection('students').where({ openid: targetOpenid }).get()
+    // 获取被挑战者信息（优先用 _id 查，openid 可能重复）
+    const targetRes = await db.collection('students').doc(targetOpenid).get()
+    const opponent = targetRes.data
     if (!targetRes.data || targetRes.data.length === 0) {
       return { success: false, error: '对手信息不存在' }
     }

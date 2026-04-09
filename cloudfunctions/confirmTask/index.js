@@ -259,8 +259,8 @@ exports.main = async (event, context) => {
       newDailyDrawLeft = currentDrawLeft + drawBonus
       const updateData = {
         totalExp: newTotalExp,
+        level: newLevel,  // 同步更新等级
         lastTaskCompleteTime: now,
-        // 直接赋值，不使用 _.inc()（避免 null 值导致 NaN）
         dailyDrawLeft: newDailyDrawLeft,
       }
       

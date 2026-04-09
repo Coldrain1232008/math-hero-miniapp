@@ -43,7 +43,7 @@ exports.main = async (event, context) => {
       .where({ classId: my.classId })
       .field({
         _id: true, realName: true, heroName: true, openid: true,
-        talentId: true, totalExp: true, level: true
+        talentId: true, totalExp: true, level: true, classId: true
       })
       .orderBy('totalExp', 'desc')
       .limit(50)  // 防止数据量过大
