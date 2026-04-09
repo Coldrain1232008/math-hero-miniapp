@@ -49,21 +49,20 @@ exports.main = async (event, context) => {
       .limit(50)  // 防止数据量过大
       .get()
 
-    // DEBUG: 返回原始数据用于排查
-    console.log('[getClassmates] raw classmatesRes:', JSON.stringify(classmatesRes))
-
-    const classmates = (classmatesRes.data || [])
-      .filter(s => s.openid !== openid)  // 排除自己
-      .map(s => {
-        const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
-        return {
-          openid: s.openid,
-          name: s.realName || s.heroName || '未知',
-          level: s.level || 1,
-          totalExp: s.totalExp || 0,
-          attrs
-        }
-      })
+    const rawData = classmatesRes.data || []
+    // 详细调试：看所有原始 openid
+    const allOpenids = rawData.map(s => s.openid)
+    const filteredData = rawData.filter(s => s.openid && s.openid !== openid)
+    const classmates = filteredData.map(s => {
+      const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
+      return {
+        openid: s.openid,
+        name: s.realName || s.heroName || '未知',
+        level: s.level || 1,
+        totalExp: s.totalExp || 0,
+        attrs
+      }
+    })
 
     return {
       success: true,
@@ -71,8 +70,11 @@ exports.main = async (event, context) => {
       // DEBUG
       debug: {
         myClassId: my.classId,
-        rawCount: classmatesRes.data ? classmatesRes.data.length : 0,
-        myOpenid: openid
+        rawCount: rawData.length,
+        myOpenid: openid,
+        allOpenids,
+        filteredCount: filteredData.length,
+        classmatesCount: classmates.length
       }
     }
 
