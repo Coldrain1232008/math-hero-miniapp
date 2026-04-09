@@ -270,6 +270,10 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(task.studentId).update({
         data: updateData
       })
+
+      // 查询更新后的真实 dailyDrawLeft（用于返回给前端）
+      const updatedStudent = await db.collection('students').doc(task.studentId).get()
+      const newDailyDrawLeft = updatedStudent.data ? updatedStudent.data.dailyDrawLeft : null
       
       // 记录经验日志
       await db.collection('expLogs').add({
@@ -313,7 +317,9 @@ exports.main = async (event, context) => {
       success: true,
       message: '任务已确认',
       taskId,
-      expReward: task.expReward
+      expReward: task.expReward,
+      dailyDrawLeft: newDailyDrawLeft, // 返回新的抽卡次数
+      totalExp: newTotalExp,
     }
     
   } catch (err) {

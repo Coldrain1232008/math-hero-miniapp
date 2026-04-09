@@ -341,8 +341,13 @@ Page({
         data: { taskId, action: 'confirm' }
       })
       wx.hideLoading()
+      // 调试：打印完整返回，方便排查抽卡次数是否增加
+      console.error('【confirmTask 云函数返回】', JSON.stringify(res.result, null, 2))
       if (res.result && res.result.success) {
-        wx.showToast({ title: '已确认', icon: 'success' })
+        const msg = res.result.dailyDrawLeft !== undefined
+          ? `已确认，抽卡次数+${task.isSpecial ? 5 : 3}（当前${res.result.dailyDrawLeft}）`
+          : '已确认'
+        wx.showToast({ title: msg, icon: 'success' })
         this.loadPendingTasks()
       } else {
         wx.showToast({ title: res.result.error || '确认失败', icon: 'none' })
