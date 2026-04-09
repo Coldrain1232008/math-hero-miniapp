@@ -98,6 +98,12 @@ exports.main = async (event) => {
           totalExp: 0,
           level: 1,
           rerollChances: 0,
+          // 抽卡系统初始化
+          dailyDrawLeft: 3,
+          lastDrawDate: '',
+          challengeVouchers: 0,
+          growthAccelerants: 0,
+          attributeGrowthBonus: [0, 0, 0, 0, 0, 0],
           createdAt: db.serverDate(),
           updatedAt: db.serverDate(),
         },
