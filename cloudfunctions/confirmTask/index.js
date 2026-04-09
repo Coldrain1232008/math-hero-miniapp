@@ -242,17 +242,21 @@ exports.main = async (event, context) => {
     // 给学生增加经验值
     const studentRes = await db.collection('students').doc(task.studentId).get()
     const student = studentRes.data
-    
+
+    // 在外层声明，防止 return 时引用不到
+    let newTotalExp = null
+    let newDailyDrawLeft = null
+
     if (student) {
       const oldLevel = calcLevel(student.totalExp || 0)
-      const newTotalExp = (student.totalExp || 0) + task.expReward
+      newTotalExp = (student.totalExp || 0) + task.expReward
       const newLevel = calcLevel(newTotalExp)
-      
+
       // 准备更新数据
       const drawBonus = task.isSpecial ? 5 : 3
       const currentDrawLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
         ? student.dailyDrawLeft : 0
-      const newDailyDrawLeft = currentDrawLeft + drawBonus
+      newDailyDrawLeft = currentDrawLeft + drawBonus
       const updateData = {
         totalExp: newTotalExp,
         lastTaskCompleteTime: now,
