@@ -318,8 +318,9 @@ exports.main = async (event, context) => {
       message: '任务已确认',
       taskId,
       expReward: task.expReward,
-      dailyDrawLeft: newDailyDrawLeft, // 返回新的抽卡次数
+      dailyDrawLeft: newDailyDrawLeft,
       totalExp: newTotalExp,
+      studentOpenid: student.openid,
     }
     
   } catch (err) {

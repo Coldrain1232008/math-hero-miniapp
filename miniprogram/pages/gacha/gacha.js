@@ -31,16 +31,56 @@ Page({
         name: 'getDrawStatus',
         data: { openid: info.openid }
       })
-      if (res.result.success) {
+      if (res.result && res.result.success) {
+        // 同步到 globalData，避免下次进入页面时丢失
+        app.globalData.studentInfo = {
+          ...info,
+          dailyDrawLeft: res.result.dailyLeft,
+          challengeVouchers: res.result.challengeVouchers,
+          growthAccelerants: res.result.growthAccelerants
+        }
         this.setData({
-          studentInfo: info,
+          studentInfo: app.globalData.studentInfo,
           dailyLeft: res.result.dailyLeft,
           challengeVouchers: res.result.challengeVouchers,
           growthAccelerants: res.result.growthAccelerants
         })
       }
     } catch (e) {
-      console.error('loadData error:', e)
+      // getDrawStatus 失败时，直接查数据库获取最新数据
+      console.error('getDrawStatus error:', e)
+      try {
+        const freshRes = await wx.cloud.callFunction({
+          name: 'getStudentInfo',
+          data: { openid: info.openid }
+        })
+        if (freshRes.result && freshRes.result.success) {
+          app.globalData.studentInfo = {
+            ...info,
+            dailyDrawLeft: freshRes.result.dailyDrawLeft,
+            challengeVouchers: freshRes.result.challengeVouchers,
+            growthAccelerants: freshRes.result.growthAccelerants
+          }
+          this.setData({
+            studentInfo: app.globalData.studentInfo,
+            dailyLeft: freshRes.result.dailyDrawLeft,
+            challengeVouchers: freshRes.result.challengeVouchers,
+            growthAccelerants: freshRes.result.growthAccelerants
+          })
+          return
+        }
+      } catch (e2) {
+        console.error('getStudentInfo error:', e2)
+      }
+      // 全都失败时用本地缓存
+      const localLeft = (info.dailyDrawLeft !== undefined && info.dailyDrawLeft !== null)
+        ? info.dailyDrawLeft : 3
+      this.setData({
+        studentInfo: info,
+        dailyLeft: localLeft,
+        challengeVouchers: info.challengeVouchers || 0,
+        growthAccelerants: info.growthAccelerants || 0
+      })
     }
   },
 

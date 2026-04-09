@@ -1,5 +1,8 @@
 {
   "name": "getDrawStatus",
   "version": "1.0.0",
-  "description": "获取学生抽卡状态"
+  "description": "获取学生抽卡状态",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
 }
