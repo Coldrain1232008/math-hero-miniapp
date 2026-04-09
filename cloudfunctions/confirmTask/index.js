@@ -271,10 +271,10 @@ exports.main = async (event, context) => {
         data: updateData
       })
 
-      // 查询更新后的真实 dailyDrawLeft（用于返回给前端）
-      const updatedStudent = await db.collection('students').doc(task.studentId).get()
-      const newDailyDrawLeft = updatedStudent.data ? updatedStudent.data.dailyDrawLeft : null
-      
+      // 计算新的抽卡次数（用于返回给前端）
+      const oldDrawLeft = typeof student.dailyDrawLeft === 'number' ? student.dailyDrawLeft : 0
+      const newDailyDrawLeft = oldDrawLeft + drawBonus
+
       // 记录经验日志
       await db.collection('expLogs').add({
         data: {
@@ -306,11 +306,11 @@ exports.main = async (event, context) => {
         }
       })
       
-      // 触发徽章检查
-      await cloud.callFunction({
+      // 触发徽章检查（不等待，快速返回）
+      cloud.callFunction({
         name: 'checkBadges',
         data: { studentId: task.studentId }
-      })
+      }).catch(err => console.error('checkBadges error:', err))
     }
     
     return {
