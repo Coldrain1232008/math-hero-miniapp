@@ -50,10 +50,19 @@ exports.main = async (event, context) => {
       .get()
 
     const rawData = classmatesRes.data || []
-    // 详细调试：看所有原始 openid
-    const allOpenids = rawData.map(s => s.openid)
-    const filteredData = rawData.filter(s => s.openid && s.openid !== openid)
-    const classmates = filteredData.map(s => {
+    // 用 _id 过滤自己（_id 每个学生唯一，openid 可能相同）
+    // 同时支持没有 _id 的情况（用 openid 过滤）
+    const myId = my._id
+    const filteredData = rawData.filter(s => {
+      if (myId && s._id && s._id !== myId) return true
+      if (!myId && s.openid && s.openid !== openid) return true
+      return false
+    })
+
+    // 如果过滤后为空（openid 重复的特殊情况），直接返回全部同学
+    const finalClassmates = filteredData.length > 0 ? filteredData : rawData
+
+    const classmates = finalClassmates.map(s => {
       const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
       return {
         openid: s.openid,
@@ -71,8 +80,8 @@ exports.main = async (event, context) => {
       debug: {
         myClassId: my.classId,
         rawCount: rawData.length,
+        myId: myId,
         myOpenid: openid,
-        allOpenids,
         filteredCount: filteredData.length,
         classmatesCount: classmates.length
       }
