@@ -33,15 +33,28 @@ exports.main = async (event, context) => {
     const lastDrawDate = student.lastDrawDate || ''
 
     // 关键：新账号（lastDrawDate为空）或新的一天，重置为3次
-    let dailyLeft
-    if (!lastDrawDate || lastDrawDate !== today) {
-      dailyLeft = 3
-    } else {
-      // 今天已有记录，用数据库中的值
-      dailyLeft = student.dailyDrawLeft ?? 0
+    // 注意：不能用这个值直接 -1，要查数据库中的实际值再 -1
+    const isFirstDrawToday = !lastDrawDate || lastDrawDate !== today
+
+    if (isFirstDrawToday) {
+      // 新一天，先把 dailyDrawLeft 重置为 3（如果需要）
+      if (typeof student.dailyDrawLeft !== 'number') {
+        await db.collection('students').doc(student._id).update({
+          data: { dailyDrawLeft: 3, lastDrawDate: today }
+        })
+      } else if (student.dailyDrawLeft < 3) {
+        await db.collection('students').doc(student._id).update({
+          data: { dailyDrawLeft: 3, lastDrawDate: today }
+        })
+      }
     }
 
-    if (dailyLeft <= 0) {
+    // 重新查询最新次数（查数据库，不依赖内存中的旧值）
+    const freshRes = await db.collection('students').doc(student._id).get()
+    const currentDrawLeft = (typeof freshRes.data.dailyDrawLeft === 'number' && !isNaN(freshRes.data.dailyDrawLeft))
+      ? freshRes.data.dailyDrawLeft : 3
+
+    if (currentDrawLeft <= 0) {
       return { success: false, error: '今日抽卡次数已用完', dailyLeft: 0 }
     }
 
@@ -59,7 +72,7 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(student._id).update({
         data: {
           growthAccelerants: _.inc(1),
-          dailyDrawLeft: dailyLeft - 1,
+          dailyDrawLeft: _.inc(-1),
           lastDrawDate: today
         }
       })
@@ -74,18 +87,17 @@ exports.main = async (event, context) => {
       await db.collection('students').doc(student._id).update({
         data: {
           challengeVouchers: _.inc(1),
-          dailyDrawLeft: dailyLeft - 1,
+          dailyDrawLeft: _.inc(-1),
           lastDrawDate: today
         }
       })
       result = bonus
     } else {
       // 70% 1 EXP
-      const newTotalExp = (student.totalExp || 0) + 1
       await db.collection('students').doc(student._id).update({
         data: {
           totalExp: _.inc(1),
-          dailyDrawLeft: dailyLeft - 1,
+          dailyDrawLeft: _.inc(-1),
           lastDrawDate: today
         }
       })

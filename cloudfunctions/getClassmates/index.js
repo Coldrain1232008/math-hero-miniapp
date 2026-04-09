@@ -38,15 +38,9 @@ exports.main = async (event, context) => {
     const my = myRes.data[0]
 
     // 查询同班同学（排除自己）
-    const query = { classId: my.classId }
-    if (targetOpenid) {
-      query.openid = targetOpenid
-    } else {
-      query.openid = db.command.neq(openid)
-    }
-
+    // 先按 classId 查所有同学，再用 JS 过滤自己
     const classmatesRes = await db.collection('students')
-      .where(query)
+      .where({ classId: my.classId })
       .field({
         _id: true, realName: true, heroName: true, openid: true,
         talentId: true, totalExp: true, level: true
@@ -58,16 +52,18 @@ exports.main = async (event, context) => {
     // DEBUG: 返回原始数据用于排查
     console.log('[getClassmates] raw classmatesRes:', JSON.stringify(classmatesRes))
 
-    const classmates = (classmatesRes.data || []).map(s => {
-      const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
-      return {
-        openid: s.openid,
-        name: s.realName || s.heroName || '未知',
-        level: s.level || 1,
-        totalExp: s.totalExp || 0,
-        attrs
-      }
-    })
+    const classmates = (classmatesRes.data || [])
+      .filter(s => s.openid !== openid)  // 排除自己
+      .map(s => {
+        const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
+        return {
+          openid: s.openid,
+          name: s.realName || s.heroName || '未知',
+          level: s.level || 1,
+          totalExp: s.totalExp || 0,
+          attrs
+        }
+      })
 
     return {
       success: true,
@@ -76,7 +72,7 @@ exports.main = async (event, context) => {
       debug: {
         myClassId: my.classId,
         rawCount: classmatesRes.data ? classmatesRes.data.length : 0,
-        query
+        myOpenid: openid
       }
     }
 
