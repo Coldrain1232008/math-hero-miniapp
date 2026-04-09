@@ -146,7 +146,7 @@ exports.main = async (event, context) => {
 
     // 获取挑战后我的最新EXP
     const updatedMe = await db.collection('students').doc(me._id).get()
-    const latestExp = updatedMe.data[0]?.totalExp || me.totalExp
+    const latestExp = updatedMe.data?.totalExp || me.totalExp
 
     return {
       success: true,

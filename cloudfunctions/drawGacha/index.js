@@ -101,7 +101,7 @@ exports.main = async (event, context) => {
 
     // 返回最新状态
     const updated = await db.collection('students').doc(student._id).get()
-    const latest = updated.data[0] || {}
+    const latest = updated.data || {}
 
     return {
       success: true,
