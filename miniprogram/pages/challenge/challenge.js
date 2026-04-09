@@ -25,7 +25,7 @@ Page({
     try {
       const res = await wx.cloud.callFunction({
         name: 'getClassmates',
-        data: { openid: app.globalData.openid }
+        data: { openid: app.globalData.studentInfo.openid }
       })
       if (res.result.success) {
         this.setData({ classmates: res.result.classmates, loading: false })
@@ -66,7 +66,7 @@ Page({
       const res = await wx.cloud.callFunction({
         name: 'useChallenge',
         data: {
-          openid: app.globalData.openid,
+          openid: app.globalData.studentInfo.openid,
           targetOpenid: opponent.openid
         }
       })
