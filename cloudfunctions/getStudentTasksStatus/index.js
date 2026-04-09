@@ -45,6 +45,7 @@ exports.main = async (event, context) => {
     // 获取今日任务记录 (使用正确的集合名 dailyTasks)
     const tasksRes = await db.collection('dailyTasks')
       .where({
+        classId,
         date: db.command.gte(start).and(db.command.lte(end))
       })
       .get()
