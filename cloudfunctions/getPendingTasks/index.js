@@ -42,7 +42,7 @@ exports.main = async (event, context) => {
       return {
         ...task,
         studentName: student.realName || student.heroName || '未知',
-        studentId: student.studentId || '',
+        studentNo: student.studentId || '',  // 修复：改用 studentNo 存学号，避免覆盖任务里的 studentId（数据库_id）
         submitTimeStr: formatTime(task.submitTime)
       }
     })

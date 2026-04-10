@@ -124,7 +124,7 @@
           <view class="task-header">
             <view class="task-student-info">
               <text class="task-student-name">{{item.studentName}}</text>
-              <text class="task-student-id" wx:if="{{item.studentId}}">{{item.studentId}}</text>
+              <text class="task-student-id" wx:if="{{item.studentNo}}">{{item.studentNo}}</text>
             </view>
             <text class="task-submit-time">{{item.submitTimeStr}}</text>
           </view>

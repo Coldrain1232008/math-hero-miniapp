@@ -240,8 +240,17 @@ exports.main = async (event, context) => {
     })
     
     // 给学生增加经验值
-    const studentRes = await db.collection('students').doc(task.studentId).get()
-    const student = studentRes.data
+    // 防御性查询：先用 _id 查，查不到（老数据 studentId 存的是 openid）再用 openid 兜底
+    let studentRes = await db.collection('students').doc(task.studentId).get()
+    let student = studentRes.data
+    if (!student) {
+      // 兜底：task.studentId 可能是 openid（历史数据）
+      const fallbackRes = await db.collection('students').where({ openid: task.studentId }).get()
+      student = fallbackRes.data && fallbackRes.data.length > 0 ? fallbackRes.data[0] : null
+      if (student) {
+        console.warn('confirmTask: 通过 openid 兜底查到学生，task.studentId 可能是 openid:', task.studentId)
+      }
+    }
 
     // 在外层声明，防止 return 时引用不到
     let newTotalExp = null
@@ -261,9 +270,14 @@ exports.main = async (event, context) => {
 
       // 如果还没有今天的抽卡记录（跨日情况），先重置为3再加任务奖励
       // 如果今天已经抽过了，直接在现有次数上累加
+      // 注意：dailyDrawLeft 字段不存在（老账号）时，当天基础次数视为3，而不是0
       const baseDrawLeft = (lastDrawDate !== todayStr)
         ? 3  // 新的一天，基础3次
-        : ((typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft)) ? student.dailyDrawLeft : 0)
+        : (
+            (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
+              ? student.dailyDrawLeft
+              : 3  // 字段不存在（老账号）时，今日基础次数默认为3
+          )
       newDailyDrawLeft = baseDrawLeft + drawBonus
 
       const updateData = {
