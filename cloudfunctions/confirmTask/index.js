@@ -254,14 +254,24 @@ exports.main = async (event, context) => {
 
       // 准备更新数据
       const drawBonus = task.isSpecial ? 5 : 3
-      const currentDrawLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
-        ? student.dailyDrawLeft : 0
-      newDailyDrawLeft = currentDrawLeft + drawBonus
+
+      // 判断今天日期字符串（用于跨日重置判断）
+      const todayStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
+      const lastDrawDate = student.lastDrawDate || ''
+
+      // 如果还没有今天的抽卡记录（跨日情况），先重置为3再加任务奖励
+      // 如果今天已经抽过了，直接在现有次数上累加
+      const baseDrawLeft = (lastDrawDate !== todayStr)
+        ? 3  // 新的一天，基础3次
+        : ((typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft)) ? student.dailyDrawLeft : 0)
+      newDailyDrawLeft = baseDrawLeft + drawBonus
+
       const updateData = {
         totalExp: newTotalExp,
         level: newLevel,  // 同步更新等级
         lastTaskCompleteTime: now,
         dailyDrawLeft: newDailyDrawLeft,
+        lastDrawDate: todayStr,  // 修复：同步更新 lastDrawDate，防止 getDrawStatus 误判重置
       }
       
       // 如果升级了，更新称号

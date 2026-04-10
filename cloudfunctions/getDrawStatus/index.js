@@ -42,8 +42,11 @@ exports.main = async (event, context) => {
 
     let dailyLeft
     if (!lastDrawDate || lastDrawDate !== today) {
-      // 新账号或新的一天 → 重置为 3
-      dailyLeft = 3
+      // 新账号或新的一天
+      // 关键修复：如果 dailyDrawLeft > 3，说明 confirmTask 已经处理了跨日+任务奖励
+      // 这种情况保留数据库中的值，不要强制重置为3
+      const raw = typeof student.dailyDrawLeft === 'number' ? student.dailyDrawLeft : 3
+      dailyLeft = raw > 3 ? raw : 3
     } else {
       // 今天已有抽卡记录 → 使用存储值
       dailyLeft = typeof student.dailyDrawLeft === 'number' ? student.dailyDrawLeft : 3

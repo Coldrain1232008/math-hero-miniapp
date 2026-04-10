@@ -31,22 +31,19 @@ exports.main = async (event, context) => {
     // 检查每日重置
     const today = getTodayStr()
     const lastDrawDate = student.lastDrawDate || ''
-
-    // 关键：新账号（lastDrawDate为空）或新的一天，重置为3次
-    // 注意：不能用这个值直接 -1，要查数据库中的实际值再 -1
     const isFirstDrawToday = !lastDrawDate || lastDrawDate !== today
 
     if (isFirstDrawToday) {
-      // 新一天，先把 dailyDrawLeft 重置为 3（如果需要）
-      if (typeof student.dailyDrawLeft !== 'number') {
-        await db.collection('students').doc(student._id).update({
-          data: { dailyDrawLeft: 3, lastDrawDate: today }
-        })
-      } else if (student.dailyDrawLeft < 3) {
-        await db.collection('students').doc(student._id).update({
-          data: { dailyDrawLeft: 3, lastDrawDate: today }
-        })
-      }
+      // 新的一天：无论当前次数多少，重置为3次基础次数
+      // 注意：confirmTask 已经在任务确认时处理了跨日+任务奖励的情况
+      // 这里只处理"今天还没有任何行为"的情况（lastDrawDate 不是今天）
+      const currentRaw = student.dailyDrawLeft
+      const resetTo = (typeof currentRaw === 'number' && !isNaN(currentRaw) && currentRaw > 3)
+        ? currentRaw  // confirmTask 已经写入了今日的次数（含奖励），保留
+        : 3           // 普通跨日重置为3
+      await db.collection('students').doc(student._id).update({
+        data: { dailyDrawLeft: resetTo, lastDrawDate: today }
+      })
     }
 
     // 重新查询最新次数（查数据库，不依赖内存中的旧值）
