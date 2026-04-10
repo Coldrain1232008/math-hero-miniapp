@@ -285,6 +285,7 @@ exports.main = async (event) => {
       // 准备更新数据
       const updateData = {
         totalExp: _.inc(totalExp),
+        level: newLevel,  // 修复：始终同步写入最新等级，避免 level 字段缺失或过期
         updatedAt: db.serverDate(),
       }
       

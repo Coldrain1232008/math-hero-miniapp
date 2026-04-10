@@ -69,8 +69,9 @@ exports.main = async (event, context) => {
     }
     const me = myRes.data[0]
 
-    // 用 _id 判断（开发测试环境 openid 可能重复）
-    if (me._id === targetOpenid || (myId && me._id === myId)) {
+    // 修复：只判断目标是不是自己（targetOpenid 是对手的 _id）
+    // 原来 (myId && me._id === myId) 永远为 true，导致所有挑战都被拦截
+    if (me._id === targetOpenid) {
       return { success: false, error: '不能挑战自己' }
     }
 
