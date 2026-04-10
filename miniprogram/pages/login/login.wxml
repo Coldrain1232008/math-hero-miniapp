@@ -1,11 +1,24 @@
 <!-- pages/login/login.wxml -->
 <view class="login-container gradient-bg">
+  <!-- 背景光晕装饰 -->
+  <view class="bg-glow bg-glow-1"></view>
+  <view class="bg-glow bg-glow-2"></view>
+
   <view class="logo-area">
-    <view class="logo-circle">
+    <view class="logo-emblem">
+      <view class="emblem-ring emblem-ring-outer"></view>
+      <view class="emblem-ring emblem-ring-inner"></view>
       <text class="logo-icon">⚔️</text>
     </view>
-    <text class="app-title">数学英雄</text>
-    <text class="app-subtitle">记录你的每一步成长</text>
+    <view class="title-wrap">
+      <text class="app-title">学业英雄养成记</text>
+      <view class="title-deco">
+        <view class="deco-line"></view>
+        <text class="deco-star">✦</text>
+        <view class="deco-line"></view>
+      </view>
+    </view>
+    <text class="app-subtitle">淬炼心智，铸就传奇</text>
   </view>
 
   <view class="form-area">

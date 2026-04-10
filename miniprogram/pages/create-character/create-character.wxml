@@ -12,7 +12,7 @@
     <!-- 头像选择 -->
     <view class="avatar-section">
       <view class="section-title">选择头像</view>
-      <scroll-view scroll-x class="avatar-list">
+      <view class="avatar-grid">
         <view
           wx:for="{{avatarList}}"
           wx:key="id"
@@ -24,7 +24,7 @@
             <text class="avatar-icon">{{item.icon}}</text>
           </view>
         </view>
-      </scroll-view>
+      </view>
     </view>
 
     <!-- 性别 -->
