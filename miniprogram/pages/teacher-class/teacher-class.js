@@ -344,9 +344,10 @@ Page({
       // 调试：打印完整返回，方便排查抽卡次数是否增加
       console.error('【confirmTask 云函数返回】', JSON.stringify(res.result, null, 2))
       if (res.result && res.result.success) {
-        const msg = res.result.dailyDrawLeft !== undefined
-          ? `已确认，当前抽卡次数${res.result.dailyDrawLeft}`
-          : '已确认'
+        const bonus = res.result.bonusToday ?? 0
+        const total = res.result.totalLeft ?? (3 + bonus)
+        const taskType = res.result.expReward >= 30 ? '(特殊)' : '(普通)'
+        const msg = `已确认 ${taskType}，今日奖励+${bonus}次`
         wx.showToast({ title: msg, icon: 'success' })
         this.loadPendingTasks()
       } else {

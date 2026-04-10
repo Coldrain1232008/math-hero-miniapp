@@ -14,9 +14,15 @@ exports.main = async (event, context) => {
       return { success: false, error: '学生不存在' }
     }
     const s = res.data[0]
+    // 计算今日剩余总次数：基础3 + bonusToday
+    const bonusToday = (typeof s.bonusToday === 'number' && !isNaN(s.bonusToday))
+      ? s.bonusToday
+      : Math.max(0, (s.dailyDrawLeft || 3) - 3)
+    const dailyDrawLeft = 3 + bonusToday
     return {
       success: true,
-      dailyDrawLeft: s.dailyDrawLeft ?? 3,
+      dailyDrawLeft,
+      bonusToday,
       challengeVouchers: s.challengeVouchers ?? 0,
       growthAccelerants: s.growthAccelerants ?? 0,
       totalExp: s.totalExp ?? 0,

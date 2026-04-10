@@ -79,7 +79,7 @@
       <text class="gacha-card-icon">🎰</text>
       <view class="gacha-card-info">
         <view class="gacha-card-title">幸运转盘</view>
-        <view class="gacha-card-sub">每日{{dailyDrawLeft}}次 · 概率抽取奖励</view>
+        <view class="gacha-card-sub">每日{{baseDraw}}次·今日剩余{{dailyDrawLeft}}次 · 概率抽取奖励</view>
       </view>
     </view>
     <view class="gacha-card-right">

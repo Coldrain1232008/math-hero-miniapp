@@ -4,7 +4,7 @@ const app = getApp()
 Page({
   data: {
     studentInfo: null,
-    dailyLeft: 0,
+    dailyLeft: 3,  // 默认3，loadData 后由 getDrawStatus 覆盖
     challengeVouchers: 0,
     growthAccelerants: 0,
     isDrawing: false,

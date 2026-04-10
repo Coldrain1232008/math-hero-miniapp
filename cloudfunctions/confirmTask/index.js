@@ -268,23 +268,26 @@ exports.main = async (event, context) => {
       const todayStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
       const lastDrawDate = student.lastDrawDate || ''
 
-      // 如果还没有今天的抽卡记录（跨日情况），先重置为3再加任务奖励
-      // 如果今天已经抽过了，直接在现有次数上累加
-      // 注意：dailyDrawLeft 字段不存在（老账号）时，当天基础次数视为3，而不是0
-      const baseDrawLeft = (lastDrawDate !== todayStr)
-        ? 3  // 新的一天，基础3次
-        : (
-            (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
-              ? student.dailyDrawLeft
-              : 3  // 字段不存在（老账号）时，今日基础次数默认为3
-          )
-      newDailyDrawLeft = baseDrawLeft + drawBonus
+      // 新的逻辑：基础次数 3 永远不变，bonusToday 单独记录今日任务奖励
+      // 跨日时 bonusToday 重置为 drawBonus，否则累加
+      let newBonusToday
+      if (lastDrawDate !== todayStr) {
+        // 新的一天，bonus 重置为本次奖励
+        newBonusToday = drawBonus
+      } else {
+        // 今天已有奖励，累加（bonusToday 不存在时视为 0）
+        const existingBonus = (typeof student.bonusToday === 'number') ? student.bonusToday : 0
+        newBonusToday = existingBonus + drawBonus
+      }
+      // dailyDrawLeft 永远存基础次数 3（兼容老账号，如果 > 3 说明有历史奖励数据，保持不变）
+      const newDailyDrawLeft = 3
 
       const updateData = {
         totalExp: newTotalExp,
         level: newLevel,  // 同步更新等级
         lastTaskCompleteTime: now,
-        dailyDrawLeft: newDailyDrawLeft,
+        dailyDrawLeft: newDailyDrawLeft,  // 基础次数，固定为3
+        bonusToday: newBonusToday,         // 今日任务奖励，单独累计
         lastDrawDate: todayStr,  // 修复：同步更新 lastDrawDate，防止 getDrawStatus 误判重置
       }
       
@@ -343,7 +346,9 @@ exports.main = async (event, context) => {
       message: '任务已确认',
       taskId,
       expReward: task.expReward,
-      dailyDrawLeft: newDailyDrawLeft,
+      dailyDrawLeft: newDailyDrawLeft,  // 基础次数，永远为3
+      bonusToday: newBonusToday,         // 今日任务奖励（单独累计）
+      totalLeft: newDailyDrawLeft + newBonusToday,  // 当日总剩余次数
       totalExp: newTotalExp,
       studentOpenid: student.openid,
     }
