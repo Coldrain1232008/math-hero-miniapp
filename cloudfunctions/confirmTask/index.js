@@ -255,6 +255,7 @@ exports.main = async (event, context) => {
     // 在外层声明，防止 return 时引用不到
     let newTotalExp = null
     let newDailyDrawLeft = null
+    let newRemaining = null
 
     if (student) {
       const oldLevel = calcLevel(student.totalExp || 0)
@@ -270,7 +271,6 @@ exports.main = async (event, context) => {
 
       // 单一字段 remainingDraws：每日总剩余抽卡次数 = 基础3 + 今日任务奖励
       // 跨日时重置为3+bonus，同日时在现有基础上累加bonus
-      let newRemaining
       if (lastDrawDate !== todayStr) {
         // 新的一天：从基础3开始，加本次奖励
         newRemaining = 3 + drawBonus
