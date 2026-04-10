@@ -14,11 +14,17 @@ exports.main = async (event, context) => {
       return { success: false, error: '学生不存在' }
     }
     const s = res.data[0]
-    // 计算今日剩余总次数：基础3 + bonusToday
-    const bonusToday = (typeof s.bonusToday === 'number' && !isNaN(s.bonusToday))
-      ? s.bonusToday
-      : Math.max(0, (s.dailyDrawLeft || 3) - 3)
-    const dailyDrawLeft = 3 + bonusToday
+    // 计算今日剩余总次数：优先用 remainingDraws，兼容老数据用 dailyDrawLeft
+    let dailyDrawLeft
+    let bonusToday = 0
+    if (typeof s.remainingDraws === 'number' && !isNaN(s.remainingDraws)) {
+      dailyDrawLeft = s.remainingDraws
+      bonusToday = Math.max(0, s.remainingDraws - 3)
+    } else {
+      dailyDrawLeft = (typeof s.dailyDrawLeft === 'number' && !isNaN(s.dailyDrawLeft))
+        ? s.dailyDrawLeft : 3
+      bonusToday = Math.max(0, dailyDrawLeft - 3)
+    }
     return {
       success: true,
       dailyDrawLeft,

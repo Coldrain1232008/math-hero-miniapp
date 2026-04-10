@@ -33,68 +33,58 @@ exports.main = async (event, context) => {
     const lastDrawDate = student.lastDrawDate || ''
     const isFirstDrawToday = !lastDrawDate || lastDrawDate !== today
 
+    // 计算当前剩余次数（单一字段 remainingDraws）
+    // 兼容老数据：优先用 remainingDraws，没有则用 dailyDrawLeft（旧格式已含奖励）
+    let currentRemaining
+    if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
+      currentRemaining = student.remainingDraws
+    } else {
+      // 老账号：直接用 dailyDrawLeft（已含基础+奖励）
+      currentRemaining = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
+        ? student.dailyDrawLeft : 3
+    }
+
     if (isFirstDrawToday) {
-      // 新的一天：重置 bonusToday（任务奖励跨日清零），base 保持 3
-      // 兼容老数据：bonusToday 不存在时，从 dailyDrawLeft 推断（总量-3）
-      const currentBonus = (typeof student.bonusToday === 'number' && !isNaN(student.bonusToday))
-        ? student.bonusToday
-        : Math.max(0, (student.dailyDrawLeft || 3) - 3)  // 老数据迁移
+      // 新的一天：从基础3重置，bonusToday 跨日清零（昨日奖励不再延续）
+      const bonusToday = (typeof student.bonusToday === 'number' && !isNaN(student.bonusToday))
+        ? student.bonusToday : 0
+      currentRemaining = 3 + bonusToday
       await db.collection('students').doc(student._id).update({
         data: {
-          dailyDrawLeft: 3,  // 基础次数重置为3
-          bonusToday: currentBonus,  // 保留旧 bonus（如果迁移值>0，说明是昨日奖励，清零更合理）
+          remainingDraws: currentRemaining,
           lastDrawDate: today
         }
       })
     }
 
-    // 重新查询最新次数（查数据库，不依赖内存中的旧值）
-    const freshRes = await db.collection('students').doc(student._id).get()
-    const freshStudent = freshRes.data
-    const bonusToday = (typeof freshStudent.bonusToday === 'number' && !isNaN(freshStudent.bonusToday))
-      ? freshStudent.bonusToday
-      : Math.max(0, (freshStudent.dailyDrawLeft || 3) - 3)
-    const totalLeft = 3 + bonusToday
-
-    if (totalLeft <= 0) {
+    if (currentRemaining <= 0) {
       return { success: false, error: '今日抽卡次数已用完', dailyLeft: 0 }
     }
 
-    // 随机抽卡
+    // 随机抽卡（每次扣 remainingDraws - 1）
     const rand = Math.random()
-    let result = {} // 返回给前端的描述
+    let result = {}
+
+    // 先扣次数（remainingDraws - 1）
+    await db.collection('students').doc(student._id).update({
+      data: { remainingDraws: _.inc(-1), lastDrawDate: today }
+    })
 
     if (rand < 0.15) {
-      // 15% 成长加速剂
-      const bonus = {
-        type: 'growthAccelerant',
-        desc: '成长加速剂',
-        subDesc: '可永久提升任一属性成长速度 +0.1'
-      }
-      const decrementData = bonusToday > 0
-        ? { growthAccelerants: _.inc(1), bonusToday: _.inc(-1), lastDrawDate: today }
-        : { growthAccelerants: _.inc(1), dailyDrawLeft: _.inc(-1), lastDrawDate: today }
-      await db.collection('students').doc(student._id).update({ data: decrementData })
-      result = bonus
+      result = { type: 'growthAccelerant', desc: '成长加速剂', subDesc: '可永久提升任一属性成长速度 +0.1' }
+      await db.collection('students').doc(student._id).update({
+        data: { growthAccelerants: _.inc(1) }
+      })
     } else if (rand < 0.30) {
-      // 15% 挑战凭证
-      const bonus = {
-        type: 'challengeVoucher',
-        desc: '挑战凭证',
-        subDesc: '可挑战同班同学，胜者获得 5 EXP'
-      }
-      const decrementData = bonusToday > 0
-        ? { challengeVouchers: _.inc(1), bonusToday: _.inc(-1), lastDrawDate: today }
-        : { challengeVouchers: _.inc(1), dailyDrawLeft: _.inc(-1), lastDrawDate: today }
-      await db.collection('students').doc(student._id).update({ data: decrementData })
-      result = bonus
+      result = { type: 'challengeVoucher', desc: '挑战凭证', subDesc: '可挑战同班同学，胜者获得 5 EXP' }
+      await db.collection('students').doc(student._id).update({
+        data: { challengeVouchers: _.inc(1) }
+      })
     } else {
-      // 70% 1 EXP
-      const decrementData = bonusToday > 0
-        ? { totalExp: _.inc(1), bonusToday: _.inc(-1), lastDrawDate: today }
-        : { totalExp: _.inc(1), dailyDrawLeft: _.inc(-1), lastDrawDate: today }
-      await db.collection('students').doc(student._id).update({ data: decrementData })
-      // 记录日志
+      result = { type: 'exp', desc: '+1 EXP', subDesc: '继续加油！' }
+      await db.collection('students').doc(student._id).update({
+        data: { totalExp: _.inc(1) }
+      })
       await db.collection('expLogs').add({
         data: {
           studentId: student._id,
@@ -107,22 +97,18 @@ exports.main = async (event, context) => {
           createdAt: Date.now()
         }
       })
-      result = { type: 'exp', desc: '+1 EXP', subDesc: '继续加油！' }
     }
 
     // 返回最新状态
     const updated = await db.collection('students').doc(student._id).get()
     const latest = updated.data || {}
-
-    // 计算最新剩余总次数：基础3 + bonusToday
-    const latestBonus = (typeof latest.bonusToday === 'number' && !isNaN(latest.bonusToday))
-      ? latest.bonusToday
-      : Math.max(0, (latest.dailyDrawLeft || 3) - 3)
-    const latestDailyLeft = 3 + latestBonus
+    const latestRemaining = (typeof latest.remainingDraws === 'number')
+      ? latest.remainingDraws
+      : (typeof latest.dailyDrawLeft === 'number' ? latest.dailyDrawLeft : 3)
     return {
       success: true,
       result,
-      dailyLeft: latestDailyLeft,
+      dailyLeft: latestRemaining,
       newTotalExp: latest.totalExp
     }
 

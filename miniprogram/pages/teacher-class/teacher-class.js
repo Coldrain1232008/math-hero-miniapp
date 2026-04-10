@@ -344,10 +344,12 @@ Page({
       // 调试：打印完整返回，方便排查抽卡次数是否增加
       console.error('【confirmTask 云函数返回】', JSON.stringify(res.result, null, 2))
       if (res.result && res.result.success) {
-        const bonus = res.result.bonusToday ?? 0
-        const total = res.result.totalLeft ?? (3 + bonus)
+        const remaining = res.result.remainingDraws ?? 3
+        const bonus = Math.max(0, remaining - 3)
         const taskType = res.result.expReward >= 30 ? '(特殊)' : '(普通)'
-        const msg = `已确认 ${taskType}，今日奖励+${bonus}次`
+        const msg = bonus > 0
+          ? `已确认 ${taskType}，今日奖励+${bonus}次`
+          : `已确认 ${taskType}`
         wx.showToast({ title: msg, icon: 'success' })
         this.loadPendingTasks()
       } else {

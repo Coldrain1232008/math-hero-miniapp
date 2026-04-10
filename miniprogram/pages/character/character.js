@@ -104,13 +104,25 @@ Page({
     } catch (e) { console.error(e) }
 
     // 计算每日抽卡剩余次数
-    // 基础次数永远是3，bonusToday 记录今日任务奖励（confirmTask 时写入）
+    // 优先用 remainingDraws（单一字段）；兼容老数据用 dailyDrawLeft
     const today = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
     const lastDrawDate = student.lastDrawDate || ''
     const isToday = lastDrawDate === today
-    const bonusToday = (typeof student.bonusToday === 'number' && !isNaN(student.bonusToday)) ? student.bonusToday : 0
-    // 总剩余 = 基础3 + 今日奖励
-    const dailyDrawLeft = isToday ? (3 + bonusToday) : 3
+    let dailyDrawLeft
+    let bonusToday = 0
+    if (isToday) {
+      if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
+        dailyDrawLeft = student.remainingDraws
+        bonusToday = Math.max(0, student.remainingDraws - 3)
+      } else {
+        dailyDrawLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
+          ? student.dailyDrawLeft : 3
+        bonusToday = Math.max(0, dailyDrawLeft - 3)
+      }
+    } else {
+      dailyDrawLeft = 3  // 新的一天，基础3次
+      bonusToday = 0
+    }
     const baseDraw = 3  // 固定显示基础次数
     const challengeVouchers = student.challengeVouchers || 0
     const growthAccelerants = student.growthAccelerants || 0

@@ -268,27 +268,26 @@ exports.main = async (event, context) => {
       const todayStr = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`
       const lastDrawDate = student.lastDrawDate || ''
 
-      // 新的逻辑：基础次数 3 永远不变，bonusToday 单独记录今日任务奖励
-      // 跨日时 bonusToday 重置为 drawBonus，否则累加
-      let newBonusToday
+      // 单一字段 remainingDraws：每日总剩余抽卡次数 = 基础3 + 今日任务奖励
+      // 跨日时重置为3+bonus，同日时在现有基础上累加bonus
+      let newRemaining
       if (lastDrawDate !== todayStr) {
-        // 新的一天，bonus 重置为本次奖励
-        newBonusToday = drawBonus
+        // 新的一天：从基础3开始，加本次奖励
+        newRemaining = 3 + drawBonus
       } else {
-        // 今天已有奖励，累加（bonusToday 不存在时视为 0）
-        const existingBonus = (typeof student.bonusToday === 'number') ? student.bonusToday : 0
-        newBonusToday = existingBonus + drawBonus
+        // 今天：直接累加bonus（在remainingDraws中，3已经包含在内）
+        const existing = (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws))
+          ? student.remainingDraws
+          : 3
+        newRemaining = existing + drawBonus
       }
-      // dailyDrawLeft 永远存基础次数 3（兼容老账号，如果 > 3 说明有历史奖励数据，保持不变）
-      const newDailyDrawLeft = 3
 
       const updateData = {
         totalExp: newTotalExp,
-        level: newLevel,  // 同步更新等级
+        level: newLevel,
         lastTaskCompleteTime: now,
-        dailyDrawLeft: newDailyDrawLeft,  // 基础次数，固定为3
-        bonusToday: newBonusToday,         // 今日任务奖励，单独累计
-        lastDrawDate: todayStr,  // 修复：同步更新 lastDrawDate，防止 getDrawStatus 误判重置
+        remainingDraws: newRemaining,  // 单一字段，总剩余次数
+        lastDrawDate: todayStr,
       }
       
       // 如果升级了，更新称号
@@ -346,9 +345,7 @@ exports.main = async (event, context) => {
       message: '任务已确认',
       taskId,
       expReward: task.expReward,
-      dailyDrawLeft: newDailyDrawLeft,  // 基础次数，永远为3
-      bonusToday: newBonusToday,         // 今日任务奖励（单独累计）
-      totalLeft: newDailyDrawLeft + newBonusToday,  // 当日总剩余次数
+      remainingDraws: newRemaining,
       totalExp: newTotalExp,
       studentOpenid: student.openid,
     }

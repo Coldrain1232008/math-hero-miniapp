@@ -23,14 +23,19 @@ exports.main = async (event, context) => {
     const today = getTodayStr()
     const lastDrawDate = student.lastDrawDate || ''
 
-    // 计算今日剩余总次数：基础 3 + bonusToday
-    // bonusToday 单独记录今日任务奖励（confirmTask 时写入）
-    // 兼容老数据：bonusToday 不存在时，从 dailyDrawLeft 推断（假设存的是总量）
-    const bonusToday = (typeof student.bonusToday === 'number' && !isNaN(student.bonusToday))
-      ? student.bonusToday
-      : Math.max(0, (student.dailyDrawLeft || 3) - 3)  // 老数据：总量-3=bonus
-    const baseDraw = 3  // 每日基础次数，永远是3
-    const dailyLeft = baseDraw + bonusToday
+    // 计算今日剩余总次数
+    // 优先用 remainingDraws（单一字段）；兼容老数据用 dailyDrawLeft
+    let dailyLeft
+    let bonusToday = 0
+    if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
+      dailyLeft = student.remainingDraws
+      bonusToday = Math.max(0, student.remainingDraws - 3)
+    } else {
+      // 老数据：dailyDrawLeft 已含基础+奖励，直接用
+      dailyLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
+        ? student.dailyDrawLeft : 3
+      bonusToday = Math.max(0, dailyLeft - 3)
+    }
 
     // 调试模式：返回数据库原始值，方便排查
     if (debug) {
@@ -39,9 +44,9 @@ exports.main = async (event, context) => {
         debug: true,
         today,
         lastDrawDate,
+        remainingDraws_raw: student.remainingDraws,
         dailyDrawLeft_raw: student.dailyDrawLeft,
         bonusToday_raw: student.bonusToday,
-        bonusToday_calculated: bonusToday,
         dailyLeft,
         challengeVouchers: student.challengeVouchers,
         growthAccelerants: student.growthAccelerants,
@@ -54,7 +59,7 @@ exports.main = async (event, context) => {
       success: true,
       dailyLeft,
       bonusToday,
-      baseDraw,
+      baseDraw: 3,
       lastDrawDate,
       challengeVouchers: student.challengeVouchers || 0,
       growthAccelerants: student.growthAccelerants || 0,
