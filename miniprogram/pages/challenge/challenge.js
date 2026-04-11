@@ -18,7 +18,16 @@ Page({
   },
 
   onLoad() {
+    // 初始化时从 globalData 读取凭证数量
+    const info = app.globalData.studentInfo || {}
+    this.setData({ vouchersLeft: info.challengeVouchers || 0 })
     this.loadClassmates()
+  },
+
+  onShow() {
+    // 每次进入页面同步最新凭证数量
+    const info = app.globalData.studentInfo || {}
+    this.setData({ vouchersLeft: info.challengeVouchers || 0 })
   },
 
   async loadClassmates() {

@@ -130,26 +130,35 @@ exports.main = async (event, context) => {
       expResult = { winner: 'draw', expAwarded: 0 }
     }
 
-    // 记录挑战日志
-    await db.collection('challengeLogs').add({
-      data: {
-        challengerId: me._id,
-        challengerName: me.name || me.heroName || '未知',
-        opponentId: opponent._id,
-        opponentName: opponent.name || opponent.heroName || '未知',
-        classId: me.classId,
-        myAttrs,
-        opponentAttrs,
-        battleRounds: battle.rounds,
-        result: battle.winner,
-        expAwarded: expResult.expAwarded,
-        createTime: Date.now()
-      }
-    })
+    // 记录挑战日志（集合不存在时不影响挑战结果）
+    try {
+      await db.collection('challengeLogs').add({
+        data: {
+          challengerId: me._id,
+          challengerName: me.name || me.heroName || '未知',
+          opponentId: opponent._id,
+          opponentName: opponent.name || opponent.heroName || '未知',
+          classId: me.classId,
+          myAttrs,
+          opponentAttrs,
+          battleRounds: battle.rounds,
+          result: battle.winner,
+          expAwarded: expResult.expAwarded,
+          createTime: Date.now()
+        }
+      })
+    } catch (logErr) {
+      // challengeLogs 集合不存在时忽略，不影响挑战流程
+      console.warn('challengeLogs write failed (collection may not exist):', logErr.message)
+    }
 
-    // 获取挑战后我的最新EXP
+    // 获取挑战后我的最新状态
     const updatedMe = await db.collection('students').doc(me._id).get()
-    const latestExp = updatedMe.data?.totalExp || me.totalExp
+    const latestMe = updatedMe.data || {}
+    const latestExp = latestMe.totalExp || me.totalExp
+    const latestVouchers = typeof latestMe.challengeVouchers === 'number'
+      ? latestMe.challengeVouchers
+      : (me.challengeVouchers || 1) - 1
 
     return {
       success: true,
@@ -160,7 +169,7 @@ exports.main = async (event, context) => {
         myName: me.name || me.heroName || '未知'
       },
       myNewExp: latestExp,
-      vouchersLeft: (me.challengeVouchers || 1) - 1
+      vouchersLeft: latestVouchers
     }
 
   } catch (e) {
