@@ -13,11 +13,15 @@ Page({
   },
 
   onLoad() {
+    this._pageLoaded = false
     this.loadData()
   },
 
   onShow() {
-    this.loadData()
+    // onLoad 与 onShow 会同时触发，用标记避免重复调用 loadData
+    if (this._pageLoaded) {
+      this.loadData()
+    }
   },
 
   async loadData() {
@@ -46,6 +50,7 @@ Page({
           challengeVouchers: res.result.challengeVouchers,
           growthAccelerants: res.result.growthAccelerants
         })
+        this._pageLoaded = true
         return
       }
       // getDrawStatus 返回 success: false（如学生不存在、openid 异常等），用 globalData 兜底
@@ -63,6 +68,7 @@ Page({
           app.globalData.studentInfo = {
             ...info,
             dailyDrawLeft: freshRes.result.dailyDrawLeft,
+            remainingDraws: freshRes.result.dailyDrawLeft,
             challengeVouchers: freshRes.result.challengeVouchers,
             growthAccelerants: freshRes.result.growthAccelerants
           }
@@ -72,6 +78,7 @@ Page({
             challengeVouchers: freshRes.result.challengeVouchers,
             growthAccelerants: freshRes.result.growthAccelerants
           })
+          this._pageLoaded = true
           return
         }
       } catch (e2) {
@@ -88,6 +95,7 @@ Page({
         challengeVouchers: info.challengeVouchers || 0,
         growthAccelerants: info.growthAccelerants || 0
       })
+      this._pageLoaded = true
     }
   },
 
@@ -98,11 +106,13 @@ Page({
 
   // 抽卡
   async drawTap() {
-    if (this.data.isDrawing) return
+    // 用同步标记防止 setData 异步导致的重复点击
+    if (this._isDrawing) return
     if (this.data.dailyLeft <= 0) {
       wx.showToast({ title: '今日次数已用完', icon: 'none' })
       return
     }
+    this._isDrawing = true
     this.setData({ isDrawing: true, showResult: false })
 
     try {
@@ -112,20 +122,27 @@ Page({
       })
 
       if (res.result.success) {
-        // 更新本地数据
+        // 更新本地数据（同时更新 remainingDraws，确保角色页能正确读取）
         app.globalData.studentInfo = {
           ...app.globalData.studentInfo,
           totalExp: res.result.newTotalExp,
           lastDrawDate: this._getTodayStr(),
-          dailyDrawLeft: res.result.dailyLeft
+          dailyDrawLeft: res.result.dailyLeft,
+          remainingDraws: res.result.dailyLeft,
+          challengeVouchers: res.result.challengeVouchers !== undefined
+            ? res.result.challengeVouchers
+            : (app.globalData.studentInfo.challengeVouchers || 0),
+          growthAccelerants: res.result.growthAccelerants !== undefined
+            ? res.result.growthAccelerants
+            : (app.globalData.studentInfo.growthAccelerants || 0),
         }
         this.setData({
           result: res.result.result,
           showResult: true,
           dailyLeft: res.result.dailyLeft,
           newTotalExp: res.result.newTotalExp,
-          challengeVouchers: app.globalData.studentInfo.challengeVouchers || 0,
-          growthAccelerants: app.globalData.studentInfo.growthAccelerants || 0
+          challengeVouchers: app.globalData.studentInfo.challengeVouchers,
+          growthAccelerants: app.globalData.studentInfo.growthAccelerants
         })
       } else {
         // 失败时也同步真实次数，避免前端显示与数据库不一致
@@ -137,6 +154,7 @@ Page({
       wx.showToast({ title: '抽卡失败，请重试', icon: 'none' })
       console.error(e)
     } finally {
+      this._isDrawing = false
       this.setData({ isDrawing: false })
     }
   },

@@ -111,7 +111,9 @@ exports.main = async (event, context) => {
       success: true,
       result,
       dailyLeft: latestRemaining,
-      newTotalExp: latest.totalExp
+      newTotalExp: latest.totalExp,
+      challengeVouchers: latest.challengeVouchers || 0,
+      growthAccelerants: latest.growthAccelerants || 0
     }
 
   } catch (e) {
