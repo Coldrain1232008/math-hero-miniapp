@@ -36,6 +36,7 @@ Page({
         app.globalData.studentInfo = {
           ...info,
           dailyDrawLeft: res.result.dailyLeft,
+          remainingDraws: res.result.dailyLeft,
           challengeVouchers: res.result.challengeVouchers,
           growthAccelerants: res.result.growthAccelerants
         }
@@ -45,7 +46,11 @@ Page({
           challengeVouchers: res.result.challengeVouchers,
           growthAccelerants: res.result.growthAccelerants
         })
+        return
       }
+      // getDrawStatus 返回 success: false（如学生不存在、openid 异常等），用 globalData 兜底
+      console.warn('getDrawStatus success:false, fallback to globalData', res.result && res.result.error)
+      throw new Error(res.result && res.result.error || 'getDrawStatus failed')
     } catch (e) {
       // getDrawStatus 失败时，直接查数据库获取最新数据
       console.error('getDrawStatus error:', e)
@@ -72,9 +77,11 @@ Page({
       } catch (e2) {
         console.error('getStudentInfo error:', e2)
       }
-      // 全都失败时用本地缓存
-      const localLeft = (info.dailyDrawLeft !== undefined && info.dailyDrawLeft !== null)
-        ? info.dailyDrawLeft : 3
+      // 全都失败时用本地缓存，优先读 remainingDraws（新字段），兼容 dailyDrawLeft（旧字段）
+      const localLeft = (typeof info.remainingDraws === 'number' && info.remainingDraws >= 0)
+        ? info.remainingDraws
+        : ((info.dailyDrawLeft !== undefined && info.dailyDrawLeft !== null)
+            ? info.dailyDrawLeft : 3)
       this.setData({
         studentInfo: info,
         dailyLeft: localLeft,

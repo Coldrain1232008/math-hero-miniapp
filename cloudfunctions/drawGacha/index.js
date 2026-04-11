@@ -45,10 +45,12 @@ exports.main = async (event, context) => {
     }
 
     if (isFirstDrawToday) {
-      // 新的一天：从基础3重置，bonusToday 跨日清零（昨日奖励不再延续）
-      const bonusToday = (typeof student.bonusToday === 'number' && !isNaN(student.bonusToday))
-        ? student.bonusToday : 0
-      currentRemaining = 3 + bonusToday
+      // 新的一天：从基础3重置
+      // 注意：不再读废弃的 bonusToday 字段
+      // 如果 confirmTask 已在今天之前写入了 remainingDraws > 3（含任务奖励），
+      // 但 lastDrawDate 可能因为任务是昨天晚确认而变成"今天"，所以 isFirstDrawToday = false 不会走到这里
+      // 如果 lastDrawDate 是更早的日期，说明昨天或更早没有任何操作，直接重置为基础3次
+      currentRemaining = 3
       await db.collection('students').doc(student._id).update({
         data: {
           remainingDraws: currentRemaining,

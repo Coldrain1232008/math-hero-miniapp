@@ -27,7 +27,13 @@ exports.main = async (event, context) => {
     // 优先用 remainingDraws（单一字段）；兼容老数据用 dailyDrawLeft
     let dailyLeft
     let bonusToday = 0
-    if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
+
+    if (lastDrawDate !== today) {
+      // 今天还没有任何抽卡/任务行为，返回基础3次（confirmTask 会在任务完成时写 remainingDraws+lastDrawDate）
+      // 不主动写数据库，仅返回基础次数，等 drawGacha 第一次被调用时才真正重置
+      dailyLeft = 3
+      bonusToday = 0
+    } else if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
       dailyLeft = student.remainingDraws
       bonusToday = Math.max(0, student.remainingDraws - 3)
     } else {
