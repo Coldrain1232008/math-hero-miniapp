@@ -30,61 +30,47 @@ Page({
       wx.redirectTo({ url: '/pages/login/login' })
       return
     }
+
+    // 从数据库获取最新数据（与角色页完全一致，确保两处显示一致）
     try {
       const res = await wx.cloud.callFunction({
-        name: 'getDrawStatus',
-        data: { openid: info.openid }
+        name: 'getStudentData',
+        data: { studentId: info._id }
       })
       if (res.result && res.result.success) {
-        // 同步到 globalData，避免下次进入页面时丢失
-        app.globalData.studentInfo = {
-          ...info,
-          dailyDrawLeft: res.result.dailyLeft,
-          remainingDraws: res.result.dailyLeft,
-          challengeVouchers: res.result.challengeVouchers,
-          growthAccelerants: res.result.growthAccelerants
+        const student = res.result.student
+        // 同步到 globalData
+        app.globalData.studentInfo = student
+
+        // 计算今日剩余次数（与 character.js 完全一致的逻辑）
+        const today = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
+        const lastDrawDate = student.lastDrawDate || ''
+        const isToday = lastDrawDate === today
+        let dailyLeft
+        if (isToday) {
+          if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
+            dailyLeft = student.remainingDraws
+          } else {
+            dailyLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
+              ? student.dailyDrawLeft : 3
+          }
+        } else {
+          dailyLeft = 3  // 新的一天
         }
+
         this.setData({
-          studentInfo: app.globalData.studentInfo,
-          dailyLeft: res.result.dailyLeft,
-          challengeVouchers: res.result.challengeVouchers,
-          growthAccelerants: res.result.growthAccelerants
+          studentInfo: student,
+          dailyLeft,
+          challengeVouchers: student.challengeVouchers || 0,
+          growthAccelerants: student.growthAccelerants || 0
         })
         this._pageLoaded = true
         return
       }
-      // getDrawStatus 返回 success: false（如学生不存在、openid 异常等），用 globalData 兜底
-      console.warn('getDrawStatus success:false, fallback to globalData', res.result && res.result.error)
-      throw new Error(res.result && res.result.error || 'getDrawStatus failed')
+      throw new Error('getStudentData failed')
     } catch (e) {
-      // getDrawStatus 失败时，直接查数据库获取最新数据
-      console.error('getDrawStatus error:', e)
-      try {
-        const freshRes = await wx.cloud.callFunction({
-          name: 'getStudentInfo',
-          data: { openid: info.openid }
-        })
-        if (freshRes.result && freshRes.result.success) {
-          app.globalData.studentInfo = {
-            ...info,
-            dailyDrawLeft: freshRes.result.dailyDrawLeft,
-            remainingDraws: freshRes.result.dailyDrawLeft,
-            challengeVouchers: freshRes.result.challengeVouchers,
-            growthAccelerants: freshRes.result.growthAccelerants
-          }
-          this.setData({
-            studentInfo: app.globalData.studentInfo,
-            dailyLeft: freshRes.result.dailyDrawLeft,
-            challengeVouchers: freshRes.result.challengeVouchers,
-            growthAccelerants: freshRes.result.growthAccelerants
-          })
-          this._pageLoaded = true
-          return
-        }
-      } catch (e2) {
-        console.error('getStudentInfo error:', e2)
-      }
-      // 全都失败时用本地缓存，优先读 remainingDraws（新字段），兼容 dailyDrawLeft（旧字段）
+      console.error('loadData error:', e)
+      // 全都失败时用 globalData 兜底
       const localLeft = (typeof info.remainingDraws === 'number' && info.remainingDraws >= 0)
         ? info.remainingDraws
         : ((info.dailyDrawLeft !== undefined && info.dailyDrawLeft !== null)
