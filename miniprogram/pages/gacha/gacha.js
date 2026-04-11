@@ -104,7 +104,7 @@ Page({
     try {
       const res = await wx.cloud.callFunction({
         name: 'drawGacha',
-        data: { openid: app.globalData.studentInfo.openid }
+        data: { studentId: app.globalData.studentInfo._id }
       })
 
       if (res.result.success) {
@@ -168,7 +168,7 @@ Page({
           try {
             const updateRes = await wx.cloud.callFunction({
               name: 'useGrowthAccelerant',
-              data: { openid: app.globalData.studentInfo.openid, attrIndex: attrIdx }
+              data: { studentId: app.globalData.studentInfo._id, attrIndex: attrIdx }
             })
             if (updateRes.result.success) {
               wx.showToast({ title: `${attrs[attrIdx]}成长加速！`, icon: 'success' })
