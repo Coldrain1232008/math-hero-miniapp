@@ -10,7 +10,8 @@
     "pages/teacher-upload/teacher-upload",
     "pages/teacher-task/teacher-task",
     "pages/gacha/gacha",
-    "pages/challenge/challenge"
+    "pages/challenge/challenge",
+    "pages/challenge-history/challenge-history"
   ],
   "window": {
     "backgroundTextStyle": "dark",

@@ -1,6 +1,6 @@
 // cloudfunctions/drawGacha/index.js
 // 抽卡系统：每天免费3次，完成普通任务+3次，完成特殊任务+5次
-// 概率：70% 获得1EXP，15% 成长加速剂，15% 挑战凭证
+// 概率：60% 挑战凭证，10% 成长加速剂，30% EXP（10/5/3/1随机分布）
 // 核心：用 _id（主键）直接查询，用数据库条件更新保证原子性
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
@@ -60,31 +60,44 @@ exports.main = async (event, context) => {
     }
 
     // === 第三步：随机结果并发放奖励 ===
+    // 概率分布：60% 挑战凭证，10% 成长加速剂，30% EXP（10/5/3/1随机）
     const rand = Math.random()
     let result = {}
 
-    if (rand < 0.15) {
-      result = { type: 'growthAccelerant', desc: '成长加速剂', subDesc: '可永久提升任一属性成长速度 +0.1' }
-      await db.collection('students').doc(studentId).update({
-        data: { growthAccelerants: _.inc(1) }
-      })
-    } else if (rand < 0.30) {
+    if (rand < 0.60) {
       result = { type: 'challengeVoucher', desc: '挑战凭证', subDesc: '可挑战同班同学，胜者获得 5 EXP' }
       await db.collection('students').doc(studentId).update({
         data: { challengeVouchers: _.inc(1) }
       })
-    } else {
-      result = { type: 'exp', desc: '+1 EXP', subDesc: '继续加油！' }
+    } else if (rand < 0.70) {
+      result = { type: 'growthAccelerant', desc: '成长加速剂', subDesc: '可永久提升任一属性成长速度 +0.1' }
       await db.collection('students').doc(studentId).update({
-        data: { totalExp: _.inc(1) }
+        data: { growthAccelerants: _.inc(1) }
+      })
+    } else {
+      // 30% EXP：5%概率+10，15%概率+5，30%概率+3，50%概率+1
+      const expRand = Math.random()
+      let expAmount = 1
+      let expDesc = '+1 EXP'
+      let expSubDesc = '小试牛刀'
+      if (expRand < 0.05) {
+        expAmount = 10; expDesc = '+10 EXP'; expSubDesc = '运气爆棚！'
+      } else if (expRand < 0.20) {
+        expAmount = 5; expDesc = '+5 EXP'; expSubDesc = '表现不错！'
+      } else if (expRand < 0.50) {
+        expAmount = 3; expDesc = '+3 EXP'; expSubDesc = '继续加油！'
+      }
+      result = { type: 'exp', desc: expDesc, subDesc: expSubDesc }
+      await db.collection('students').doc(studentId).update({
+        data: { totalExp: _.inc(expAmount) }
       })
       await db.collection('expLogs').add({
         data: {
           studentId: studentId,
           classId: student.classId,
           type: 'gacha',
-          amount: 1,
-          baseExp: 1,
+          amount: expAmount,
+          baseExp: expAmount,
           bonusExp: 0,
           desc: '抽卡奖励',
           createdAt: Date.now()

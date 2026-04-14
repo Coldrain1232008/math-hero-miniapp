@@ -1,0 +1,214 @@
+/* pages/challenge-history/challenge-history.wxss */
+.page-bg {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40rpx 30rpx 60rpx;
+  color: #fff;
+}
+
+.header-title {
+  font-size: 40rpx;
+  font-weight: 600;
+  margin-bottom: 8rpx;
+}
+
+.header-sub {
+  font-size: 24rpx;
+  opacity: 0.8;
+}
+
+/* Tab */
+.tab-bar {
+  display: flex;
+  background: #fff;
+  padding: 0;
+  margin: -30rpx 20rpx 0;
+  border-radius: 20rpx 20rpx 0 0;
+  box-shadow: 0 -4rpx 20rpx rgba(0, 0, 0, 0.06);
+  position: relative;
+  z-index: 2;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 0;
+  color: #999;
+  position: relative;
+  font-size: 26rpx;
+}
+
+.tab-item.active {
+  color: #6c63ff;
+}
+
+.tab-icon {
+  font-size: 36rpx;
+  margin-bottom: 6rpx;
+}
+
+.tab-text {
+  font-size: 24rpx;
+}
+
+.tab-count {
+  position: absolute;
+  top: 12rpx;
+  right: 20%;
+  background: #6c63ff;
+  color: #fff;
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 20rpx;
+  transform: translateX(50%);
+}
+
+.tab-item.active .tab-count {
+  background: #6c63ff;
+}
+
+/* 内容区 */
+.tab-content {
+  background: #fff;
+  margin: 0 20rpx;
+  padding: 24rpx;
+  min-height: 60vh;
+  border-radius: 0 0 20rpx 20rpx;
+}
+
+.loading {
+  text-align: center;
+  padding: 100rpx;
+  color: #999;
+  font-size: 26rpx;
+}
+
+/* 记录卡片 */
+.record-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.record-card {
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  border-left: 6rpx solid #ccc;
+}
+
+.record-card.win {
+  background: linear-gradient(135deg, rgba(82, 196, 26, 0.08) 0%, rgba(82, 196, 26, 0.03) 100%);
+  border-left-color: #52c41a;
+}
+
+.record-card.lose {
+  background: linear-gradient(135deg, rgba(255, 77, 79, 0.08) 0%, rgba(255, 77, 79, 0.03) 100%);
+  border-left-color: #ff4d4f;
+}
+
+.record-card.draw {
+  background: linear-gradient(135deg, rgba(250, 173, 20, 0.08) 0%, rgba(250, 173, 20, 0.03) 100%);
+  border-left-color: #faad14;
+}
+
+.record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16rpx;
+}
+
+.record-opponent {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.vs-label {
+  font-size: 22rpx;
+  color: #999;
+  background: #f0f0f0;
+  padding: 4rpx 12rpx;
+  border-radius: 12rpx;
+}
+
+.opponent-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+}
+
+.record-result {
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+}
+
+.record-result.win {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.record-result.lose {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+
+.record-result.draw {
+  background: #fffbe6;
+  color: #faad14;
+}
+
+.record-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.record-time {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.record-exp {
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.record-exp.win {
+  color: #52c41a;
+}
+
+.record-exp.lose {
+  color: #ff4d4f;
+}
+
+.record-exp.draw {
+  color: #999;
+}
+
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 26rpx;
+  color: #999;
+}

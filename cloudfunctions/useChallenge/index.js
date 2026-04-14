@@ -120,9 +120,12 @@ exports.main = async (event, context) => {
       data: { challengeVouchers: _.inc(-1) }
     })
 
-    // 胜者获得5 EXP（负者无惩罚）
+    // 奖惩逻辑：
+    // - 发起挑战者（me）：胜+5EXP，负-5EXP（保底不低于0）
+    // - 被挑战者（opponent）：对方胜则+1EXP，对方负则+0EXP（平局不奖不罚）
     let expResult = null
     if (battle.winner === 'me') {
+      // 发起者胜利：+5EXP
       await db.collection('students').doc(me._id).update({
         data: { totalExp: _.inc(5) }
       })
@@ -138,10 +141,51 @@ exports.main = async (event, context) => {
           createdAt: Date.now()
         }
       })
+      // 被挑战者失败：无奖励（不记录）
       expResult = { winner: 'me', expAwarded: 5 }
     } else if (battle.winner === 'opponent') {
-      expResult = { winner: 'opponent', expAwarded: 0 }
+      // 发起者失败：-5EXP（保底0，防止负数）
+      const myNewExp = (me.totalExp || 0) - 5
+      if (myNewExp >= 0) {
+        await db.collection('students').doc(me._id).update({
+          data: { totalExp: _.inc(-5) }
+        })
+      } else {
+        await db.collection('students').doc(me._id).update({
+          data: { totalExp: -((me.totalExp || 0)) }  // 直接清到0
+        })
+      }
+      await db.collection('expLogs').add({
+        data: {
+          studentId: me._id,
+          classId: me.classId,
+          type: 'challenge_lose',
+          amount: -5,
+          baseExp: 5,
+          bonusExp: 0,
+          desc: `挑战「${opponent.name || opponent.heroName || '同学'}」失败`,
+          createdAt: Date.now()
+        }
+      })
+      // 被挑战者胜利：+1EXP
+      await db.collection('students').doc(opponent._id).update({
+        data: { totalExp: _.inc(1) }
+      })
+      await db.collection('expLogs').add({
+        data: {
+          studentId: opponent._id,
+          classId: opponent.classId,
+          type: 'defend_win',
+          amount: 1,
+          baseExp: 1,
+          bonusExp: 0,
+          desc: `防守「${me.name || me.heroName || '同学'}」挑战成功`,
+          createdAt: Date.now()
+        }
+      })
+      expResult = { winner: 'opponent', expAwarded: -5 }
     } else {
+      // 平局：双方无奖惩
       expResult = { winner: 'draw', expAwarded: 0 }
     }
 
@@ -158,7 +202,8 @@ exports.main = async (event, context) => {
           opponentAttrs,
           battleRounds: battle.rounds,
           result: battle.winner,
-          expAwarded: expResult.expAwarded,
+          challengerExpChange: battle.winner === 'me' ? 5 : (battle.winner === 'opponent' ? -5 : 0),
+          opponentExpChange: battle.winner === 'opponent' ? 1 : 0,
           createTime: Date.now()
         }
       })

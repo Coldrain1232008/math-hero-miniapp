@@ -140,7 +140,53 @@
         </view>
       </view>
       <view class="student-actions">
+        <button class="btn-grant" bindtap="showGrantMenu" data-studentid="{{item.studentId}}" data-name="{{item.studentName}}">发放</button>
         <button class="btn-reset" bindtap="resetStudentTask" data-studentid="{{item.studentId}}" data-name="{{item.studentName}}">重置</button>
+      </view>
+    </view>
+
+    <!-- 发放道具菜单 -->
+    <view wx:if="{{showGrantMenu}}" class="modal-mask" bindtap="hideGrantMenu">
+      <view class="modal-box grant-modal" catchtap="preventBubble">
+        <text class="modal-title">发放道具给 {{grantTargetName}}</text>
+
+        <view class="grant-options">
+          <view class="grant-item" bindtap="doGrant" data-action="challengeVoucher">
+            <text class="grant-icon">⚔️</text>
+            <text class="grant-name">挑战凭证</text>
+            <text class="grant-hint">挑战同学时消耗</text>
+          </view>
+          <view class="grant-item" bindtap="doGrant" data-action="growthAccelerant">
+            <text class="grant-icon">⚡</text>
+            <text class="grant-name">成长加速剂</text>
+            <text class="grant-hint">永久提升属性成长</text>
+          </view>
+          <view class="grant-item" bindtap="doGrant" data-action="addDraws">
+            <text class="grant-icon">🎰</text>
+            <text class="grant-name">增加抽卡次数</text>
+            <text class="grant-hint">叠加到今日剩余次数</text>
+          </view>
+          <view class="grant-item" bindtap="doGrant" data-action="resetDraws">
+            <text class="grant-icon">🔄</text>
+            <text class="grant-name">重置抽卡次数</text>
+            <text class="grant-hint">设为3次（当日有效）</text>
+          </view>
+        </view>
+
+        <view class="grant-count-section">
+          <text class="form-label">数量</text>
+          <view class="grant-count-row">
+            <text class="grant-count-btn" bindtap="adjustGrantCount" data delta="-5">-5</text>
+            <text class="grant-count-btn" bindtap="adjustGrantCount" data-delta="-1">-1</text>
+            <text class="grant-count-num">{{grantCount}}</text>
+            <text class="grant-count-btn" bindtap="adjustGrantCount" data-delta="1">+1</text>
+            <text class="grant-count-btn" bindtap="adjustGrantCount" data-delta="5">+5</text>
+          </view>
+        </view>
+
+        <view class="modal-btns">
+          <button class="btn-secondary" bindtap="hideGrantMenu">取消</button>
+        </view>
       </view>
     </view>
 

@@ -64,7 +64,7 @@ Page({
     this.setData({ selectedOpponent: opponent })
     wx.showModal({
       title: `向「${opponent.name}」发起挑战？`,
-      content: '系统将随机抽取你的3个属性与对手的3个属性进行对决，胜者获得 +5 EXP，负方无惩罚。',
+      content: '系统随机抽取你的3个属性与对手的3个属性对决。胜 +5 EXP，负 -5 EXP！被挑战者胜 +1 EXP。',
       confirmText: '发起挑战',
       cancelText: '取消',
       success: async (res) => {
@@ -119,5 +119,9 @@ Page({
   backToList() {
     this.closeBattle()
     this.loadClassmates()
+  },
+
+  goHistory() {
+    wx.navigateTo({ url: '/pages/challenge-history/challenge-history' })
   }
 })

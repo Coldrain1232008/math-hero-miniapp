@@ -1,0 +1,9 @@
+{
+  "name": "teacherGrantItem",
+  "version": "1.0.0",
+  "description": "教师端手动发放道具或增加抽卡次数",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

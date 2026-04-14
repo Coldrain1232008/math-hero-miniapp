@@ -1,0 +1,72 @@
+<!-- pages/challenge-history/challenge-history.wxml -->
+<view class="page-bg">
+  <!-- 页面标题 -->
+  <view class="header">
+    <view class="header-title">⚔️ 挑战记录</view>
+    <view class="header-sub">近30天挑战历史</view>
+  </view>
+
+  <!-- Tab切换 -->
+  <view class="tab-bar">
+    <view class="tab-item {{activeTab === 'initiator' ? 'active' : ''}}" bindtap="switchTab" data-tab="initiator">
+      <text class="tab-icon">🎯</text>
+      <text class="tab-text">我发起的</text>
+      <view class="tab-count" wx:if="{{asInitiator.length > 0}}">{{asInitiator.length}}</view>
+    </view>
+    <view class="tab-item {{activeTab === 'receiver' ? 'active' : ''}}" bindtap="switchTab" data-tab="receiver">
+      <text class="tab-icon">🛡️</text>
+      <text class="tab-text">被挑战</text>
+      <view class="tab-count" wx:if="{{asReceiver.length > 0}}">{{asReceiver.length}}</view>
+    </view>
+  </view>
+
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 记录列表 -->
+  <view class="tab-content" wx:else>
+    <view class="record-list" wx:if="{{activeTab === 'initiator'}}">
+      <view wx:for="{{asInitiator}}" wx:key="_id" class="record-card {{item.resultClass}}">
+        <view class="record-header">
+          <view class="record-opponent">
+            <text class="vs-label">挑战</text>
+            <text class="opponent-name">{{item.opponentName}}</text>
+          </view>
+          <view class="record-result {{item.resultClass}}">
+            <text>{{item.resultText}}</text>
+          </view>
+        </view>
+        <view class="record-footer">
+          <text class="record-time">{{item.createTimeStr}}</text>
+          <text class="record-exp {{item.expTextClass}}">{{item.expText}} EXP</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="record-list" wx:if="{{activeTab === 'receiver'}}">
+      <view wx:for="{{asReceiver}}" wx:key="_id" class="record-card {{item.resultClass}}">
+        <view class="record-header">
+          <view class="record-opponent">
+            <text class="vs-label">来自</text>
+            <text class="opponent-name">{{item.opponentName}}</text>
+          </view>
+          <view class="record-result {{item.resultClass}}">
+            <text>{{item.resultText}}</text>
+          </view>
+        </view>
+        <view class="record-footer">
+          <text class="record-time">{{item.createTimeStr}}</text>
+          <text class="record-exp {{item.expTextClass}}">{{item.expText}} EXP</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{emptyText}}">
+      <text class="empty-icon">📭</text>
+      <text class="empty-text">{{emptyText}}</text>
+    </view>
+  </view>
+</view>

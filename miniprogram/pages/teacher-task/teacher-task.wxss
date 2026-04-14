@@ -744,3 +744,86 @@
   color: #fa8c16;
   font-weight: 500;
 }
+
+/* ========== 发放道具样式 ========== */
+.btn-grant {
+  background: #e8f4ff;
+  color: #1890ff;
+  border: none;
+  padding: 16rpx 28rpx;
+  border-radius: 12rpx;
+  font-size: 26rpx;
+  margin-right: 16rpx;
+}
+
+.btn-grant::after {
+  border: none;
+}
+
+.grant-modal .modal-title {
+  margin-bottom: 30rpx;
+}
+
+.grant-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-bottom: 30rpx;
+}
+
+.grant-item {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: #f8f8f8;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  border: 1rpx solid #eee;
+}
+
+.grant-icon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.grant-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #333;
+  flex: 1;
+}
+
+.grant-hint {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.grant-count-section {
+  margin-bottom: 30rpx;
+}
+
+.grant-count-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24rpx;
+  margin-top: 16rpx;
+}
+
+.grant-count-btn {
+  background: #6c63ff;
+  color: #fff;
+  padding: 12rpx 24rpx;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+  min-width: 60rpx;
+  text-align: center;
+}
+
+.grant-count-num {
+  font-size: 40rpx;
+  font-weight: 600;
+  color: #333;
+  min-width: 80rpx;
+  text-align: center;
+}

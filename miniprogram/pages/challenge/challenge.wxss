@@ -60,6 +60,15 @@
 .rules-text { font-size: 26rpx; color: #666; line-height: 1.6; margin-bottom: 8rpx; }
 .rules-text.highlight { color: #10b981; font-weight: 600; }
 .rules-divider { height: 1rpx; background: #f0f0f0; margin: 16rpx 0; }
+.btn-history {
+  text-align: center;
+  color: #6c63ff;
+  font-size: 26rpx;
+  margin-top: 20rpx;
+  padding: 16rpx;
+  background: #f8f6ff;
+  border-radius: 12rpx;
+}
 
 /* 对决弹窗 */
 .battle-mask {
@@ -111,6 +120,8 @@
   border-radius: 40rpx;
 }
 .exp-badge.neutral { background: #f3f4f6; color: #999; }
+.exp-badge.win { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+.exp-badge.lose { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
 
 /* 双方选手 */
 .battle-info {

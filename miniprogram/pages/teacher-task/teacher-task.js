@@ -35,6 +35,13 @@ Page({
     // 学生任务
     studentList: [],
     loading: false,
+
+    // 发放道具
+    showGrantMenu: false,
+    grantTargetId: '',
+    grantTargetName: '',
+    grantAction: '',
+    grantCount: 1,
   },
 
   onLoad() {
@@ -536,6 +543,80 @@ Page({
         }
       }
     })
+  },
+
+  // ========== 发放道具 ==========
+  showGrantMenu(e) {
+    const studentId = e.currentTarget.dataset.studentid
+    const studentName = e.currentTarget.dataset.name || '该学生'
+    this.setData({
+      showGrantMenu: true,
+      grantTargetId: studentId,
+      grantTargetName: studentName,
+      grantAction: '',
+      grantCount: 1
+    })
+  },
+
+  hideGrantMenu() {
+    this.setData({ showGrantMenu: false })
+  },
+
+  async doGrant(e) {
+    const action = e.currentTarget.dataset.action
+    const { grantTargetId, grantTargetName, grantCount } = this.data
+
+    if (!grantTargetId) return
+
+    const actionNames = {
+      challengeVoucher: '挑战凭证',
+      growthAccelerant: '成长加速剂',
+      addDraws: '抽卡次数',
+      resetDraws: '抽卡次数'
+    }
+    const actionName = actionNames[action] || action
+    const actionLabel = action === 'resetDraws' ? '重置' : '发放'
+
+    wx.showModal({
+      title: `${actionLabel}${actionName}`,
+      content: `${actionLabel}「${grantTargetName}」${actionName} x${grantCount}，确定吗？`,
+      success: async (res) => {
+        if (!res.confirm) return
+
+        wx.showLoading({ title: '处理中...' })
+        try {
+          const app = getApp()
+          const result = await wx.cloud.callFunction({
+            name: 'teacherGrantItem',
+            data: {
+              teacherId: app.globalData.teacherId,
+              studentId: grantTargetId,
+              action,
+              amount: grantCount
+            }
+          })
+          wx.hideLoading()
+
+          if (result.result && result.result.success) {
+            wx.showToast({ title: result.result.message || '操作成功', icon: 'success' })
+            this.hideGrantMenu()
+            this.loadStudentTasks()
+          } else {
+            wx.showToast({ title: result.result?.error || '操作失败', icon: 'none' })
+          }
+        } catch (e) {
+          wx.hideLoading()
+          wx.showToast({ title: '操作失败', icon: 'none' })
+          console.error(e)
+        }
+      }
+    })
+  },
+
+  adjustGrantCount(e) {
+    const delta = parseInt(e.currentTarget.dataset.delta) || 0
+    const newCount = Math.max(1, this.data.grantCount + delta)
+    this.setData({ grantCount: newCount })
   },
 
   // 阻止冒泡

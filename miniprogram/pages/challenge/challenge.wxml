@@ -10,10 +10,13 @@
 
       <!-- EXP奖励 -->
       <view class="battle-exp" wx:if="{{battleResult.winner === 'me'}}">
-        <text class="exp-badge">+5 EXP</text>
+        <text class="exp-badge win">+5 EXP</text>
       </view>
       <view class="battle-exp" wx:elif="{{battleResult.winner === 'opponent'}}">
-        <text class="exp-badge neutral">无惩罚</text>
+        <text class="exp-badge lose">-5 EXP</text>
+      </view>
+      <view class="battle-exp" wx:else>
+        <text class="exp-badge neutral">平局</text>
       </view>
 
       <!-- 对决详情 -->
@@ -99,8 +102,9 @@
   <view class="rules">
     <view class="rules-title">📖 挑战规则</view>
     <view class="rules-text">系统随机抽取你的3个属性与对手的3个属性进行对比，共3轮，胜多负少者获胜。</view>
-    <view class="rules-text highlight">胜者获得 +5 EXP，负者无惩罚！</view>
+    <view class="rules-text highlight">胜者 +5 EXP，负者 -5 EXP！被挑战者胜 +1 EXP。</view>
     <view class="rules-divider"></view>
     <view class="rules-text">挑战凭证：{{vouchersLeft >= 0 ? vouchersLeft : '—'}} 张</view>
+    <view class="btn-history" bindtap="goHistory">📜 查看挑战记录</view>
   </view>
 </view>
