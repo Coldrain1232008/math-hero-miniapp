@@ -26,16 +26,27 @@ function calcAttributes(talentId, level) {
 
 exports.main = async (event, context) => {
   try {
-    const { openid, targetOpenid } = event
+    // 优先用 studentId（_id 主键），fallback 到 openid（兼容老调用方式）
+    const studentId = event.studentId
+    const openid = event.openid || cloud.getWXContext().OPENID
 
-    if (!openid) return { success: false, error: '缺少 openid' }
+    let my = null
 
-    // 获取自己的信息
-    const myRes = await db.collection('students').where({ openid }).get()
-    if (!myRes.data || myRes.data.length === 0) {
+    // 方式1：用 _id 主键精确查（推荐）
+    if (studentId) {
+      const res = await db.collection('students').doc(studentId).get()
+      my = res.data
+    }
+
+    // 方式2：用 openid 兜底（兼容老数据/老调用）
+    if (!my && openid) {
+      const res = await db.collection('students').where({ openid }).get()
+      if (res.data && res.data.length > 0) my = res.data[0]
+    }
+
+    if (!my) {
       return { success: false, error: '学生信息不存在' }
     }
-    const my = myRes.data[0]
 
     // 查询同班同学（排除自己）
     // 先按 classId 查所有同学，再用 JS 过滤自己
@@ -59,14 +70,13 @@ exports.main = async (event, context) => {
       return false
     })
 
-    // 如果过滤后为空（openid 重复的特殊情况），直接返回全部同学
+    // 如果过滤后为空（极端情况），直接返回全部同学
     const finalClassmates = filteredData.length > 0 ? filteredData : rawData
 
     const classmates = finalClassmates.map(s => {
       const attrs = calcAttributes(s.talentId || 'A1', s.level || 1)
       return {
         _id: s._id,  // 用于挑战功能，必须返回
-        openid: s.openid,
         name: s.realName || s.heroName || '未知',
         level: s.level || 1,
         totalExp: s.totalExp || 0,
@@ -81,8 +91,7 @@ exports.main = async (event, context) => {
       debug: {
         myClassId: my.classId,
         rawCount: rawData.length,
-        myId: myId,
-        myOpenid: openid,
+        myId: my._id,
         filteredCount: filteredData.length,
         classmatesCount: classmates.length
       }

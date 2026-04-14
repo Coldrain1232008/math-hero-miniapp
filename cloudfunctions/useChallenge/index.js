@@ -57,21 +57,36 @@ function doBattle(myAttrs, opponentAttrs) {
 
 exports.main = async (event, context) => {
   try {
-    const { openid, targetOpenid, myId } = event
-    if (!openid || !targetOpenid) {
-      return { success: false, error: '缺少参数' }
+    // 优先用 studentId（_id 主键），fallback 到 openid（兼容老调用方式）
+    const studentId = event.studentId
+    const openid = event.openid || cloud.getWXContext().OPENID
+    const { targetId } = event  // 对手的 _id
+
+    if (!targetId) {
+      return { success: false, error: '缺少 targetId' }
     }
 
     // 获取挑战者信息
-    const myRes = await db.collection('students').where({ openid }).get()
-    if (!myRes.data || myRes.data.length === 0) {
+    let me = null
+
+    // 方式1：用 _id 主键精确查（推荐）
+    if (studentId) {
+      const res = await db.collection('students').doc(studentId).get()
+      me = res.data
+    }
+
+    // 方式2：用 openid 兜底（兼容老数据/老调用）
+    if (!me && openid) {
+      const res = await db.collection('students').where({ openid }).get()
+      if (res.data && res.data.length > 0) me = res.data[0]
+    }
+
+    if (!me) {
       return { success: false, error: '学生信息不存在' }
     }
-    const me = myRes.data[0]
 
-    // 修复：只判断目标是不是自己（targetOpenid 是对手的 _id）
-    // 原来 (myId && me._id === myId) 永远为 true，导致所有挑战都被拦截
-    if (me._id === targetOpenid) {
+    // 不能挑战自己
+    if (me._id === targetId) {
       return { success: false, error: '不能挑战自己' }
     }
 
@@ -82,7 +97,7 @@ exports.main = async (event, context) => {
     }
 
     // 获取被挑战者信息（用 _id 查）
-    const targetRes = await db.collection('students').doc(targetOpenid).get()
+    const targetRes = await db.collection('students').doc(targetId).get()
     if (!targetRes.data) {
       return { success: false, error: '对手信息不存在' }
     }

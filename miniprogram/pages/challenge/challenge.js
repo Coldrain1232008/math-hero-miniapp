@@ -34,7 +34,7 @@ Page({
     try {
       const res = await wx.cloud.callFunction({
         name: 'getClassmates',
-        data: { openid: app.globalData.studentInfo.openid }
+        data: { studentId: app.globalData.studentInfo._id }
       })
       if (res.result.success) {
         const classmates = res.result.classmates || []
@@ -81,9 +81,8 @@ Page({
       const res = await wx.cloud.callFunction({
         name: 'useChallenge',
         data: {
-          openid: app.globalData.studentInfo.openid,
-          myId: app.globalData.studentInfo._id,
-          targetOpenid: opponent._id  // 用 _id 查（开发环境 openid 可能重复）
+          studentId: app.globalData.studentInfo._id,
+          targetId: opponent._id
         }
       })
       wx.hideLoading()

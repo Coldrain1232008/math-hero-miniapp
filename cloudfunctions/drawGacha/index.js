@@ -48,8 +48,15 @@ exports.main = async (event, context) => {
       }
     })
 
-    if (!updateRes.updated) {
-      return { success: false, error: '今日抽卡次数已用完', dailyLeft: 0 }
+    // where().update() 的返回结构是 { stats: { updated: N }, errMsg: "..." }
+    // 注意：不是 updateRes.updated，而是 updateRes.stats.updated
+    const updatedCount = updateRes && updateRes.stats ? updateRes.stats.updated : 0
+
+    if (!updatedCount) {
+      // 重新查询当前状态，返回真实的剩余次数
+      const current = await db.collection('students').doc(studentId).get()
+      const realLeft = current.data?.remainingDraws ?? 0
+      return { success: false, error: '今日抽卡次数已用完', dailyLeft: realLeft }
     }
 
     // === 第三步：随机结果并发放奖励 ===

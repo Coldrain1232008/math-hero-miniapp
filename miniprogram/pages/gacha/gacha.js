@@ -31,52 +31,39 @@ Page({
       return
     }
 
-    // 从数据库获取最新数据（与角色页完全一致，确保两处显示一致）
+    // 改用 getDrawStatus 获取权威抽卡次数（处理跨日重置逻辑）
+    // 不再用 getStudentData，因为那个返回的是原始 student 对象，不处理跨日逻辑
     try {
       const res = await wx.cloud.callFunction({
-        name: 'getStudentData',
+        name: 'getDrawStatus',
         data: { studentId: info._id }
       })
       if (res.result && res.result.success) {
-        const student = res.result.student
-        // 同步到 globalData
-        app.globalData.studentInfo = student
-
-        // 计算今日剩余次数（与 character.js 完全一致的逻辑）
-        const today = `${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, '0')}${String(new Date().getDate()).padStart(2, '0')}`
-        const lastDrawDate = student.lastDrawDate || ''
-        const isToday = lastDrawDate === today
-        let dailyLeft
-        if (isToday) {
-          if (typeof student.remainingDraws === 'number' && !isNaN(student.remainingDraws)) {
-            dailyLeft = student.remainingDraws
-          } else {
-            dailyLeft = (typeof student.dailyDrawLeft === 'number' && !isNaN(student.dailyDrawLeft))
-              ? student.dailyDrawLeft : 3
-          }
-        } else {
-          dailyLeft = 3  // 新的一天
-        }
-
         this.setData({
-          studentInfo: student,
-          dailyLeft,
-          challengeVouchers: student.challengeVouchers || 0,
-          growthAccelerants: student.growthAccelerants || 0
+          dailyLeft: res.result.dailyLeft,
+          challengeVouchers: res.result.challengeVouchers ?? 0,
+          growthAccelerants: res.result.growthAccelerants ?? 0
         })
+        // 同步到 globalData（仅同步次数相关字段，studentInfo 整体由 character.js 维护）
+        app.globalData.studentInfo = {
+          ...app.globalData.studentInfo,
+          lastDrawDate: res.result.lastDrawDate,
+          remainingDraws: res.result.dailyLeft,
+          dailyDrawLeft: res.result.dailyLeft,
+          challengeVouchers: res.result.challengeVouchers ?? 0,
+          growthAccelerants: res.result.growthAccelerants ?? 0,
+        }
         this._pageLoaded = true
         return
       }
-      throw new Error('getStudentData failed')
+      throw new Error('getDrawStatus failed')
     } catch (e) {
       console.error('loadData error:', e)
-      // 全都失败时用 globalData 兜底
-      const localLeft = (typeof info.remainingDraws === 'number' && info.remainingDraws >= 0)
+      // 全都失败时用 globalData 兜底（但优先信任 remainingDraws 为 0，不要 fallback 到 3）
+      const localLeft = (typeof info.remainingDraws === 'number' && !isNaN(info.remainingDraws))
         ? info.remainingDraws
-        : ((info.dailyDrawLeft !== undefined && info.dailyDrawLeft !== null)
-            ? info.dailyDrawLeft : 3)
+        : 0  // 宁可显示 0，也不要误显示 3
       this.setData({
-        studentInfo: info,
         dailyLeft: localLeft,
         challengeVouchers: info.challengeVouchers || 0,
         growthAccelerants: info.growthAccelerants || 0

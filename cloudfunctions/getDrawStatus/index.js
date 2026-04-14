@@ -1,5 +1,6 @@
 // cloudfunctions/getDrawStatus/index.js
 // 获取抽卡状态，不依赖前端缓存
+// 注意：不再用 openid 查询，统一用 studentId（_id 主键）
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
@@ -11,14 +12,27 @@ function getTodayStr() {
 
 exports.main = async (event, context) => {
   try {
-    const { openid, debug } = event
-    if (!openid) return { success: false, error: '缺少 openid' }
+    // 优先用 studentId（_id 主键），fallback 到 openid（兼容老调用方式）
+    const studentId = event.studentId
+    const openid = event.openid || cloud.getWXContext().OPENID
 
-    const studentRes = await db.collection('students').where({ openid }).get()
-    if (!studentRes.data || studentRes.data.length === 0) {
+    let student = null
+
+    // 方式1：用 _id 主键精确查（推荐）
+    if (studentId) {
+      const res = await db.collection('students').doc(studentId).get()
+      student = res.data
+    }
+
+    // 方式2：用 openid 兜底（兼容老数据/老调用）
+    if (!student && openid) {
+      const res = await db.collection('students').where({ openid }).get()
+      if (res.data && res.data.length > 0) student = res.data[0]
+    }
+
+    if (!student) {
       return { success: false, error: '学生信息不存在' }
     }
-    const student = studentRes.data[0]
 
     const today = getTodayStr()
     const lastDrawDate = student.lastDrawDate || ''
@@ -44,7 +58,7 @@ exports.main = async (event, context) => {
     }
 
     // 调试模式：返回数据库原始值，方便排查
-    if (debug) {
+    if (event.debug) {
       return {
         success: true,
         debug: true,

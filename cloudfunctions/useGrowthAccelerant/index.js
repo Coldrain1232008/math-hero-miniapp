@@ -56,33 +56,6 @@ exports.main = async (event, context) => {
       }
     })
 
-    return {
-      success: true,
-      attrName: ATTR_NAMES_ZH[attrIndex],
-      left: (student.growthAccelerants || 1) - 1,
-      currentBonus: accels
-    }
-
-    // 记录日志
-    await db.collection('itemLogs').add({
-      data: {
-        studentId: student._id,
-        classId: student.classId,
-        type: 'use_accelerant',
-        attrIndex,
-        attrName: ATTR_NAMES_ZH[attrIndex],
-        growthAdd: 0.1,
-        createTime: Date.now()
-      }
-    })
-
-    return {
-      success: true,
-      attrName: ATTR_NAMES_ZH[attrIndex],
-      left: (student.growthAccelerants || 1) - 1,
-      currentBonus: accels
-    }
-
   } catch (e) {
     console.error('useGrowthAccelerant error:', e)
     return { success: false, error: e.message || '使用失败' }
