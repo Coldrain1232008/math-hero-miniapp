@@ -54,7 +54,7 @@ Page({
       if (res.result && res.result.success) {
         const students = res.result.students.map(s => {
           const levelInfo = calcLevel(s.totalExp)
-          const attrs = calcAttributes(s.talentId, levelInfo.level)
+          const attrs = calcAttributes(s.talentId, levelInfo.level, s.growthMultiplier || 1.0)
           const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
           const attrDisplay = ATTR_NAMES.map((name, i) => ({
             name, val: attrs[i], color: ATTR_COLORS[i],

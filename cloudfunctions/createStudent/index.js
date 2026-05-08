@@ -40,6 +40,8 @@ exports.main = async (event) => {
         talentName: event.talentName,
         talentCategory: event.talentCategory,
         talentColor: event.talentColor,
+        growthMultiplier: event.growthMultiplier !== undefined ? event.growthMultiplier : 1.0,
+        testCompleted: event.testCompleted !== undefined ? event.testCompleted : false,
         // 抽卡系统初始化
         dailyDrawLeft: 3,
         lastDrawDate: '',
@@ -71,6 +73,8 @@ exports.main = async (event) => {
         totalExp: 0,
         level: 1,
         rerollChances: 0,
+        growthMultiplier: event.growthMultiplier !== undefined ? event.growthMultiplier : 1.0,
+        testCompleted: event.testCompleted !== undefined ? event.testCompleted : false,
         // 抽卡系统初始化
         dailyDrawLeft: 3,
         lastDrawDate: '',

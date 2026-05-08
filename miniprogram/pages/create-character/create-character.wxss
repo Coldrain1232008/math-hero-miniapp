@@ -24,7 +24,6 @@
   text-align: center;
 }
 
-/* 棋盘式网格：每行4个 */
 .avatar-grid {
   width: 100%;
   display: flex;
@@ -96,104 +95,242 @@
 }
 
 .next-btn { width: 80%; }
-.next-btn.disabled { opacity: 0.5; }
 
-/* 天赋大类选择 */
-.category-list {
+/* ========== 天赋觉醒选择 ========== */
+.awaken-options {
   width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 20rpx;
-  margin-bottom: 48rpx;
+  gap: 28rpx;
 }
 
-.category-card {
-  border: 3rpx solid transparent;
-  border-radius: 20rpx;
-  padding: 32rpx;
-  background: rgba(255,255,255,0.06);
+.awaken-card {
+  display: flex;
+  align-items: center;
+  border-radius: 24rpx;
+  padding: 36rpx 32rpx;
   transition: all 0.2s;
 }
 
-.category-card.selected {
-  border-width: 3rpx;
-  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.2);
+.test-card {
+  background: rgba(108,99,255,0.12);
+  border: 2rpx solid rgba(108,99,255,0.3);
 }
 
-.category-header {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-  margin-bottom: 16rpx;
+.test-card:active {
+  background: rgba(108,99,255,0.25);
 }
 
-.category-icon {
-  width: 64rpx;
-  height: 64rpx;
-  border-radius: 16rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 36rpx;
+.random-card {
+  background: rgba(255,255,255,0.06);
+  border: 2rpx solid rgba(255,255,255,0.15);
 }
 
-.category-name {
-  font-size: 36rpx;
-  font-weight: bold;
+.random-card:active {
+  background: rgba(255,255,255,0.12);
 }
 
-.category-desc {
-  font-size: 26rpx;
-  color: rgba(255,255,255,0.6);
-  display: block;
-  margin-bottom: 20rpx;
-}
-
-.category-features {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12rpx;
-}
-
-.feature-tag {
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.1);
-  padding: 8rpx 16rpx;
-  border-radius: 8rpx;
-}
-
-/* 天赋揭示 */
-.talent-egg {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 60rpx 0;
-}
-
-.egg-glow {
-  width: 200rpx;
-  height: 200rpx;
-  background: radial-gradient(circle, rgba(108,99,255,0.4), transparent);
+.awaken-icon-wrap {
+  width: 88rpx;
+  height: 88rpx;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 32rpx;
+  flex-shrink: 0;
 }
 
-.egg-glow.rolling {
-  animation: glow-spin 0.6s linear infinite;
+.test-glow {
+  background: rgba(108,99,255,0.25);
+  box-shadow: 0 0 20rpx rgba(108,99,255,0.3);
+}
+
+.random-glow {
+  background: rgba(255,255,255,0.1);
+}
+
+.awaken-icon {
+  font-size: 44rpx;
+}
+
+.awaken-info {
+  flex: 1;
+  margin-left: 28rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.awaken-title {
+  font-size: 34rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.awaken-desc {
+  font-size: 24rpx;
+  color: rgba(255,255,255,0.5);
+}
+
+.awaken-badge {
+  display: inline-block;
+  font-size: 22rpx;
+  padding: 6rpx 16rpx;
+  border-radius: 8rpx;
+  margin-top: 8rpx;
+  width: fit-content;
+}
+
+.full-rate {
+  background: rgba(108,99,255,0.2);
+  color: #a89bff;
+}
+
+.reduced-rate {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.4);
+}
+
+.awaken-arrow {
+  font-size: 32rpx;
+  color: rgba(255,255,255,0.3);
+  margin-left: 16rpx;
+}
+
+/* 随机动画遮罩 */
+.rolling-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.rolling-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+}
+
+.rolling-icon {
+  font-size: 120rpx;
+  animation: glow-spin 0.8s ease-in-out infinite;
 }
 
 @keyframes glow-spin {
-  from { transform: scale(1); }
-  50% { transform: scale(1.15); }
-  to { transform: scale(1); }
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); }
 }
 
-.egg-icon { font-size: 120rpx; }
-.egg-hint { color: rgba(255,255,255,0.6); font-size: 28rpx; }
+.rolling-text {
+  font-size: 32rpx;
+  color: rgba(255,255,255,0.8);
+}
+
+/* ========== 测试答题 ========== */
+.progress-bar-wrap {
+  width: 100%;
+  margin-bottom: 48rpx;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 8rpx;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4rpx;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6c63ff, #a855f7);
+  border-radius: 4rpx;
+  transition: width 0.3s ease;
+}
+
+.question-card {
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border-radius: 24rpx;
+  padding: 40rpx 32rpx;
+}
+
+.question-text {
+  font-size: 34rpx;
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.6;
+  display: block;
+  margin-bottom: 40rpx;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.06);
+  border: 2rpx solid rgba(255,255,255,0.12);
+  border-radius: 16rpx;
+  padding: 28rpx 24rpx;
+  transition: all 0.15s;
+}
+
+.option-btn:active {
+  background: rgba(108,99,255,0.2);
+  border-color: #6c63ff;
+  transform: scale(0.98);
+}
+
+.option-letter {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: rgba(108,99,255,0.2);
+  color: #a89bff;
+  font-size: 26rpx;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-right: 20rpx;
+}
+
+.option-text {
+  font-size: 28rpx;
+  color: rgba(255,255,255,0.85);
+  line-height: 1.5;
+}
+
+/* ========== 结果展示 ========== */
+.result-badge {
+  font-size: 26rpx;
+  padding: 12rpx 32rpx;
+  border-radius: 50rpx;
+  margin-bottom: 32rpx;
+  text-align: center;
+}
+
+.badge-test {
+  background: rgba(108,99,255,0.2);
+  color: #a89bff;
+  border: 1rpx solid rgba(108,99,255,0.3);
+}
+
+.badge-random {
+  background: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.5);
+  border: 1rpx solid rgba(255,255,255,0.15);
+}
 
 /* 天赋卡片 */
 .talent-reveal { width: 100%; }
@@ -203,12 +340,38 @@
   border-radius: 20rpx;
   padding: 40rpx;
   text-align: center;
-  margin-bottom: 40rpx;
+  margin-bottom: 24rpx;
 }
 
 .talent-category { font-size: 24rpx; display: block; margin-bottom: 12rpx; }
 .talent-name { font-size: 44rpx; font-weight: bold; color: #fff; display: block; margin-bottom: 16rpx; }
 .talent-desc { font-size: 26rpx; color: rgba(255,255,255,0.7); display: block; }
+
+/* 学习人格总结 */
+.personality-card {
+  background: rgba(108,99,255,0.1);
+  border: 1rpx solid rgba(108,99,255,0.2);
+  border-radius: 16rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 24rpx;
+  text-align: center;
+}
+
+.personality-label {
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.4);
+  display: block;
+  margin-bottom: 12rpx;
+  text-transform: uppercase;
+  letter-spacing: 4rpx;
+}
+
+.personality-text {
+  font-size: 28rpx;
+  color: #a89bff;
+  line-height: 1.6;
+  display: block;
+}
 
 /* 属性预览 */
 .attrs-preview {
@@ -268,5 +431,4 @@
   align-items: center;
 }
 
-.reroll-btn { width: 80%; }
 .confirm-btn { width: 80%; }

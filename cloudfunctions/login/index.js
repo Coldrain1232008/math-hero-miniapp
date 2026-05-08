@@ -54,6 +54,10 @@ exports.main = async (event, context) => {
         return { success: false, error: '个人密钥不正确' }
       }
       
+      if (studentRes.data.length > 1) {
+        return { success: false, error: '该口令存在重复，请联系老师处理' }
+      }
+
       let student = studentRes.data[0]
       
       // 3. 绑定openid（首次登录）- 从云函数上下文自动获取

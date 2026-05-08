@@ -38,7 +38,7 @@ exports.main = async (event, context) => {
     
     // 重置天赋（保留原有名字、头像、经验等，同时扣除一次机会）
     if (action === 'rerollTalent') {
-      const { talentId, talentName, talentCategory, talentColor } = event
+      const { talentId, talentName, talentCategory, talentColor, growthMultiplier, testCompleted } = event
       if (!talentId || !talentName) {
         return { success: false, error: '缺少天赋信息' }
       }
@@ -48,6 +48,8 @@ exports.main = async (event, context) => {
           talentName,
           talentCategory,
           talentColor,
+          growthMultiplier: growthMultiplier !== undefined ? growthMultiplier : 1.0,
+          testCompleted: testCompleted !== undefined ? testCompleted : false,
           rerollChances: _.inc(-1),  // 扣除一次重置机会
           updatedAt: new Date()
         }
@@ -55,6 +57,36 @@ exports.main = async (event, context) => {
       return { success: true, message: '天赋已重置' }
     }
     
+    // 修改个人口令（学生自助）
+    if (action === 'changeKey') {
+      const { newKey } = event
+      if (!newKey || newKey.length < 6) {
+        return { success: false, error: '口令至少6位' }
+      }
+      // 口令格式：6位以上字母+数字
+      if (!/^[A-Za-z0-9]{6,20}$/.test(newKey)) {
+        return { success: false, error: '口令只能包含字母和数字' }
+      }
+      // 获取当前学生信息（需要classId做班级内唯一性检查）
+      const stu = await db.collection('students').doc(studentId).get()
+      if (stu.data.studentKey === newKey) {
+        return { success: false, error: '新口令不能和当前口令相同' }
+      }
+      // 检查班级内是否有其他学生已使用该口令（防止登录冲突）
+      const conflict = await db.collection('students').where({
+        classId: stu.data.classId,
+        studentKey: newKey,
+        _id: _.neq(studentId),
+      }).get()
+      if (conflict.data.length > 0) {
+        return { success: false, error: '该口令已被其他同学使用，请换一个' }
+      }
+      await db.collection('students').doc(studentId).update({
+        data: { studentKey: newKey, updatedAt: new Date() }
+      })
+      return { success: true, message: '口令修改成功' }
+    }
+
     // 通用更新
     if (action === 'update') {
       await db.collection('students').doc(studentId).update({

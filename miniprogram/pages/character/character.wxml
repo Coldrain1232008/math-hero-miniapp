@@ -164,6 +164,35 @@
     <text class="reroll-arrow">›</text>
   </view>
 
+  <!-- 修改口令 -->
+  <view class="card settings-card" bindtap="showChangeKeyDialog">
+    <text class="settings-icon">🔑</text>
+    <view class="settings-info">
+      <text class="settings-title">修改登录口令</text>
+      <text class="settings-desc">设置一个6位以上、只含字母和数字的口令</text>
+    </view>
+    <text class="settings-arrow">›</text>
+  </view>
+
+  <!-- 修改口令弹窗 -->
+  <view wx:if="{{showKeyDialog}}" class="modal-mask" bindtap="hideChangeKeyDialog">
+    <view class="modal-box" catchtap="preventBubble">
+      <text class="modal-title">修改登录口令</text>
+      <view class="key-input-group">
+        <text class="key-label">当前口令</text>
+        <input class="key-input" value="{{student.studentKey}}" disabled />
+      </view>
+      <view class="key-input-group">
+        <text class="key-label">新口令（6位以上字母+数字）</text>
+        <input class="key-input" placeholder="例如：abc123" value="{{newKeyInput}}" bindinput="onNewKeyInput" maxlength="20" />
+      </view>
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="hideChangeKeyDialog">取消</button>
+        <button class="btn-primary" bindtap="confirmChangeKey" loading="{{keyChanging}}">确认修改</button>
+      </view>
+    </view>
+  </view>
+
   <!-- 经验记录 -->
   <view class="card log-card">
     <view class="card-title">最近经验记录</view>

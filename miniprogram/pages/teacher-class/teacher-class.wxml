@@ -92,10 +92,10 @@
   <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddDialog">
     <view class="modal-box" catchtap="preventBubble">
       <text class="modal-title">批量导入学生</text>
-      <text class="modal-desc">每行一个学生，格式：学号 姓名 或 学号,姓名</text>
+      <text class="modal-desc">每行一个学生，格式：学号 姓名 口令（口令可省略，自动随机生成）</text>
       <textarea
         class="name-textarea"
-        placeholder="20240101 张三&#10;20240102 李四&#10;20240103 王五"
+        placeholder="202501 张三 abc123&#10;202502 李四 def456&#10;202503 王五（自动随机口令）"
         value="{{nameInput}}"
         bindinput="onNameInput"
         maxlength="1000"

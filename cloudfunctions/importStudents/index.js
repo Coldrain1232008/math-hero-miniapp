@@ -14,29 +14,36 @@ function genKey(len = 6) {
 }
 
 // 解析输入行，支持多种格式：
-// "20240101 张三" -> {studentId: '20240101', realName: '张三'}
-// "20240101,张三" -> {studentId: '20240101', realName: '张三'}
-// "20240101, 张三" -> {studentId: '20240101', realName: '张三'}
-// "张三" -> {studentId: null, realName: '张三'}（无学号时自动生成）
+// "20240101 张三 ABC123" -> {studentId: '20240101', realName: '张三', studentKey: 'ABC123'}
+// "20240101 张三" -> {studentId: '20240101', realName: '张三', studentKey: null}
+// "20240101,张三,ABC123" -> {studentId: '20240101', realName: '张三', studentKey: 'ABC123'}
+// "20240101,张三" -> {studentId: '20240101', realName: '张三', studentKey: null}
+// "张三" -> {studentId: null, realName: '张三', studentKey: null}
 function parseStudentLine(line) {
   line = line.trim()
   if (!line) return null
 
-  // 尝试匹配 学号,姓名 或 学号 姓名 格式
-  // 学号通常是数字
-  const match = line.match(/^(\d+)[,，\s]+(.+)$/)
-  if (match) {
-    return {
-      studentId: match[1].trim(),
-      realName: match[2].trim()
+  // 按逗号或空格/制表符分割（支持中英文逗号）
+  const parts = line.split(/[,，\t ]+/).filter(p => p.length > 0)
+
+  if (parts.length >= 3) {
+    // 学号 姓名 口令
+    const idMatch = parts[0].match(/^\d+$/)
+    if (idMatch) {
+      return { studentId: parts[0], realName: parts[1], studentKey: parts[2] }
     }
   }
 
-  // 只有姓名，没有学号
-  return {
-    studentId: null,
-    realName: line
+  if (parts.length >= 2) {
+    // 学号 姓名（或 姓名 口令）
+    const idMatch = parts[0].match(/^\d+$/)
+    if (idMatch) {
+      return { studentId: parts[0], realName: parts[1], studentKey: null }
+    }
   }
+
+  // 只有姓名
+  return { studentId: null, realName: parts[0], studentKey: null }
 }
 
 // 生成唯一学号（当用户未提供时）
@@ -57,7 +64,7 @@ exports.main = async (event) => {
       const parsed = parseStudentLine(lines[i])
       if (!parsed) continue
 
-      let { studentId, realName } = parsed
+      let { studentId, realName, studentKey } = parsed
 
       // 如果没有提供学号，自动生成
       if (!studentId) {
@@ -80,7 +87,35 @@ exports.main = async (event) => {
         continue
       }
 
-      const studentKey = genKey(6)
+      // 如果指定了口令，检查班级内是否已有其他学生使用
+      if (studentKey) {
+        const keyConflict = await db.collection('students')
+          .where({ classId, studentKey })
+          .get()
+        if (keyConflict.data.length > 0) {
+          results.push({
+            studentId,
+            realName,
+            key: studentKey,
+            status: 'error',
+            message: '口令已被其他学生使用'
+          })
+          continue
+        }
+      }
+
+      // 如果未指定口令，随机生成（确保不重复）
+      if (!studentKey) {
+        let attempts = 0
+        do {
+          studentKey = genKey(6)
+          const dup = await db.collection('students')
+            .where({ classId, studentKey })
+            .get()
+          if (dup.data.length === 0) break
+          attempts++
+        } while (attempts < 10)
+      }
       await db.collection('students').add({
         data: {
           classId,

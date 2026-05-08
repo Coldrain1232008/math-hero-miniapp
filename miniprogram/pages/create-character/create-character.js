@@ -1,56 +1,57 @@
 // pages/create-character/create-character.js
-const { TALENT_DATA, randomTalent, ATTR_NAMES } = require('../../utils/gameData')
+const {
+  TALENT_DATA, TALENT_QUESTIONS, randomTalent, ATTR_NAMES,
+  evaluateTest, matchTalent, getPersonalitySummary
+} = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
 const db = wx.cloud.database()
 
 Page({
   data: {
-    step: 1,
+    step: 1,              // 1=基本信息, 2=天赋选择(测试/跳过), 3=测试答题, 4=结果展示
     heroName: '',
     gender: 'male',
     selectedAvatar: null,
     avatarList: [],
-    selectedCategory: null, // 选中的天赋大类
-    talentCategories: [],   // 天赋大类列表
-    talent: null,
-    revealed: false,
-    rolling: false,
-    rerollCount: 2, // 最多重置2次
     creating: false,
+    isRerollMode: false,
+
+    // 测试相关
+    questions: TALENT_QUESTIONS,
+    currentQuestion: 0,    // 当前题号（0-based）
+    answers: [],           // 用户选择的答案索引
+    testScores: null,      // 测试得分 [智,专,毅,灵,表,心]
+
+    // 结果相关
+    talent: null,
+    growthMultiplier: 1.0,
+    testCompleted: false,
+    personalitySummary: '',
     attrNames: ATTR_NAMES,
     attrColors: ['#6c63ff', '#f59e0b', '#10b981', '#ec4899', '#3b82f6', '#ef4444'],
+
+    // 随机动画
+    rolling: false,
   },
 
   onLoad(options) {
-    // 加载头像列表
     const avatarList = AvatarManager.getAvatars()
-    // 加载天赋大类
-    const categories = Object.keys(TALENT_DATA).map(key => ({
-      id: key,
-      ...TALENT_DATA[key]
-    }))
-
-    // 检查是否是重置天赋模式（教师触发）
     const isReroll = options.reroll === '1'
 
     if (isReroll) {
-      // 重置模式：直接跳到天赋选择（保留之前的名字和头像）
       const app = getApp()
       const student = app.globalData.studentInfo || {}
       this.setData({
         avatarList,
         selectedAvatar: student.avatar || avatarList[0].id,
         heroName: student.heroName || '',
-        talentCategories: categories,
-        step: 2,  // 直接到 step 2（选择天赋大类）
+        step: 2,
         isRerollMode: true,
       })
     } else {
-      // 正常创建模式
       this.setData({
         avatarList,
         selectedAvatar: avatarList[0].id,
-        talentCategories: categories,
       })
     }
   },
@@ -69,69 +70,78 @@ Page({
     this.setData({ step: 2 })
   },
 
-  // 选择天赋大类
-  selectCategory(e) {
-    const categoryId = e.currentTarget.dataset.id
-    this.setData({ selectedCategory: categoryId })
+  // ========== 天赋选择：测试 or 跳过 ==========
+
+  startTest() {
+    this.setData({
+      step: 3,
+      currentQuestion: 0,
+      answers: [],
+    })
   },
 
-  // 从选中大类随机天赋
-  toStep3() {
-    if (!this.data.selectedCategory) {
-      wx.showToast({ title: '请先选择一个天赋方向', icon: 'none' })
-      return
-    }
-    this.setData({ step: 3 })
-  },
-
-  revealTalent() {
-    if (this.data.rolling) return
+  skipTest() {
+    // 随机觉醒，成长率×0.8
     this.setData({ rolling: true })
     setTimeout(() => {
-      // 从选中大类随机
-      const { selectedCategory } = this.data
-      const category = TALENT_DATA[selectedCategory]
-      const subtypes = category.subtypes
-      const randomSubtype = subtypes[Math.floor(Math.random() * subtypes.length)]
-      const talent = {
-        categoryId: selectedCategory,
-        categoryName: category.name,
-        color: category.color,
-        ...randomSubtype
-      }
-      this.setData({ talent, revealed: true, rolling: false })
+      const talent = randomTalent()
+      this.setData({
+        step: 4,
+        talent,
+        growthMultiplier: 0.8,
+        testCompleted: false,
+        rolling: false,
+      })
       wx.vibrateShort()
-    }, 800)
+    }, 1000)
   },
 
-  reroll() {
-    const count = this.data.rerollCount
-    if (count <= 0) return
-    const { selectedCategory } = this.data
-    const category = TALENT_DATA[selectedCategory]
-    const subtypes = category.subtypes
-    const randomSubtype = subtypes[Math.floor(Math.random() * subtypes.length)]
-    const talent = {
-      categoryId: selectedCategory,
-      categoryName: category.name,
-      color: category.color,
-      ...randomSubtype
+  // ========== 测试答题 ==========
+
+  selectOption(e) {
+    const optionIdx = parseInt(e.currentTarget.dataset.idx)
+    const { currentQuestion, answers } = this.data
+    const newAnswers = [...answers, optionIdx]
+
+    if (currentQuestion < TALENT_QUESTIONS.length - 1) {
+      // 下一题
+      this.setData({
+        currentQuestion: currentQuestion + 1,
+        answers: newAnswers,
+      })
+    } else {
+      // 最后一题，评估结果
+      const scores = evaluateTest(newAnswers)
+      const talent = matchTalent(scores)
+      const summary = getPersonalitySummary(scores)
+      this.setData({
+        step: 4,
+        answers: newAnswers,
+        testScores: scores,
+        talent,
+        growthMultiplier: 1.0,
+        testCompleted: true,
+        personalitySummary: summary,
+      })
+      wx.vibrateShort()
     }
-    this.setData({ talent, rerollCount: count - 1 })
-    wx.vibrateShort()
   },
+
+  // ========== 确认创建 ==========
 
   async confirmCreate() {
     if (this.data.creating) return
     this.setData({ creating: true })
     const app = getApp()
-    const { heroName, gender, selectedAvatar, talent, isRerollMode } = this.data
-    // 预导入学生的 _id（通过登录时传入 globalData）
+    const {
+      heroName, gender, selectedAvatar, talent,
+      growthMultiplier, testCompleted, isRerollMode
+    } = this.data
     const existingId = app.globalData.studentInfo?._id || ''
 
     try {
-      // 重置天赋模式：直接调用 updateStudent 更新天赋
       if (isRerollMode) {
+        // 重置天赋模式
         const res = await wx.cloud.callFunction({
           name: 'updateStudent',
           data: {
@@ -141,17 +151,20 @@ Page({
             talentName: talent.name,
             talentCategory: talent.categoryId,
             talentColor: talent.color,
+            growthMultiplier,
+            testCompleted,
           },
         })
 
         if (res.result && res.result.success) {
-          // 更新 globalData 中的学生信息
           app.globalData.studentInfo = {
             ...app.globalData.studentInfo,
             talentId: talent.id,
             talentName: talent.name,
             talentCategory: talent.categoryId,
             talentColor: talent.color,
+            growthMultiplier,
+            testCompleted,
           }
           wx.showToast({ title: '天赋重置成功！', icon: 'success' })
           setTimeout(() => {
@@ -164,10 +177,10 @@ Page({
         return
       }
 
-      // 正常创建模式：调用 createStudent
+      // 正常创建模式
       const studentData = {
         classId: app.globalData.classId,
-        studentId: existingId,  // 预导入学生传 _id，云函数据此更新
+        studentId: existingId,
         heroName: heroName.trim(),
         gender,
         avatar: selectedAvatar,
@@ -175,6 +188,8 @@ Page({
         talentName: talent.name,
         talentCategory: talent.categoryId,
         talentColor: talent.color,
+        growthMultiplier,
+        testCompleted,
       }
 
       const res = await wx.cloud.callFunction({
@@ -183,7 +198,6 @@ Page({
       })
 
       if (res.result && res.result.success) {
-        // 更新 globalData 中的学生信息
         app.globalData.studentInfo = {
           ...app.globalData.studentInfo,
           ...studentData,

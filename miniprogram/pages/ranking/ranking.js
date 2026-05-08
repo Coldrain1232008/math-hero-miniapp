@@ -8,6 +8,7 @@ Page({
     rankList: [],
     myRank: 0,
     myStudent: null,
+    vouchersLeft: 0,
   },
 
   onShow() {
@@ -16,6 +17,33 @@ Page({
       this.getTabBar().setData({ selected: 1 })
     }
     this.loadRanking()
+    this.loadVouchers()
+  },
+
+  // 加载挑战凭证数量
+  async loadVouchers() {
+    const app = getApp()
+    const studentId = app.globalData.studentInfo?._id
+    if (!studentId) return
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'getDrawStatus',
+        data: { studentId }
+      })
+      if (res.result && res.result.success) {
+        this.setData({ vouchersLeft: res.result.challengeVouchers || 0 })
+      }
+    } catch (e) {
+      console.error('loadVouchers error:', e)
+    }
+  },
+
+  // 跳转到挑战页面
+  goToChallenge() {
+    wx.navigateTo({
+      url: '/miniprogram/pages/challenge/challenge'
+    })
   },
 
   async loadRanking() {
@@ -38,7 +66,7 @@ Page({
 
         const rankList = students.map((s, i) => {
           const levelInfo = calcLevel(s.totalExp)
-          const attrs = calcAttributes(s.talentId, levelInfo.level)
+          const attrs = calcAttributes(s.talentId, levelInfo.level, s.growthMultiplier || 1.0)
           const titleInfo = calcTitle(attrs, levelInfo.level)
           const avatarInfo = AvatarManager.getAvatarById(s.avatar) || AvatarManager.getRandomAvatar()
           return {

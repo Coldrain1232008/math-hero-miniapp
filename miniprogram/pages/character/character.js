@@ -28,6 +28,10 @@ Page({
     dailyDrawLeft: 3,
     challengeVouchers: 0,
     growthAccelerants: 0,
+    // 修改口令
+    showKeyDialog: false,
+    newKeyInput: '',
+    keyChanging: false,
   },
 
   onShow() {
@@ -59,7 +63,7 @@ Page({
     } catch (e) { console.error(e) }
 
     const levelInfo = calcLevel(student.totalExp)
-    const attrs = calcAttributes(student.talentId, levelInfo.level)
+    const attrs = calcAttributes(student.talentId, levelInfo.level, student.growthMultiplier || 1.0)
     const maxAttrVal = Math.max(...attrs, 50)
 
     // 计算称号（优先使用数据库存储的，否则实时计算）
@@ -286,7 +290,7 @@ Page({
 
     wx.showModal({
       title: '重置天赋',
-      content: `你有 ${student.rerollChances} 次机会，确定要重新随机天赋吗？\n注意：这会重新计算所有属性！`,
+      content: `你有 ${student.rerollChances} 次机会，确定要重新觉醒天赋吗？\n可以选择做天赋测试或跳过测试随机觉醒。`,
       success: async (res) => {
         if (!res.confirm) return
         wx.navigateTo({ url: '/pages/create-character/create-character?reroll=1' })
@@ -298,6 +302,62 @@ Page({
   goGacha() {
     wx.navigateTo({ url: '/pages/gacha/gacha' })
   },
+
+  // ========== 修改口令 ==========
+  showChangeKeyDialog() {
+    this.setData({ showKeyDialog: true, newKeyInput: '' })
+  },
+
+  hideChangeKeyDialog() {
+    this.setData({ showKeyDialog: false })
+  },
+
+  onNewKeyInput(e) {
+    this.setData({ newKeyInput: e.detail.value })
+  },
+
+  async confirmChangeKey() {
+    const { newKeyInput, student } = this.data
+    if (!newKeyInput || newKeyInput.length < 6) {
+      wx.showToast({ title: '口令至少6位', icon: 'none' })
+      return
+    }
+    if (!/^[A-Za-z0-9]{6,20}$/.test(newKeyInput)) {
+      wx.showToast({ title: '口令只能包含字母和数字', icon: 'none' })
+      return
+    }
+    this.setData({ keyChanging: true })
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'updateStudent',
+        data: {
+          action: 'changeKey',
+          studentId: student._id,
+          newKey: newKeyInput,
+        },
+      })
+      if (res.result && res.result.success) {
+        wx.showToast({ title: '口令修改成功', icon: 'success' })
+        // 更新本地数据
+        this.setData({
+          'student.studentKey': newKeyInput,
+          showKeyDialog: false,
+          newKeyInput: '',
+        })
+        // 同步到 globalData
+        const app = getApp()
+        app.globalData.studentInfo.studentKey = newKeyInput
+      } else {
+        wx.showToast({ title: res.result?.error || '修改失败', icon: 'none' })
+      }
+    } catch (e) {
+      console.error('修改口令失败:', e)
+      wx.showToast({ title: '网络异常，请重试', icon: 'none' })
+    }
+    this.setData({ keyChanging: false })
+  },
+
+  preventBubble() {},
 
   _formatTime(date) {
     if (!date) return ''

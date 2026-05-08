@@ -8,6 +8,9 @@
  * 天赋大类 × 子类
  * growth: 每升一级各属性增加的点数（对应 [智识, 专注, 毅力, 灵感, 表达, 心志]）
  * baseAttrs: 角色初始属性值
+ *
+ * ⚠️ 此数据与数据库中学生的 talentId/talentCategory 绑定，修改会导致数据不一致
+ * 如需查看完整配置参考，见 config/talent-data.json
  */
 const TALENT_DATA = {
   // ============ A类：探索者 ============
@@ -16,226 +19,71 @@ const TALENT_DATA = {
     desc: '善于发现规律，思维活跃',
     color: '#6c63ff',
     subtypes: [
-      {
-        id: 'A1',
-        name: '星图探索者',
-        desc: '擅长找到问题的内在规律，智识与灵感双高成长',
-        growth: [2.5, 0.8, 0.7, 2.0, 1.0, 1.0],
-        baseAttrs: [12, 8, 8, 10, 8, 9],
-      },
-      {
-        id: 'A2',
-        name: '迷宫探索者',
-        desc: '在复杂问题中抽丝剥茧，智识与专注均衡成长',
-        growth: [2.2, 1.5, 0.8, 1.5, 1.0, 1.0],
-        baseAttrs: [11, 10, 8, 9, 8, 9],
-      },
-      {
-        id: 'A3',
-        name: '海图探索者',
-        desc: '好奇心驱动学习，灵感爆发型',
-        growth: [1.8, 0.8, 0.6, 2.8, 1.2, 0.8],
-        baseAttrs: [10, 8, 7, 12, 9, 9],
-      },
-      {
-        id: 'A4',
-        name: '废墟探索者',
-        desc: '越挫越勇，毅力与心志极高成长',
-        growth: [1.5, 1.0, 2.5, 1.0, 0.8, 2.2],
-        baseAttrs: [9, 9, 11, 8, 8, 10],
-      },
+      { id: 'A1', name: '星图探索者', desc: '擅长找到问题的内在规律，智识与灵感双高成长', growth: [2.5, 0.8, 0.7, 2.0, 1.0, 1.0], baseAttrs: [12, 8, 8, 10, 8, 9] },
+      { id: 'A2', name: '迷宫探索者', desc: '在复杂问题中抽丝剥茧，智识与专注均衡成长', growth: [2.2, 1.5, 0.8, 1.5, 1.0, 1.0], baseAttrs: [11, 10, 8, 9, 8, 9] },
+      { id: 'A3', name: '海图探索者', desc: '好奇心驱动学习，灵感爆发型', growth: [1.8, 0.8, 0.6, 2.8, 1.2, 0.8], baseAttrs: [10, 8, 7, 12, 9, 9] },
+      { id: 'A4', name: '废墟探索者', desc: '越挫越勇，毅力与心志极高成长', growth: [1.5, 1.0, 2.5, 1.0, 0.8, 2.2], baseAttrs: [9, 9, 11, 8, 8, 10] },
     ],
   },
-
   // ============ B类：铸造者 ============
   B: {
     name: '铸造者',
     desc: '踏实稳健，积累型学习者',
     color: '#f59e0b',
     subtypes: [
-      {
-        id: 'B1',
-        name: '烈火铸造者',
-        desc: '专注与毅力并重，稳定输出高分',
-        growth: [1.5, 2.2, 2.0, 0.8, 0.8, 1.7],
-        baseAttrs: [9, 11, 11, 8, 8, 10],
-      },
-      {
-        id: 'B2',
-        name: '寒冰铸造者',
-        desc: '沉稳冷静，专注力极强，不受干扰',
-        growth: [1.8, 2.8, 1.0, 0.5, 1.2, 1.7],
-        baseAttrs: [10, 13, 9, 7, 8, 9],
-      },
-      {
-        id: 'B3',
-        name: '岩石铸造者',
-        desc: '心志坚定，长线积累爆发强',
-        growth: [1.2, 1.5, 2.0, 0.8, 1.0, 2.5],
-        baseAttrs: [9, 9, 10, 8, 9, 12],
-      },
-      {
-        id: 'B4',
-        name: '光明铸造者',
-        desc: '全面均衡发展，没有明显短板',
-        growth: [1.7, 1.7, 1.7, 1.3, 1.3, 1.3],
-        baseAttrs: [10, 10, 10, 9, 9, 9],
-      },
+      { id: 'B1', name: '烈火铸造者', desc: '专注与毅力并重，稳定输出高分', growth: [1.5, 2.2, 2.0, 0.8, 0.8, 1.7], baseAttrs: [9, 11, 11, 8, 8, 10] },
+      { id: 'B2', name: '寒冰铸造者', desc: '沉稳冷静，专注力极强，不受干扰', growth: [1.8, 2.8, 1.0, 0.5, 1.2, 1.7], baseAttrs: [10, 13, 9, 7, 8, 9] },
+      { id: 'B3', name: '岩石铸造者', desc: '心志坚定，长线积累爆发强', growth: [1.2, 1.5, 2.0, 0.8, 1.0, 2.5], baseAttrs: [9, 9, 10, 8, 9, 12] },
+      { id: 'B4', name: '光明铸造者', desc: '全面均衡发展，没有明显短板', growth: [1.7, 1.7, 1.7, 1.3, 1.3, 1.3], baseAttrs: [10, 10, 10, 9, 9, 9] },
     ],
   },
-
   // ============ C类：编织者 ============
   C: {
     name: '编织者',
     desc: '善于表达与组织，逻辑清晰',
     color: '#10b981',
     subtypes: [
-      {
-        id: 'C1',
-        name: '语言编织者',
-        desc: '答题条理清晰，表达与智识均衡成长',
-        growth: [2.0, 1.0, 0.8, 1.2, 2.5, 0.5],
-        baseAttrs: [10, 9, 8, 9, 12, 8],
-      },
-      {
-        id: 'C2',
-        name: '图腾编织者',
-        desc: '善用图形辅助思考，灵感与表达双高',
-        growth: [1.3, 0.8, 0.8, 2.2, 2.4, 0.5],
-        baseAttrs: [9, 8, 8, 11, 11, 8],
-      },
-      {
-        id: 'C3',
-        name: '梦境编织者',
-        desc: '思维跳跃，灵感超强但需要锻炼专注',
-        growth: [1.5, 0.5, 0.5, 3.0, 1.8, 0.7],
-        baseAttrs: [9, 7, 7, 13, 10, 8],
-      },
-      {
-        id: 'C4',
-        name: '命运编织者',
-        desc: '心志支撑表达，越重要的考试越超常发挥',
-        growth: [1.5, 1.0, 1.0, 1.5, 2.0, 2.0],
-        baseAttrs: [9, 9, 9, 9, 10, 10],
-      },
+      { id: 'C1', name: '语言编织者', desc: '答题条理清晰，表达与智识均衡成长', growth: [2.0, 1.0, 0.8, 1.2, 2.5, 0.5], baseAttrs: [10, 9, 8, 9, 12, 8] },
+      { id: 'C2', name: '图腾编织者', desc: '善用图形辅助思考，灵感与表达双高', growth: [1.3, 0.8, 0.8, 2.2, 2.4, 0.5], baseAttrs: [9, 8, 8, 11, 11, 8] },
+      { id: 'C3', name: '梦境编织者', desc: '思维跳跃，灵感超强但需要锻炼专注', growth: [1.5, 0.5, 0.5, 3.0, 1.8, 0.7], baseAttrs: [9, 7, 7, 13, 10, 8] },
+      { id: 'C4', name: '命运编织者', desc: '心志支撑表达，越重要的考试越超常发挥', growth: [1.5, 1.0, 1.0, 1.5, 2.0, 2.0], baseAttrs: [9, 9, 9, 9, 10, 10] },
     ],
   },
-
   // ============ D类：守护者 ============
   D: {
     name: '守护者',
     desc: '稳定可靠，保持高度自律',
     color: '#ec4899',
     subtypes: [
-      {
-        id: 'D1',
-        name: '圣盾守护者',
-        desc: '心志最强，面对压力从容不迫',
-        growth: [1.5, 1.5, 1.5, 0.5, 0.8, 3.2],
-        baseAttrs: [9, 9, 9, 7, 8, 14],
-      },
-      {
-        id: 'D2',
-        name: '自然守护者',
-        desc: '毅力与心志双高，持久稳定',
-        growth: [1.2, 1.2, 2.5, 0.8, 0.8, 2.5],
-        baseAttrs: [8, 9, 11, 8, 8, 12],
-      },
-      {
-        id: 'D3',
-        name: '星光守护者',
-        desc: '专注与心志支撑，考场稳定发挥',
-        growth: [1.5, 2.0, 1.2, 0.8, 1.0, 2.5],
-        baseAttrs: [9, 11, 9, 8, 9, 11],
-      },
-      {
-        id: 'D4',
-        name: '黎明守护者',
-        desc: '所有属性持续稳定成长，适应各种学习场景',
-        growth: [1.5, 1.5, 1.8, 1.2, 1.2, 1.8],
-        baseAttrs: [9, 9, 10, 8, 8, 11],
-      },
+      { id: 'D1', name: '圣盾守护者', desc: '心志最强，面对压力从容不迫', growth: [1.5, 1.5, 1.5, 0.5, 0.8, 3.2], baseAttrs: [9, 9, 9, 7, 8, 14] },
+      { id: 'D2', name: '自然守护者', desc: '毅力与心志双高，持久稳定', growth: [1.2, 1.2, 2.5, 0.8, 0.8, 2.5], baseAttrs: [8, 9, 11, 8, 8, 12] },
+      { id: 'D3', name: '星光守护者', desc: '专注与心志支撑，考场稳定发挥', growth: [1.5, 2.0, 1.2, 0.8, 1.0, 2.5], baseAttrs: [9, 11, 9, 8, 9, 11] },
+      { id: 'D4', name: '黎明守护者', desc: '所有属性持续稳定成长，适应各种学习场景', growth: [1.5, 1.5, 1.8, 1.2, 1.2, 1.8], baseAttrs: [9, 9, 10, 8, 8, 11] },
     ],
   },
-
   // ============ E类：引导者 ============
   E: {
     name: '引导者',
     desc: '善于总结归纳，思维系统性强',
     color: '#3b82f6',
     subtypes: [
-      {
-        id: 'E1',
-        name: '光之引导者',
-        desc: '智识与表达双强，擅长总结规律并表达',
-        growth: [2.3, 1.0, 0.8, 1.2, 2.2, 0.5],
-        baseAttrs: [11, 9, 8, 9, 11, 8],
-      },
-      {
-        id: 'E2',
-        name: '风之引导者',
-        desc: '思维敏捷，智识与灵感共同高速成长',
-        growth: [2.5, 0.8, 0.5, 2.2, 1.2, 0.8],
-        baseAttrs: [12, 8, 7, 11, 9, 8],
-      },
-      {
-        id: 'E3',
-        name: '时之引导者',
-        desc: '专注力支撑智识，稳步提升成绩',
-        growth: [2.2, 2.0, 1.0, 0.8, 1.0, 1.0],
-        baseAttrs: [11, 11, 9, 8, 8, 9],
-      },
-      {
-        id: 'E4',
-        name: '空之引导者',
-        desc: '六维均衡中偏智识，全面发展',
-        growth: [2.0, 1.3, 1.2, 1.3, 1.2, 1.0],
-        baseAttrs: [11, 9, 9, 9, 9, 9],
-      },
+      { id: 'E1', name: '光之引导者', desc: '智识与表达双强，擅长总结规律并表达', growth: [2.3, 1.0, 0.8, 1.2, 2.2, 0.5], baseAttrs: [11, 9, 8, 9, 11, 8] },
+      { id: 'E2', name: '风之引导者', desc: '思维敏捷，智识与灵感共同高速成长', growth: [2.5, 0.8, 0.5, 2.2, 1.2, 0.8], baseAttrs: [12, 8, 7, 11, 9, 8] },
+      { id: 'E3', name: '时之引导者', desc: '专注力支撑智识，稳步提升成绩', growth: [2.2, 2.0, 1.0, 0.8, 1.0, 1.0], baseAttrs: [11, 11, 9, 8, 8, 9] },
+      { id: 'E4', name: '空之引导者', desc: '六维均衡中偏智识，全面发展', growth: [2.0, 1.3, 1.2, 1.3, 1.2, 1.0], baseAttrs: [11, 9, 9, 9, 9, 9] },
     ],
   },
-
   // ============ F类：突破者 ============
   F: {
     name: '突破者',
     desc: '天赋异禀，在某一维度爆发',
     color: '#ef4444',
     subtypes: [
-      {
-        id: 'F1',
-        name: '烈焰突破者',
-        desc: '灵感极强，创意解题无人能及',
-        growth: [1.5, 0.5, 0.5, 3.5, 1.0, 1.0],
-        baseAttrs: [9, 7, 7, 15, 9, 9],
-      },
-      {
-        id: 'F2',
-        name: '雷霆突破者',
-        desc: '专注力惊人，一旦投入进入极度高效状态',
-        growth: [1.5, 3.5, 0.5, 0.5, 1.0, 1.0],
-        baseAttrs: [9, 15, 7, 7, 9, 9],
-      },
-      {
-        id: 'F3',
-        name: '钢铁突破者',
-        desc: '毅力无与伦比，最擅长题海战术',
-        growth: [1.0, 1.0, 3.5, 0.5, 0.5, 1.5],
-        baseAttrs: [8, 9, 15, 7, 7, 10],
-      },
-      {
-        id: 'F4',
-        name: '深渊突破者',
-        desc: '心志碾压一切，在极端压力下反而爆发',
-        growth: [1.0, 0.8, 1.5, 0.8, 0.8, 3.1],
-        baseAttrs: [8, 8, 10, 7, 8, 15],
-      },
-      {
-        id: 'F5',
-        name: '黄金突破者',
-        desc: '智识爆炸型，天生对数学有感觉',
-        growth: [3.5, 0.8, 0.5, 1.2, 1.0, 1.0],
-        baseAttrs: [15, 8, 7, 9, 8, 9],
-      },
+      { id: 'F1', name: '烈焰突破者', desc: '灵感极强，创意解题无人能及', growth: [1.5, 0.5, 0.5, 3.5, 1.0, 1.0], baseAttrs: [9, 7, 7, 15, 9, 9] },
+      { id: 'F2', name: '雷霆突破者', desc: '专注力惊人，一旦投入进入极度高效状态', growth: [1.5, 3.5, 0.5, 0.5, 1.0, 1.0], baseAttrs: [9, 15, 7, 7, 9, 9] },
+      { id: 'F3', name: '钢铁突破者', desc: '毅力无与伦比，最擅长题海战术', growth: [1.0, 1.0, 3.5, 0.5, 0.5, 1.5], baseAttrs: [8, 9, 15, 7, 7, 10] },
+      { id: 'F4', name: '深渊突破者', desc: '心志碾压一切，在极端压力下反而爆发', growth: [1.0, 0.8, 1.5, 0.8, 0.8, 3.1], baseAttrs: [8, 8, 10, 7, 8, 15] },
+      { id: 'F5', name: '黄金突破者', desc: '智识爆炸型，天生对数学有感觉', growth: [3.5, 0.8, 0.5, 1.2, 1.0, 1.0], baseAttrs: [15, 8, 7, 9, 8, 9] },
     ],
   },
 }
@@ -340,13 +188,16 @@ function calcLevel(totalExp) {
 
 /**
  * 根据天赋ID和等级计算当前属性值
+ * @param {string} talentId - 天赋ID
+ * @param {number} level - 当前等级
+ * @param {number} growthMultiplier - 成长率倍率（默认1.0，跳过测试为0.8）
  */
-function calcAttributes(talentId, level) {
+function calcAttributes(talentId, level, growthMultiplier = 1.0) {
   const talent = getTalentById(talentId)
   if (!talent) return [10, 10, 10, 10, 10, 10]
   const base = talent.baseAttrs
   const growth = talent.growth
-  return base.map((b, i) => Math.floor(b + growth[i] * (level - 1)))
+  return base.map((b, i) => Math.floor(b + growth[i] * growthMultiplier * (level - 1)))
 }
 
 /**
@@ -374,6 +225,109 @@ function getTalentById(talentId) {
     if (found) return { ...found, categoryName: TALENT_DATA[key].name, color: TALENT_DATA[key].color }
   }
   return null
+}
+
+// ============================================================
+// 天赋测试系统（配置从 config/talent-test.json 加载）
+// 属性索引：0=智识, 1=专注, 2=毅力, 3=灵感, 4=表达, 5=心志
+// ============================================================
+
+// 加载测试配置（JS文件可直接修改题目和评分，无需改代码）
+const TALENT_TEST_CONFIG = require('../config/talent-test')
+const TALENT_QUESTIONS = TALENT_TEST_CONFIG.questions
+const PERSONALITY_SUMMARIES = TALENT_TEST_CONFIG.personalitySummaries
+
+/**
+ * 评估测试结果
+ * @param {number[]} answers - 答案索引数组（每题0-3）
+ * @returns {number[]} 六维得分 [智识, 专注, 毅力, 灵感, 表达, 心志]
+ */
+function evaluateTest(answers) {
+  const scores = [0, 0, 0, 0, 0, 0]
+  answers.forEach((answerIdx, qIdx) => {
+    if (TALENT_QUESTIONS[qIdx] && TALENT_QUESTIONS[qIdx].options[answerIdx]) {
+      const optionScores = TALENT_QUESTIONS[qIdx].options[answerIdx].scores
+      scores.forEach((_, i) => { scores[i] += optionScores[i] })
+    }
+  })
+  return scores
+}
+
+/**
+ * 根据六维得分匹配天赋类型
+ * 使用余弦相似度匹配
+ * @param {number[]} scores - 六维得分
+ * @returns {Object} { categoryId, categoryName, color, id, name, desc, growth, baseAttrs }
+ */
+function matchTalent(scores) {
+  // 计算余弦相似度
+  function cosineSimilarity(a, b) {
+    let dotProduct = 0, normA = 0, normB = 0
+    for (let i = 0; i < a.length; i++) {
+      dotProduct += a[i] * b[i]
+      normA += a[i] * a[i]
+      normB += b[i] * b[i]
+    }
+    if (normA === 0 || normB === 0) return 0
+    return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB))
+  }
+
+  // 第1步：匹配大类（取每个大类所有子类 growth 均值作为类别特征）
+  let bestCategoryKey = null
+  let bestCategorySim = -1
+  for (const key of Object.keys(TALENT_DATA)) {
+    const category = TALENT_DATA[key]
+    // 计算该大类 growth 均值向量
+    const avgGrowth = [0, 0, 0, 0, 0, 0]
+    category.subtypes.forEach(sub => {
+      sub.growth.forEach((g, i) => { avgGrowth[i] += g })
+    })
+    avgGrowth.forEach((_, i) => { avgGrowth[i] /= category.subtypes.length })
+    const sim = cosineSimilarity(scores, avgGrowth)
+    if (sim > bestCategorySim) {
+      bestCategorySim = sim
+      bestCategoryKey = key
+    }
+  }
+
+  // 第2步：在最佳大类内匹配子类
+  const category = TALENT_DATA[bestCategoryKey]
+  let bestSubtype = null
+  let bestSubtypeSim = -1
+  category.subtypes.forEach(sub => {
+    const sim = cosineSimilarity(scores, sub.growth)
+    if (sim > bestSubtypeSim) {
+      bestSubtypeSim = sim
+      bestSubtype = sub
+    }
+  })
+
+  return {
+    categoryId: bestCategoryKey,
+    categoryName: category.name,
+    color: category.color,
+    ...bestSubtype,
+  }
+}
+
+/**
+ * 根据测试得分生成学习人格总结
+ * 描述文本从 config/talent-test.json 的 personalitySummaries 中读取
+ * @param {number[]} scores - 六维得分
+ * @returns {string} 一句话人格描述
+ */
+function getPersonalitySummary(scores) {
+  // 找出得分最高的两个属性
+  const sorted = scores
+    .map((val, idx) => ({ val, idx, name: ATTR_NAMES[idx] }))
+    .sort((a, b) => b.val - a.val)
+
+  const first = sorted[0]
+  const second = sorted[1]
+
+  // 组合键（按Unicode排序，与JS默认sort一致）
+  const key = [first.name, second.name].sort().join('_')
+  return PERSONALITY_SUMMARIES[key] || `${first.name}与${second.name}兼备型学习者，综合实力均衡`
 }
 
 /**
@@ -550,6 +504,7 @@ function calcTitle(attrs, level) {
 
 module.exports = {
   TALENT_DATA,
+  TALENT_QUESTIONS,
   LEVEL_EXP_TABLE,
   MAX_LEVEL,
   ATTR_NAMES,
@@ -567,4 +522,7 @@ module.exports = {
   calcTitle,
   randomTalent,
   getTalentById,
+  evaluateTest,
+  matchTalent,
+  getPersonalitySummary,
 }

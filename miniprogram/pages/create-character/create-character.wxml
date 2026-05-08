@@ -47,63 +47,110 @@
     <button class="btn-primary next-btn" bindtap="toStep2">下一步 →</button>
   </view>
 
-  <!-- 步骤二：选择天赋大类 -->
+  <!-- 步骤二：天赋觉醒 — 选择测试或跳过 -->
   <view wx:if="{{step === 2}}" class="step-wrap">
     <view class="step-title">
-      <text class="step-num">2 / 3</text>
-      <text class="step-heading">选择你的天赋方向</text>
-      <text class="step-desc">选择最符合你学习风格的方向</text>
+      <text class="step-num">2 / 2</text>
+      <text class="step-heading">天赋觉醒</text>
+      <text class="step-desc">每个英雄都有独特的天赋，完成测试发现最适合你的</text>
     </view>
 
-    <view class="category-list">
-      <view
-        wx:for="{{talentCategories}}"
-        wx:key="id"
-        class="category-card {{selectedCategory === item.id ? 'selected' : ''}}"
-        bindtap="selectCategory"
-        data-id="{{item.id}}"
-        style="border-color: {{selectedCategory === item.id ? item.color : 'transparent'}}; background: {{selectedCategory === item.id ? item.color + '18' : '#ffffff18'}}"
-      >
-        <view class="category-header">
-          <text class="category-icon" style="background: {{item.color}}20; color: {{item.color}}">
-            {{item.id === 'A' ? '🔍' : item.id === 'B' ? '⚒️' : item.id === 'C' ? '🧵' : item.id === 'D' ? '🛡️' : item.id === 'E' ? '💡' : '⚡'}}
-          </text>
-          <text class="category-name" style="color: {{item.color}}">{{item.name}}</text>
+    <view class="awaken-options">
+      <!-- 测试觉醒 -->
+      <view class="awaken-card test-card" bindtap="startTest">
+        <view class="awaken-icon-wrap test-glow">
+          <text class="awaken-icon">🔍</text>
         </view>
-        <text class="category-desc">{{item.desc}}</text>
-        <view class="category-features">
-          <text class="feature-tag" wx:for="{{item.subtypes}}" wx:key="id" wx:for-item="sub">{{sub.name}}</text>
+        <view class="awaken-info">
+          <text class="awaken-title">天赋测试</text>
+          <text class="awaken-desc">回答12道题，精准匹配你的天赋类型</text>
+          <view class="awaken-badge full-rate">成长率 100%</view>
         </view>
+        <text class="awaken-arrow">→</text>
+      </view>
+
+      <!-- 随机觉醒 -->
+      <view class="awaken-card random-card" bindtap="skipTest">
+        <view class="awaken-icon-wrap random-glow">
+          <text class="awaken-icon">🎲</text>
+        </view>
+        <view class="awaken-info">
+          <text class="awaken-title">随机觉醒</text>
+          <text class="awaken-desc">跳过测试，随机获得天赋类型</text>
+          <view class="awaken-badge reduced-rate">成长率 80%</view>
+        </view>
+        <text class="awaken-arrow">→</text>
       </view>
     </view>
 
-    <button class="btn-primary next-btn {{!selectedCategory ? 'disabled' : ''}}" bindtap="toStep3">
-      {{selectedCategory ? '下一步 →' : '请先选择天赋方向'}}
-    </button>
+    <!-- 随机动画 -->
+    <view wx:if="{{rolling}}" class="rolling-overlay">
+      <view class="rolling-content">
+        <view class="rolling-icon">🔮</view>
+        <text class="rolling-text">天赋觉醒中...</text>
+      </view>
+    </view>
   </view>
 
-  <!-- 步骤三：天赋揭晓 -->
+  <!-- 步骤三：测试答题 -->
   <view wx:if="{{step === 3}}" class="step-wrap">
     <view class="step-title">
-      <text class="step-num">3 / 3</text>
-      <text class="step-heading">天赋觉醒</text>
-      <text class="step-desc">系统正在为你随机解析具体天赋类型</text>
+      <text class="step-num">{{currentQuestion + 1}} / {{questions.length}}</text>
+      <text class="step-heading">天赋测试</text>
     </view>
 
-    <view wx:if="{{!revealed}}" class="talent-egg" bindtap="revealTalent">
-      <view class="egg-glow {{rolling ? 'rolling' : ''}}">
-        <text class="egg-icon">🔮</text>
+    <!-- 进度条 -->
+    <view class="progress-bar-wrap">
+      <view class="progress-bar-bg">
+        <view class="progress-bar-fill" style="width: {{(currentQuestion / questions.length) * 100}}%"></view>
       </view>
-      <text class="egg-hint">点击解析天赋</text>
     </view>
 
-    <view wx:if="{{revealed && talent}}" class="talent-reveal">
+    <!-- 题目卡片 -->
+    <view class="question-card">
+      <text class="question-text">{{questions[currentQuestion].question}}</text>
+      <view class="options-list">
+        <view
+          wx:for="{{questions[currentQuestion].options}}"
+          wx:key="index"
+          class="option-btn"
+          bindtap="selectOption"
+          data-idx="{{index}}"
+        >
+          <text class="option-letter">{{index === 0 ? 'A' : index === 1 ? 'B' : index === 2 ? 'C' : 'D'}}</text>
+          <text class="option-text">{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤四：结果展示 -->
+  <view wx:if="{{step === 4 && talent}}" class="step-wrap">
+    <view class="step-title">
+      <text class="step-heading">{{testCompleted ? '测试觉醒' : '随机觉醒'}}</text>
+    </view>
+
+    <!-- 觉醒标签 -->
+    <view class="result-badge {{testCompleted ? 'badge-test' : 'badge-random'}}">
+      <text wx:if="{{testCompleted}}">🔍 测试觉醒 · 成长率 100%</text>
+      <text wx:else>🎲 随机觉醒 · 成长率 80%</text>
+    </view>
+
+    <!-- 天赋卡片 -->
+    <view class="talent-reveal">
       <view class="talent-badge" style="border-color:{{talent.color}}; background: {{talent.color}}18;">
         <text class="talent-category" style="color:{{talent.color}}">【{{talent.categoryName}}】</text>
         <text class="talent-name">{{talent.name}}</text>
         <text class="talent-desc">{{talent.desc}}</text>
       </view>
 
+      <!-- 学习人格总结（仅测试路径） -->
+      <view wx:if="{{testCompleted && personalitySummary}}" class="personality-card">
+        <text class="personality-label">你的学习人格</text>
+        <text class="personality-text">{{personalitySummary}}</text>
+      </view>
+
+      <!-- 属性预览 -->
       <view class="attrs-preview">
         <text class="attrs-title">初始属性</text>
         <view class="attr-rows">
@@ -117,10 +164,8 @@
         </view>
       </view>
 
+      <!-- 操作按钮 -->
       <view class="create-actions">
-        <button class="btn-secondary reroll-btn" bindtap="reroll" wx:if="{{rerollCount > 0}}">
-          重新随机（剩{{rerollCount}}次）
-        </button>
         <button class="btn-primary confirm-btn" bindtap="confirmCreate" loading="{{creating}}">
           确认创建 ⚔️
         </button>
