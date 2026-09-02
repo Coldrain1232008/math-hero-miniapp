@@ -1,0 +1,9 @@
+{
+  "name": "coinOperation",
+  "version": "1.0.0",
+  "description": "金币核心操作：教师发放/扣除（走班级对公钱包）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

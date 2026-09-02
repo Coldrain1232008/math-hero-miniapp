@@ -15,6 +15,184 @@ Page({
     showTaskConfirm: false,
     pendingTasks: [],
     pendingTaskCount: 0,
+    // 修改密钥弹窗
+    showKeyEdit: false,
+    keyEditType: '',        // 'teacherKey' | 'studentKey'
+    keyEditOldValue: '',
+    keyEditValue: '',
+    keyCheckStatus: '',     // '' | 'checking' | 'ok' | 'bad' | 'same'
+    keyCheckMsg: '',
+    keyUpdating: false,
+    // 删除班级
+    showDeleteClass: false,
+    deleteConfirmName: '',
+    deleteNameMatched: false,
+    deleting: false,
+  },
+
+  // ========== 修改班级密钥 / 教师密钥 ==========
+  openKeyEdit(e) {
+    const type = e.currentTarget.dataset.type
+    const classInfo = this.data.classInfo || {}
+    this.setData({
+      showKeyEdit: true,
+      keyEditType: type,
+      keyEditOldValue: classInfo[type] || '',
+      keyEditValue: '',
+      keyCheckStatus: '',
+      keyCheckMsg: '',
+      keyUpdating: false,
+    })
+  },
+
+  closeKeyEdit() {
+    this.setData({
+      showKeyEdit: false,
+      keyEditValue: '',
+      keyCheckStatus: '',
+      keyCheckMsg: '',
+      keyUpdating: false,
+    })
+    if (this._keyCheckTimer) {
+      clearTimeout(this._keyCheckTimer)
+      this._keyCheckTimer = null
+    }
+  },
+
+  // 输入时本地先做格式校验，通过后再防抖调用云函数查重
+  onKeyEditInput(e) {
+    // 输入即归一化：去空格 + 转大写
+    // 云函数写入前也会这样做（normalizeKey），这里同步处理，
+    // 保证"输入框里看到的" === "数据库里存的" === "登录时要输的"
+    const raw = (e.detail.value || '').replace(/\s/g, '').toUpperCase()
+    this.setData({ keyEditValue: raw })
+
+    if (this._keyCheckTimer) {
+      clearTimeout(this._keyCheckTimer)
+      this._keyCheckTimer = null
+    }
+
+    if (!raw) {
+      this.setData({ keyCheckStatus: '', keyCheckMsg: '' })
+      return
+    }
+
+    if (!/^[A-Z0-9]{4,12}$/.test(raw)) {
+      this.setData({
+        keyCheckStatus: 'bad',
+        keyCheckMsg: '需为 4-12 位字母或数字（空格已自动去除）',
+      })
+      return
+    }
+
+    // 与原值相同无需查重
+    if (raw.toUpperCase() === (this.data.keyEditOldValue || '').toUpperCase()) {
+      this.setData({ keyCheckStatus: 'same', keyCheckMsg: '与原密钥相同' })
+      return
+    }
+
+    this.setData({ keyCheckStatus: 'checking', keyCheckMsg: '正在检查是否可用...' })
+    const value = raw
+    this._keyCheckTimer = setTimeout(() => {
+      this.checkKeyAvailable(value)
+    }, 500)
+  },
+
+  async checkKeyAvailable(value) {
+    const app = getApp()
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'updateClassKeys',
+        data: {
+          action: 'check',
+          classId: app.globalData.classId,
+          type: this.data.keyEditType,
+          newKey: value,
+        }
+      })
+      const r = res.result || {}
+      // 云函数里与原值相同会返回 unchanged，这里单独提示
+      if (r.success && r.unchanged) {
+        this.setData({ keyCheckStatus: 'same', keyCheckMsg: '与原密钥相同' })
+      } else if (r.success) {
+        this.setData({ keyCheckStatus: 'ok', keyCheckMsg: '可以使用' })
+      } else {
+        this.setData({
+          keyCheckStatus: 'bad',
+          keyCheckMsg: r.error || '该密钥不可用',
+        })
+      }
+    } catch (err) {
+      console.error('查重失败:', err)
+      this.setData({ keyCheckStatus: 'bad', keyCheckMsg: '校验失败，请检查网络后重试' })
+    }
+  },
+
+  async saveKeyEdit() {
+    const { keyEditType, keyEditValue, keyCheckStatus } = this.data
+    // 粘贴等情况可能绕过输入监听，这里再归一化一次，确保与云函数规则一致
+    const value = (keyEditValue || '').replace(/\s/g, '').toUpperCase()
+
+    if (!value) {
+      wx.showToast({ title: '请输入新密钥', icon: 'none' })
+      return
+    }
+    if (keyCheckStatus === 'bad') {
+      wx.showToast({ title: '当前密钥不可用', icon: 'none' })
+      return
+    }
+    if (keyCheckStatus === 'same') {
+      this.closeKeyEdit()
+      return
+    }
+
+    // 还没查重过（例如粘贴后直接点保存），先查一次
+    if (keyCheckStatus !== 'ok') {
+      this.setData({ keyCheckStatus: 'checking', keyCheckMsg: '正在检查是否可用...' })
+      await this.checkKeyAvailable(value)
+      if (this.data.keyCheckStatus === 'bad') return
+      if (this.data.keyCheckStatus === 'same') { this.closeKeyEdit(); return }
+    }
+
+    const label = keyEditType === 'teacherKey' ? '教师密钥' : '班级密钥'
+    wx.showModal({
+      title: `确认修改${label}？`,
+      content: `新${label}：${value}\n\n请照此大写形式使用，登录时输入大小写均可。\n\n修改后旧的${label}立即失效，请第一时间通知学生。`,
+      success: async (res) => {
+        if (!res.confirm) return
+        this.setData({ keyUpdating: true })
+        wx.showLoading({ title: '保存中...' })
+        try {
+          const result = await wx.cloud.callFunction({
+            name: 'updateClassKeys',
+            data: {
+              action: 'update',
+              classId: getApp().globalData.classId,
+              type: keyEditType,
+              newKey: value,
+            }
+          })
+          wx.hideLoading()
+          const r = result.result || {}
+          if (r.success) {
+            wx.showToast({ title: r.unchanged ? '密钥未变化' : `${label}已更新`, icon: 'success' })
+            this.closeKeyEdit()
+            await this.loadClassInfo()
+          } else {
+            wx.showToast({ title: r.error || '修改失败', icon: 'none' })
+            this.setData({
+              keyCheckStatus: 'bad',
+              keyCheckMsg: r.error || '修改失败',
+            })
+          }
+        } catch (err) {
+          wx.hideLoading()
+          console.error('修改密钥失败:', err)
+          wx.showToast({ title: '修改失败，请重试', icon: 'none' })
+        }
+        this.setData({ keyUpdating: false })
+      }
+    })
   },
 
   onLoad() {
@@ -285,6 +463,119 @@ Page({
         })
       },
     })
+  },
+
+  // ========== 删除班级（危险操作） ==========
+  openDeleteClass() {
+    if (!this.data.classInfo) {
+      wx.showToast({ title: '班级信息未加载完成', icon: 'none' })
+      return
+    }
+    this.setData({
+      showDeleteClass: true,
+      deleteConfirmName: '',
+      deleteNameMatched: false,
+      deleting: false,
+    })
+  },
+
+  closeDeleteClass() {
+    if (this.data.deleting) return // 删除进行中不允许关闭
+    this.setData({
+      showDeleteClass: false,
+      deleteConfirmName: '',
+      deleteNameMatched: false,
+      deleting: false,
+    })
+  },
+
+  onDeleteNameInput(e) {
+    const v = (e.detail.value || '').trim()
+    const target = ((this.data.classInfo && this.data.classInfo.name) || '').trim()
+    this.setData({
+      deleteConfirmName: v,
+      deleteNameMatched: !!target && v === target,
+    })
+  },
+
+  confirmDeleteClass() {
+    const { classInfo, deleteNameMatched, students, deleting } = this.data
+    if (deleting) return
+
+    if (students.length > 0) {
+      wx.showToast({ title: `还有 ${students.length} 名学生未删除`, icon: 'none' })
+      return
+    }
+    if (!deleteNameMatched) {
+      wx.showToast({ title: '班级名称不一致', icon: 'none' })
+      return
+    }
+
+    const className = (classInfo && classInfo.name) || '该班级'
+    wx.showModal({
+      title: '最后确认',
+      content: `即将永久删除「${className}」及其全部数据。\n\n此操作无法撤销，确定继续吗？`,
+      confirmColor: '#ef4444',
+      confirmText: '永久删除',
+      success: (r) => {
+        if (r.confirm) this.doDeleteClass()
+      },
+    })
+  },
+
+  async doDeleteClass() {
+    const app = getApp()
+    const classInfo = this.data.classInfo || {}
+
+    this.setData({ deleting: true })
+    wx.showLoading({ title: '正在清除数据...', mask: true })
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'deleteClass',
+        data: {
+          classId: app.globalData.classId,
+          teacherKey: classInfo.teacherKey || '',
+          confirmName: (this.data.deleteConfirmName || '').trim(),
+        },
+      })
+      wx.hideLoading()
+      const r = res.result || {}
+
+      if (r.success) {
+        // 清理本地登录态，避免停留在已不存在的班级
+        app.globalData.classId = null
+        app.globalData.className = null
+        app.globalData.isTeacher = false
+        app.globalData.studentInfo = null
+
+        this.setData({ showDeleteClass: false, deleting: false })
+
+        wx.showModal({
+          title: '删除完成',
+          content: r.message || '班级已永久删除',
+          showCancel: false,
+          confirmText: '返回登录',
+          success: () => {
+            wx.reLaunch({ url: '/pages/login/login' })
+          },
+        })
+      } else {
+        this.setData({ deleting: false })
+        wx.showModal({
+          title: '无法删除',
+          content: r.error || '删除失败，请重试',
+          showCancel: false,
+        })
+        // 若是因为还有学生，顺手刷新一下列表，保证数量是最新的
+        if (r.needRemoveStudents) this.loadStudents()
+      }
+    } catch (e) {
+      wx.hideLoading()
+      this.setData({ deleting: false })
+      console.error('[deleteClass] 调用失败:', e)
+      wx.showToast({ title: '删除失败，请重试', icon: 'none' })
+    }
   },
 
   // 阻止冒泡（用于弹窗内部点击）

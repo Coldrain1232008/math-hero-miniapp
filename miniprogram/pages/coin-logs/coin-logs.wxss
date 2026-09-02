@@ -1,0 +1,210 @@
+/* pages/coin-logs/coin-logs.wxss */
+.page-bg {
+  min-height: 100vh;
+  background: #f5f5f5;
+  padding: 24rpx;
+  box-sizing: border-box;
+}
+
+/* 余额卡 */
+.balance-card {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  border-radius: 24rpx;
+  padding: 36rpx 32rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24rpx;
+  box-shadow: 0 8rpx 24rpx rgba(245, 158, 11, 0.25);
+}
+
+.balance-main {
+  display: flex;
+  align-items: center;
+}
+
+.balance-icon {
+  font-size: 64rpx;
+  margin-right: 24rpx;
+}
+
+.balance-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.balance-num {
+  font-size: 60rpx;
+  font-weight: bold;
+  color: #fff;
+  line-height: 1.1;
+}
+
+.balance-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.85);
+  margin-top: 6rpx;
+}
+
+.balance-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.side-num {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.side-label {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 6rpx;
+}
+
+/* 筛选 */
+.filter-bar {
+  display: flex;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  margin-bottom: 24rpx;
+}
+
+.filter-item {
+  flex: 1;
+  text-align: center;
+  padding: 16rpx 0;
+  font-size: 28rpx;
+  color: #666;
+  border-radius: 12rpx;
+}
+
+.filter-item.active {
+  background: #fffbeb;
+  color: #b45309;
+  font-weight: bold;
+}
+
+/* 流水列表 */
+.log-list {
+  background: #fff;
+  border-radius: 16rpx;
+  overflow: hidden;
+}
+
+.log-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 28rpx 24rpx;
+  border-bottom: 2rpx solid #f5f5f5;
+}
+
+.log-item:last-child {
+  border-bottom: none;
+}
+
+.log-icon {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  background: #fffbeb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.log-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.log-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.log-type {
+  font-size: 28rpx;
+  color: #333;
+  font-weight: 500;
+}
+
+.log-amount {
+  font-size: 32rpx;
+  font-weight: bold;
+}
+
+.log-amount.income {
+  color: #f59e0b;
+}
+
+.log-amount.expense {
+  color: #9ca3af;
+}
+
+.log-desc {
+  font-size: 24rpx;
+  color: #666;
+  margin-top: 8rpx;
+  display: block;
+  word-break: break-all;
+}
+
+.log-bottom {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 10rpx;
+}
+
+.log-time {
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.log-balance {
+  font-size: 22rpx;
+  color: #c0c4cc;
+}
+
+/* 提示 */
+.tip-wrap {
+  text-align: center;
+  padding: 32rpx;
+  font-size: 26rpx;
+  color: #9ca3af;
+}
+
+.tip-wrap.load-more {
+  color: #f59e0b;
+}
+
+/* 空状态 */
+.empty-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 120rpx 0;
+}
+
+.empty-icon {
+  font-size: 100rpx;
+  margin-bottom: 24rpx;
+}
+
+.empty-text {
+  font-size: 30rpx;
+  color: #666;
+}
+
+.empty-sub {
+  font-size: 24rpx;
+  color: #9ca3af;
+  margin-top: 12rpx;
+}

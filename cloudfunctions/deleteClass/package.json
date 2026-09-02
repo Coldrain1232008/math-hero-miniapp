@@ -1,0 +1,9 @@
+{
+  "name": "deleteClass",
+  "version": "1.0.0",
+  "description": "永久删除班级及其全部云数据（需教师密钥 + 班级名确认 + 班级内无学生）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

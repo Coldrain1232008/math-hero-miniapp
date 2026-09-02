@@ -58,6 +58,35 @@
       </view>
       <text class="menu-arrow">›</text>
     </view>
+
+    <view class="menu-item" bindtap="goAnalytics">
+      <view class="menu-icon" style="background:#dbeafe">📈</view>
+      <view class="menu-info">
+        <text class="menu-title">班级数据</text>
+        <text class="menu-desc">查看班级整体数据分析</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goCoins">
+      <view class="menu-icon" style="background:#fef3c7">🪙</view>
+      <view class="menu-info">
+        <text class="menu-title">金币管理</text>
+        <text class="menu-desc">
+          钱包余额 {{wallet ? wallet.balance : 0}}，发放 / 扣除学生金币
+        </text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
+
+    <view class="menu-item" bindtap="goShop">
+      <view class="menu-icon" style="background:#fce7f3">🏪</view>
+      <view class="menu-info">
+        <text class="menu-title">商城管理</text>
+        <text class="menu-desc">上架商品，让学生有地方花金币</text>
+      </view>
+      <text class="menu-arrow">›</text>
+    </view>
   </view>
 
   <!-- 近期操作日志 -->

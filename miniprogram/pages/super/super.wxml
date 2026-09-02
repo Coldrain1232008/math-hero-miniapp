@@ -1,0 +1,360 @@
+<!-- pages/super/super.wxml -->
+<!-- super 管理员后台：班级钱包充值 / 全局金币总览 / 操作审计 -->
+<view class="page">
+
+  <!-- ===== 未登录 ===== -->
+  <view wx:if="{{!logged}}" class="login-wrap">
+    <view class="login-card">
+      <text class="login-icon">🛡️</text>
+      <text class="login-title">管理员后台</text>
+      <text class="login-sub">请输入管理员密钥</text>
+
+      <view class="input-group">
+        <view class="ph-wrap">
+          <input
+            class="input-field"
+            value="{{superKey}}"
+            bindinput="onSuperKeyInput"
+            bindconfirm="onLogin"
+            password
+          />
+          <text wx:if="{{!superKey}}" class="ph">管理员密钥</text>
+        </view>
+      </view>
+
+      <button class="btn-primary" bindtap="onLogin" loading="{{loading}}">进入</button>
+
+      <text wx:if="{{loginError}}" class="error-text">{{loginError}}</text>
+      <text class="login-tip">本页仅系统管理员可用，所有操作会记入审计日志</text>
+    </view>
+  </view>
+
+  <!-- ===== 已登录 ===== -->
+  <view wx:else class="main-wrap">
+
+    <!-- 管理员条 -->
+    <view class="admin-bar">
+      <text class="admin-name">管理员：{{adminName}}</text>
+      <button class="btn-exit" bindtap="onLogout">退出</button>
+    </view>
+
+    <!-- 全局总览 -->
+    <view class="overview-card">
+      <text class="ov-title">全局金币总览</text>
+      <view class="ov-grid">
+        <view class="ov-item">
+          <text class="ov-num">{{overview.totalRecharged}}</text>
+          <text class="ov-label">累计发行</text>
+        </view>
+        <view class="ov-item">
+          <text class="ov-num">{{overview.studentCoins}}</text>
+          <text class="ov-label">学生持有</text>
+        </view>
+        <view class="ov-item">
+          <text class="ov-num">{{overview.walletBalance}}</text>
+          <text class="ov-label">钱包沉淀</text>
+        </view>
+        <view class="ov-item">
+          <text class="ov-num burn">{{overview.totalBurned}}</text>
+          <text class="ov-label">商城销毁</text>
+        </view>
+        <view class="ov-item">
+          <text class="ov-num">{{overview.studentCount}}</text>
+          <text class="ov-label">学生总数</text>
+        </view>
+      </view>
+      <view class="ov-check {{overview.balanced ? 'ok' : 'bad'}}">
+        <text wx:if="{{overview.balanced}}">账目平衡：累计发行 = 学生持有 + 钱包沉淀 + 商城销毁</text>
+        <text wx:else>账目差额 {{overview.diff}}，可能被直接改过数据库</text>
+      </view>
+    </view>
+
+    <!-- Tab -->
+    <view class="tab-row">
+      <view class="tab {{tab === 'classes' ? 'active' : ''}}" bindtap="switchTab" data-tab="classes">班级（{{classes.length}}）</view>
+      <view class="tab {{tab === 'logs' ? 'active' : ''}}" bindtap="switchTab" data-tab="logs">审计日志</view>
+      <view class="tab {{tab === 'shop' ? 'active' : ''}}" bindtap="switchTab" data-tab="shop">全局商品（{{shopItems.length}}）</view>
+    </view>
+
+    <!-- 班级列表 -->
+    <view wx:if="{{tab === 'classes'}}">
+      <view wx:if="{{loadingList}}" class="empty">加载中...</view>
+      <view wx:elif="{{classes.length === 0}}" class="empty">暂无班级</view>
+      <view wx:else>
+        <view wx:for="{{classes}}" wx:key="_id" class="class-card">
+          <view class="class-top">
+            <text class="class-name">{{item.name}}</text>
+            <text class="class-count">{{item.studentCount}} 人</text>
+          </view>
+
+          <view class="class-keys">
+            <text class="key-tag">师 {{item.teacherKey}}</text>
+            <text class="key-tag">生 {{item.studentKey}}</text>
+          </view>
+
+          <view class="class-stats">
+            <view class="cs-item">
+              <text class="cs-num">{{item.balance}}</text>
+              <text class="cs-label">钱包余额</text>
+            </view>
+            <view class="cs-item">
+              <text class="cs-num">{{item.studentCoins}}</text>
+              <text class="cs-label">学生持有</text>
+            </view>
+            <view class="cs-item">
+              <text class="cs-num">{{item.totalRecharged}}</text>
+              <text class="cs-label">累计充值</text>
+            </view>
+          </view>
+
+          <button class="btn-recharge" bindtap="openRecharge" data-index="{{index}}">充值</button>
+        </view>
+      </view>
+    </view>
+
+    <!-- 审计日志 -->
+    <view wx:elif="{{tab === 'logs'}}">
+      <view wx:if="{{logs.length === 0}}" class="empty">暂无操作记录</view>
+      <view wx:else>
+        <view wx:for="{{logs}}" wx:key="_id" class="log-card">
+          <view class="log-top">
+            <text class="log-action">{{item.actionLabel}}</text>
+            <text class="log-amount">+{{item.amount}}</text>
+          </view>
+          <view class="log-mid">{{item.targetClassName}}</view>
+          <view class="log-bottom">
+            <text class="log-ba">{{item.before}} → {{item.after}}</text>
+            <text class="log-time">{{item.timeStr}}</text>
+          </view>
+          <view wx:if="{{item.note}}" class="log-note">备注：{{item.note}}</view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 全局商品模板（第三个分支，放最后收尾） -->
+    <view wx:else>
+      <view class="shop-tip">
+        全局模板对所有班级可见。教师只能在本班添加自定义商品，改不了这里的模板。
+      </view>
+
+      <view wx:if="{{loadingShop}}" class="empty">加载中...</view>
+      <view wx:elif="{{shopItems.length === 0}}" class="empty">还没有全局商品</view>
+      <view wx:else>
+        <view wx:for="{{shopItems}}" wx:key="_id" class="shop-card">
+          <view class="shop-top">
+            <text class="shop-icon">{{item.icon}}</text>
+            <view class="shop-head">
+              <text class="shop-name">{{item.name}}</text>
+              <text wx:if="{{item.desc}}" class="shop-desc">{{item.desc}}</text>
+            </view>
+            <text class="shop-price">{{item.price}} 币</text>
+          </view>
+
+          <view class="shop-tags">
+            <text class="shop-tag">{{item.typeLabel}} ×{{item.payload}}</text>
+            <text class="shop-tag">{{item.stock >= 0 ? '库存 ' + item.stock : '库存不限'}}</text>
+            <text wx:if="{{item.limitPerUser > 0}}" class="shop-tag">每人限 {{item.limitPerUser}}</text>
+            <text wx:if="{{item.limitPerDay > 0}}" class="shop-tag">每日限 {{item.limitPerDay}}</text>
+            <text class="shop-tag global">全局</text>
+            <text class="shop-tag {{item.status === 'on' ? 'on' : 'off'}}">{{item.status === 'on' ? '上架中' : '已下架'}}</text>
+          </view>
+
+          <view class="shop-actions">
+            <button class="shop-act" bindtap="openItemForm" data-index="{{index}}">编辑</button>
+            <button class="shop-act" bindtap="toggleItemStatus" data-index="{{index}}">{{item.status === 'on' ? '下架' : '上架'}}</button>
+            <button class="shop-act danger" bindtap="removeShopItem" data-index="{{index}}">删除</button>
+          </view>
+        </view>
+      </view>
+
+      <button class="btn-add-shop" bindtap="openItemForm" data-index="-1">+ 新增全局商品</button>
+    </view>
+
+  </view>
+
+  <!-- ===== 充值弹窗 ===== -->
+  <view wx:if="{{showRecharge}}" class="modal-mask" bindtap="closeRecharge">
+    <view class="modal-box" catchtap="preventBubble">
+      <view class="modal-title">充值</view>
+      <view class="modal-sub">{{rechargeTarget.name}}</view>
+
+      <view class="modal-row">
+        <text class="modal-label">当前余额</text>
+        <text class="modal-current">{{rechargeTarget.balance}}</text>
+      </view>
+
+      <view class="modal-input-group">
+        <text class="modal-label">充值数量</text>
+        <view class="ph-wrap">
+          <input
+            class="modal-input"
+            type="number"
+            value="{{rechargeAmount}}"
+            bindinput="onAmountInput"
+          />
+          <text wx:if="{{!rechargeAmount}}" class="ph ph-modal">正整数，单次最多 100000</text>
+        </view>
+      </view>
+
+      <view class="modal-input-group">
+        <text class="modal-label">备注（可选）</text>
+        <view class="ph-wrap">
+          <input
+            class="modal-input"
+            value="{{rechargeNote}}"
+            bindinput="onNoteInput"
+            maxlength="30"
+          />
+          <text wx:if="{{!rechargeNote}}" class="ph ph-modal">例如：期中奖励额度</text>
+        </view>
+      </view>
+
+      <view class="modal-tip">充值后余额将变为 {{previewBalance}}，操作会记入审计日志。</view>
+
+      <view class="modal-btn-row">
+        <button class="modal-btn cancel" bindtap="closeRecharge">取消</button>
+        <button class="modal-btn confirm" bindtap="submitRecharge" loading="{{recharging}}">确认充值</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 全局商品编辑弹窗 ===== -->
+  <view wx:if="{{showItemForm}}" class="modal-mask" bindtap="closeItemForm">
+    <view class="modal-box item-box" catchtap="preventBubble">
+      <view class="modal-title">{{itemFormId ? '编辑全局商品' : '新增全局商品'}}</view>
+
+      <scroll-view scroll-y class="form-scroll">
+        <view class="modal-input-group">
+          <text class="modal-label">商品名称</text>
+          <view class="ph-wrap">
+            <input
+              class="modal-input"
+              value="{{itemForm.name}}"
+              bindinput="onItemField"
+              data-field="name"
+              maxlength="20"
+            />
+            <text wx:if="{{!itemForm.name}}" class="ph ph-modal">最多 20 字，例如：抽卡券</text>
+          </view>
+        </view>
+
+        <view class="modal-input-group">
+          <text class="modal-label">说明（可选）</text>
+          <view class="ph-wrap">
+            <input
+              class="modal-input"
+              value="{{itemForm.desc}}"
+              bindinput="onItemField"
+              data-field="desc"
+              maxlength="30"
+            />
+            <text wx:if="{{!itemForm.desc}}" class="ph ph-modal">学生端会显示在商品名下面</text>
+          </view>
+        </view>
+
+        <view class="modal-input-group">
+          <text class="modal-label">图标</text>
+          <view class="icon-grid">
+            <view
+              wx:for="{{iconOptions}}"
+              wx:key="*this"
+              class="icon-cell {{itemForm.icon === item ? 'active' : ''}}"
+              bindtap="pickItemIcon"
+              data-icon="{{item}}"
+            >{{item}}</view>
+          </view>
+        </view>
+
+        <view class="modal-input-group">
+          <text class="modal-label">商品类型</text>
+          <picker mode="selector" range="{{typeOptions}}" range-key="label" value="{{itemFormTypeIndex}}" bindchange="onItemTypeChange">
+            <view class="picker-view">{{typeOptions[itemFormTypeIndex].label}} ▾</view>
+          </picker>
+        </view>
+
+        <view class="form-row-2">
+          <view class="modal-input-group fr-item">
+            <text class="modal-label">价格（金币）</text>
+            <view class="ph-wrap">
+              <input
+                class="modal-input"
+                type="number"
+                value="{{itemForm.price}}"
+                bindinput="onItemField"
+                data-field="price"
+              />
+              <text wx:if="{{!itemForm.price}}" class="ph ph-modal">1-9999</text>
+            </view>
+          </view>
+          <view class="modal-input-group fr-item">
+            <text class="modal-label">发放数量</text>
+            <view class="ph-wrap">
+              <input
+                class="modal-input"
+                type="number"
+                value="{{itemForm.payload}}"
+                bindinput="onItemField"
+                data-field="payload"
+              />
+              <text wx:if="{{!itemForm.payload}}" class="ph ph-modal">1-99</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="form-row-2">
+          <view class="modal-input-group fr-item">
+            <text class="modal-label">库存</text>
+            <view class="ph-wrap">
+              <input
+                class="modal-input"
+                type="number"
+                value="{{itemForm.stock}}"
+                bindinput="onItemField"
+                data-field="stock"
+              />
+              <text wx:if="{{!itemForm.stock}}" class="ph ph-modal">留空 = 不限</text>
+            </view>
+          </view>
+          <view class="modal-input-group fr-item">
+            <text class="modal-label">每人限购</text>
+            <view class="ph-wrap">
+              <input
+                class="modal-input"
+                type="number"
+                value="{{itemForm.limitPerUser}}"
+                bindinput="onItemField"
+                data-field="limitPerUser"
+              />
+              <text wx:if="{{!itemForm.limitPerUser}}" class="ph ph-modal">留空 = 不限</text>
+            </view>
+          </view>
+        </view>
+
+        <view class="modal-input-group">
+          <text class="modal-label">每日限购</text>
+          <view class="ph-wrap">
+            <input
+              class="modal-input"
+              type="number"
+              value="{{itemForm.limitPerDay}}"
+              bindinput="onItemField"
+              data-field="limitPerDay"
+            />
+            <text wx:if="{{!itemForm.limitPerDay}}" class="ph ph-modal">留空 = 不限</text>
+          </view>
+        </view>
+
+        <view class="switch-row">
+          <text class="modal-label sw-label">上架销售</text>
+          <switch checked="{{itemForm.status === 'on'}}" bindchange="onItemStatusSwitch" color="#6c63ff" />
+        </view>
+      </scroll-view>
+
+      <view class="modal-btn-row">
+        <button class="modal-btn cancel" bindtap="closeItemForm">取消</button>
+        <button class="modal-btn confirm" bindtap="submitItemForm" loading="{{savingItem}}">保存</button>
+      </view>
+    </view>
+  </view>
+
+</view>

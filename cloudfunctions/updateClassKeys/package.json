@@ -1,0 +1,9 @@
+{
+  "name": "updateClassKeys",
+  "version": "1.0.0",
+  "description": "修改班级密钥/教师密钥（带全局查重）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

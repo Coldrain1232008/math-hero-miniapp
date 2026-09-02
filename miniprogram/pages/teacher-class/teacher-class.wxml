@@ -11,13 +11,15 @@
         <view class="key-value-box">
           <text class="key-value">{{classInfo.studentKey || '-'}}</text>
           <button class="btn-copy-sm" catchtap="copyText" data-text="{{classInfo.studentKey}}" data-label="班级密钥">复制</button>
+          <button class="btn-edit-sm" catchtap="openKeyEdit" data-type="studentKey">修改</button>
         </view>
       </view>
       <view class="key-item">
-        <text class="key-label">教师密钥</text>
+        <text class="key-label">教师密钥（你自己登录用）</text>
         <view class="key-value-box">
           <text class="key-value teacher-key">{{classInfo.teacherKey || '-'}}</text>
           <button class="btn-copy-sm" catchtap="copyText" data-text="{{classInfo.teacherKey}}" data-label="教师密钥">复制</button>
+          <button class="btn-edit-sm" catchtap="openKeyEdit" data-type="teacherKey">修改</button>
         </view>
       </view>
     </view>
@@ -29,6 +31,16 @@
         📋 任务确认
         <text class="task-badge" wx:if="{{pendingTaskCount > 0}}">{{pendingTaskCount}}</text>
       </button>
+    </view>
+
+    <!-- 危险操作区 -->
+    <view class="danger-zone">
+      <view class="danger-head">
+        <text class="danger-title">⚠️ 危险操作</text>
+        <text class="danger-sub">删除后不可恢复</text>
+      </view>
+      <text class="danger-desc">删除班级会永久清除该班的全部数据。为安全起见，<text class="danger-strong">必须先把班级里的学生全部删除</text>，清空后才允许删除班级。</text>
+      <button class="btn-danger" bindtap="openDeleteClass">🗑️ 删除班级</button>
     </view>
   </view>
 
@@ -88,18 +100,115 @@
     </view>
   </view>
 
+  <!-- 删除班级弹窗 -->
+  <view wx:if="{{showDeleteClass}}" class="modal-mask" bindtap="closeDeleteClass">
+    <view class="modal-box delete-modal" catchtap="preventBubble">
+      <text class="modal-title">删除班级「{{classInfo.name || '我的班级'}}」</text>
+      <text class="modal-sub">此操作不可恢复</text>
+
+      <!-- 还有学生：阻断 -->
+      <view wx:if="{{students.length > 0}}" class="delete-block">
+        <text class="delete-block-icon">🚫</text>
+        <text class="delete-block-text">班级内还有 {{students.length}} 名学生。请先在下方学生列表中逐个点击「🗑️ 删除」把学生清空，之后才能删除班级。</text>
+      </view>
+
+      <!-- 已清空：可删 -->
+      <block wx:else>
+        <view class="delete-ok">✅ 班级内已无学生，可以删除。</view>
+
+        <view class="delete-scope">
+          <text class="delete-scope-title">将一并永久清除：</text>
+          <text class="delete-scope-item">· 全部学生的记录与经验日志</text>
+          <text class="delete-scope-item">· 每日任务、任务完成记录</text>
+          <text class="delete-scope-item">· 徽章状态、挑战记录、道具日志</text>
+          <text class="delete-scope-item">· 本班自定义任务与特殊任务</text>
+          <text class="delete-scope-item">· 班级密钥、教师密钥与班级本身</text>
+        </view>
+
+        <view class="modal-input-group">
+          <text class="modal-label">请输入班级名称「{{classInfo.name}}」以确认</text>
+          <view class="ph-wrap">
+            <input
+              class="modal-input"
+              value="{{deleteConfirmName}}"
+              bindinput="onDeleteNameInput"
+            />
+            <text wx:if="{{!deleteConfirmName}}" class="ph">{{classInfo.name}}</text>
+          </view>
+        </view>
+
+        <view class="delete-name-check" wx:if="{{deleteConfirmName}}">
+          <text wx:if="{{deleteNameMatched}}" class="check-ok">✅ 名称一致，可以删除</text>
+          <text wx:else class="check-bad">❌ 与班级名称不一致</text>
+        </view>
+      </block>
+
+      <view class="modal-btn-row">
+        <button class="modal-btn cancel" bindtap="closeDeleteClass">{{students.length > 0 ? '知道了' : '取消'}}</button>
+        <button
+          class="modal-btn danger"
+          bindtap="confirmDeleteClass"
+          loading="{{deleting}}"
+          disabled="{{students.length > 0 || !deleteNameMatched}}"
+        >确认删除</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 修改密钥弹窗 -->
+  <view wx:if="{{showKeyEdit}}" class="modal-mask" bindtap="closeKeyEdit">
+    <view class="modal-box key-edit-modal" catchtap="preventBubble">
+      <text class="modal-title">{{keyEditType === 'teacherKey' ? '修改教师密钥' : '修改班级密钥'}}</text>
+      <text class="modal-sub">4-12 位字母或数字，不区分大小写</text>
+
+      <view class="current-key-row">
+        <text class="current-key-label">当前：</text>
+        <text class="current-key-value">{{keyEditOldValue || '-'}}</text>
+      </view>
+
+      <view class="modal-input-group">
+        <text class="modal-label">新密钥</text>
+        <view class="ph-wrap">
+          <input
+            class="modal-input"
+            value="{{keyEditValue}}"
+            bindinput="onKeyEditInput"
+            maxlength="12"
+          />
+          <text wx:if="{{!keyEditValue}}" class="ph">例如：LONGYUE7</text>
+        </view>
+      </view>
+
+      <view class="key-check {{keyCheckStatus}}" wx:if="{{keyCheckMsg}}">
+        <text wx:if="{{keyCheckStatus === 'checking'}}">⏳ {{keyCheckMsg}}</text>
+        <text wx:elif="{{keyCheckStatus === 'ok'}}">✅ {{keyCheckMsg}}</text>
+        <text wx:elif="{{keyCheckStatus === 'same'}}">⚠️ {{keyCheckMsg}}</text>
+        <text wx:else>❌ {{keyCheckMsg}}</text>
+      </view>
+
+      <view class="modal-tip warn">⚠️ 密钥修改后立即生效。旧密钥会失效，请第一时间把新密钥告知学生。</view>
+
+      <view class="modal-btn-row">
+        <button class="modal-btn cancel" bindtap="closeKeyEdit">取消</button>
+        <button class="modal-btn confirm" bindtap="saveKeyEdit" loading="{{keyUpdating}}" disabled="{{keyCheckStatus === 'bad' || keyCheckStatus === 'checking'}}">保存</button>
+      </view>
+    </view>
+  </view>
+
   <!-- 导入名单弹窗 -->
   <view wx:if="{{showAdd}}" class="modal-mask" bindtap="hideAddDialog">
     <view class="modal-box" catchtap="preventBubble">
       <text class="modal-title">批量导入学生</text>
       <text class="modal-desc">每行一个学生，格式：学号 姓名 口令（口令可省略，自动随机生成）</text>
-      <textarea
-        class="name-textarea"
-        placeholder="202501 张三 abc123&#10;202502 李四 def456&#10;202503 王五（自动随机口令）"
-        value="{{nameInput}}"
-        bindinput="onNameInput"
-        maxlength="1000"
-      />
+      <view class="ph-wrap ph-textarea-wrap">
+        <textarea
+          class="name-textarea"
+          value="{{nameInput}}"
+          bindinput="onNameInput"
+          maxlength="1000"
+        />
+        <text wx:if="{{!nameInput}}" class="ph ph-textarea">202501 张三 abc123\n202502 李四 def456\n202503 王五（自动随机口令）</text>
+      </view>
       <view class="modal-btns">
         <button class="btn-secondary" bindtap="hideAddDialog">取消</button>
         <button class="btn-primary" bindtap="importNames" loading="{{addLoading}}">导入</button>

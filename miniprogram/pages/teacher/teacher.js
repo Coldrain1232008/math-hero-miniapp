@@ -8,6 +8,8 @@ Page({
     recentLogs: [],
     showLogDetail: false,
     selectedLog: null,
+    // 班级对公钱包
+    wallet: null,
   },
 
   onShow() {
@@ -22,6 +24,33 @@ Page({
     this.setData({ className: app.globalData.className || '我的班级' })
     this.loadStats()
     this.loadLogs()
+    this.loadWallet()
+  },
+
+  // 加载班级钱包余额（额度由 super 管理员分配）
+  async loadWallet() {
+    const app = getApp()
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'coinOperation',
+        data: { action: 'query', classId: app.globalData.classId }
+      })
+      if (res.result && res.result.success) {
+        this.setData({ wallet: res.result.wallet })
+      }
+    } catch (e) {
+      console.error('加载钱包失败:', e)
+    }
+  },
+
+  // 进入金币管理（发金币模式）
+  goCoins() {
+    wx.navigateTo({ url: '/pages/teacher-score/teacher-score?mode=coin' })
+  },
+
+  // 进入商城管理（商品增删改）
+  goShop() {
+    wx.navigateTo({ url: '/pages/teacher-shop/teacher-shop' })
   },
 
   async loadStats() {
@@ -78,6 +107,7 @@ Page({
   goUpload() { wx.navigateTo({ url: '/pages/teacher-upload/teacher-upload' }) },
   goClass() { wx.navigateTo({ url: '/pages/teacher-class/teacher-class' }) },
   goTask() { wx.navigateTo({ url: '/pages/teacher-task/teacher-task' }) },
+  goAnalytics() { wx.navigateTo({ url: '/pages/class-analytics/class-analytics' }) },
 
   _fmt(date) {
     if (!date) return ''

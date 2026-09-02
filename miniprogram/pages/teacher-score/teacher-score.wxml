@@ -1,20 +1,99 @@
 <!-- pages/teacher-score/teacher-score.wxml -->
 <view class="page-bg">
+
+  <!-- 模式切换 -->
+  <view class="mode-tabs">
+    <view
+      class="mode-tab {{mode === 'exp' ? 'active' : ''}}"
+      data-mode="exp"
+      bindtap="switchMode"
+    >⚡ 加经验</view>
+    <view
+      class="mode-tab {{mode === 'coin' ? 'active' : ''}}"
+      data-mode="coin"
+      bindtap="switchMode"
+    >🪙 发金币</view>
+  </view>
+
+  <!-- 钱包余额（仅金币模式） -->
+  <view class="wallet-bar" wx:if="{{mode === 'coin'}}">
+    <view class="wallet-left">
+      <text class="wallet-icon">🏦</text>
+      <view class="wallet-info">
+        <text class="wallet-num">{{wallet ? wallet.balance : 0}}</text>
+        <text class="wallet-label">班级钱包余额</text>
+      </view>
+    </view>
+    <view class="wallet-right">
+      <text class="wallet-stat">已发放 {{wallet ? wallet.totalGranted : 0}}</text>
+      <text class="wallet-hint">额度由管理员分配</text>
+    </view>
+  </view>
+
+  <!-- 本次金额（仅金币模式，单人与批量共用） -->
+  <view class="amount-bar" wx:if="{{mode === 'coin'}}">
+    <text class="amount-label">本次金额</text>
+    <view class="ph-wrap ph-amount">
+      <input
+        class="amount-input"
+        type="number"
+        value="{{coinAmount}}"
+        bindinput="onCoinAmountInput"
+      />
+      <text wx:if="{{!coinAmount}}" class="ph">1-999</text>
+    </view>
+    <view class="quick-amounts">
+      <text
+        class="quick-item {{coinAmount === '1' ? 'active' : ''}}"
+        data-amount="1"
+        bindtap="setQuickAmount"
+      >1</text>
+      <text
+        class="quick-item {{coinAmount === '5' ? 'active' : ''}}"
+        data-amount="5"
+        bindtap="setQuickAmount"
+      >5</text>
+      <text
+        class="quick-item {{coinAmount === '10' ? 'active' : ''}}"
+        data-amount="10"
+        bindtap="setQuickAmount"
+      >10</text>
+      <text
+        class="quick-item {{coinAmount === '20' ? 'active' : ''}}"
+        data-amount="20"
+        bindtap="setQuickAmount"
+      >20</text>
+    </view>
+  </view>
+
   <view class="search-bar">
-    <input
-      class="search-input"
-      placeholder="搜索学生名字..."
-      value="{{keyword}}"
-      bindinput="onSearch"
-    />
+    <view class="ph-wrap ph-search">
+      <input
+        class="search-input"
+        value="{{keyword}}"
+        bindinput="onSearch"
+      />
+      <text wx:if="{{!keyword}}" class="ph">搜索学生名字...</text>
+    </view>
   </view>
 
   <!-- 批量操作 -->
   <view class="batch-bar" wx:if="{{selected.length > 0}}">
     <text>已选 {{selected.length}} 人</text>
-    <button class="btn-batch" bindtap="batchAddExp" loading="{{submitting}}">
-      一键 +1 经验
-    </button>
+    <block wx:if="{{mode === 'exp'}}">
+      <button class="btn-batch" bindtap="batchAddExp" loading="{{submitting}}">
+        一键 +1 经验
+      </button>
+    </block>
+    <block wx:else>
+      <text class="batch-total">共 {{selected.length * coinAmount}} 金币</text>
+      <button class="btn-batch coin" bindtap="batchGrantCoins" loading="{{submitting}}">
+        发放
+      </button>
+      <button class="btn-batch deduct" bindtap="batchDeductCoins" loading="{{submitting}}">
+        扣除
+      </button>
+    </block>
     <text class="clear-btn" bindtap="clearSelect">取消</text>
   </view>
 
@@ -37,15 +116,16 @@
         </view>
       </view>
       <view class="s-right">
-        <view class="s-lv">Lv.{{item.level}}</view>
-        <!-- 单独加分按钮 -->
+        <view class="s-lv" wx:if="{{mode === 'exp'}}">Lv.{{item.level}}</view>
+        <view class="s-coins" wx:else>🪙 {{item.coins || 0}}</view>
+        <!-- 右侧按钮：按当前模式分发到加经验或发金币 -->
         <button
-          class="add-btn"
-          catchtap="addSingle"
+          class="add-btn {{mode === 'coin' ? 'coin-mode' : ''}}"
+          catchtap="onItemAction"
           data-id="{{item._id}}"
           data-name="{{item.heroName}}"
           loading="{{loadingMap[item._id]}}"
-        >+1</button>
+        >{{mode === 'exp' ? '+1' : '发'}}</button>
       </view>
     </view>
   </view>

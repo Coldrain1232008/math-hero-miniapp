@@ -1,0 +1,80 @@
+<!-- pages/coin-logs/coin-logs.wxml -->
+<view class="page-bg">
+
+  <!-- 余额卡片 -->
+  <view class="balance-card">
+    <view class="balance-main">
+      <text class="balance-icon">🪙</text>
+      <view class="balance-info">
+        <text class="balance-num">{{coins}}</text>
+        <text class="balance-label">当前余额</text>
+      </view>
+    </view>
+    <view class="balance-side">
+      <text class="side-num">{{totalCoinsEarned}}</text>
+      <text class="side-label">累计获得</text>
+    </view>
+  </view>
+
+  <!-- 筛选 -->
+  <view class="filter-bar">
+    <view
+      class="filter-item {{filter === 'all' ? 'active' : ''}}"
+      data-filter="all"
+      bindtap="switchFilter"
+    >全部</view>
+    <view
+      class="filter-item {{filter === 'income' ? 'active' : ''}}"
+      data-filter="income"
+      bindtap="switchFilter"
+    >收入</view>
+    <view
+      class="filter-item {{filter === 'expense' ? 'active' : ''}}"
+      data-filter="expense"
+      bindtap="switchFilter"
+    >支出</view>
+  </view>
+
+  <!-- 流水列表 -->
+  <view class="log-list" wx:if="{{logs.length > 0}}">
+    <view wx:for="{{logs}}" wx:key="_id" class="log-item">
+      <view class="log-icon">{{item.icon}}</view>
+      <view class="log-content">
+        <view class="log-top">
+          <text class="log-type">{{item.typeLabel}}</text>
+          <text class="log-amount {{item.isIncome ? 'income' : 'expense'}}">
+            {{item.isIncome ? '+' : '-'}}{{item.absAmount}}
+          </text>
+        </view>
+        <text class="log-desc">{{item.description}}</text>
+        <view class="log-bottom">
+          <text class="log-time">{{item.timeText}}</text>
+          <text class="log-balance">余额 {{item.balance}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="tip-wrap" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="tip-wrap load-more" wx:elif="{{hasMore}}" bindtap="loadMore">
+    <text>{{loadingMore ? '加载中...' : '加载更多'}}</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="tip-wrap" wx:elif="{{logs.length > 0 && !hasMore}}">
+    <text>没有更多了</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-wrap" wx:if="{{!loading && logs.length === 0}}">
+    <text class="empty-icon">🪙</text>
+    <text class="empty-text">还没有金币记录</text>
+    <text class="empty-sub">等老师给你发第一笔金币吧</text>
+  </view>
+
+</view>

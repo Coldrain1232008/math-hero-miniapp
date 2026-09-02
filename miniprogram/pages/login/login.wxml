@@ -5,7 +5,8 @@
   <view class="bg-glow bg-glow-2"></view>
 
   <view class="logo-area">
-    <view class="logo-emblem">
+    <!-- 长按徽章 3 秒进入管理员后台（隐藏入口，学生不易误触） -->
+    <view class="logo-emblem" bindlongpress="goSuper">
       <view class="emblem-ring emblem-ring-outer"></view>
       <view class="emblem-ring emblem-ring-inner"></view>
       <text class="logo-icon">⚔️</text>
@@ -31,13 +32,15 @@
     <block wx:if="{{role === 'teacher'}}">
       <view class="input-group">
         <text class="input-label">教师密钥</text>
-        <input
-          class="input-field"
-          placeholder="输入教师密钥"
-          value="{{secretKey}}"
-          bindinput="onKeyInput"
-          password
-        />
+        <view class="ph-wrap">
+          <input
+            class="input-field"
+            value="{{secretKey}}"
+            bindinput="onKeyInput"
+            password
+          />
+          <text wx:if="{{!secretKey}}" class="ph">输入教师密钥</text>
+        </view>
       </view>
       <button class="btn-primary login-btn" bindtap="onLogin" loading="{{loading}}">进入</button>
     </block>
@@ -46,27 +49,114 @@
     <block wx:else>
       <view class="input-group">
         <text class="input-label">班级密钥</text>
-        <input
-          class="input-field"
-          placeholder="输入班级密钥"
-          value="{{classKey}}"
-          bindinput="onClassKeyInput"
-          password
-        />
+        <view class="ph-wrap">
+          <input
+            class="input-field"
+            value="{{classKey}}"
+            bindinput="onClassKeyInput"
+            password
+          />
+          <text wx:if="{{!classKey}}" class="ph">输入班级密钥</text>
+        </view>
       </view>
       <view class="input-group">
         <text class="input-label">个人密钥</text>
-        <input
-          class="input-field"
-          placeholder="输入老师给你的个人密钥"
-          value="{{studentKey}}"
-          bindinput="onStudentKeyInput"
-          password
-        />
+        <view class="ph-wrap">
+          <input
+            class="input-field"
+            value="{{studentKey}}"
+            bindinput="onStudentKeyInput"
+            password
+          />
+          <text wx:if="{{!studentKey}}" class="ph">输入老师给你的个人密钥</text>
+        </view>
       </view>
       <button class="btn-primary login-btn" bindtap="onLogin" loading="{{loading}}">进入</button>
     </block>
   </view>
 
   <text class="hint">由班主任提供密钥</text>
+
+  <!-- 注册新班级入口 -->
+  <view class="register-entry" bindtap="showRegisterDialog">
+    <text class="register-entry-text">还没有班级？注册一个新班级</text>
+    <text class="register-entry-arrow">›</text>
+  </view>
+</view>
+
+<!-- 注册新班级弹窗 -->
+<view wx:if="{{showRegister}}" class="modal-mask" bindtap="hideRegisterDialog">
+  <view class="modal-box" catchtap="preventBubble">
+
+    <!-- 状态一：输入班级名称 -->
+    <block wx:if="{{!createdClass}}">
+      <view class="modal-title">注册新班级</view>
+      <view class="modal-sub">系统自动生成教师密钥和班级密钥</view>
+
+      <view class="modal-input-group">
+        <text class="modal-label">班级名称</text>
+        <view class="ph-wrap">
+          <input
+            class="modal-input"
+            value="{{registerName}}"
+            bindinput="onRegisterNameInput"
+            maxlength="20"
+          />
+          <text wx:if="{{!registerName}}" class="ph ph-modal">例如：七年级3班</text>
+        </view>
+      </view>
+
+      <view class="modal-input-group">
+        <text class="modal-label">邀请口令</text>
+        <view class="ph-wrap">
+          <input
+            class="modal-input"
+            value="{{inviteKey}}"
+            bindinput="onInviteKeyInput"
+            maxlength="12"
+          />
+          <text wx:if="{{!inviteKey}}" class="ph ph-modal">向已在使用本小程序的老师索取</text>
+        </view>
+      </view>
+
+      <view class="modal-tip">🔒 填写任意一个已存在班级的密钥（教师密钥或班级密钥均可）作为邀请口令，验证通过后才能创建。</view>
+      <view class="modal-tip sub">一个教师账号对应一个班级。若你要带多个班，可注册多个，用各自的教师密钥登录即可。</view>
+
+      <view class="modal-btn-row">
+        <button class="modal-btn cancel" bindtap="hideRegisterDialog">取消</button>
+        <button class="modal-btn confirm" bindtap="submitRegister" loading="{{registering}}">创建</button>
+      </view>
+    </block>
+
+    <!-- 状态二：展示生成的密钥 -->
+    <block wx:else>
+      <view class="modal-title">🎉 创建成功</view>
+      <view class="created-class-name">{{createdClass.name}}</view>
+
+      <view class="key-display">
+        <view class="key-display-item">
+          <text class="key-display-label">教师密钥（你自己登录用）</text>
+          <view class="key-display-row">
+            <text class="key-display-value">{{createdClass.teacherKey}}</text>
+            <button class="btn-copy-sm" catchtap="copyKey" data-text="{{createdClass.teacherKey}}" data-label="教师密钥">复制</button>
+          </view>
+        </view>
+        <view class="key-display-item">
+          <text class="key-display-label">班级密钥（发给学生）</text>
+          <view class="key-display-row">
+            <text class="key-display-value">{{createdClass.studentKey}}</text>
+            <button class="btn-copy-sm" catchtap="copyKey" data-text="{{createdClass.studentKey}}" data-label="班级密钥">复制</button>
+          </view>
+        </view>
+      </view>
+
+      <view class="modal-tip warn">⚠️ 请保存好这两个密钥。进入班级后可在「班级管理」随时查看，并在那里导入学生名单。</view>
+
+      <view class="modal-btn-row">
+        <button class="modal-btn cancel" bindtap="hideRegisterDialog">稍后再说</button>
+        <button class="modal-btn confirm" bindtap="enterNewClass">进入新班级</button>
+      </view>
+    </block>
+
+  </view>
 </view>

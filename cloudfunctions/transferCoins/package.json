@@ -1,0 +1,9 @@
+{
+  "name": "transferCoins",
+  "version": "1.0.0",
+  "description": "学生之间互赠金币（含每日限额）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

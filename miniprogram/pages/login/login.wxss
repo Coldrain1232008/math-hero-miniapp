@@ -127,6 +127,7 @@
   border-radius: 24rpx;
   padding: 48rpx 40rpx;
   width: 100%;
+  box-sizing: border-box;
   border: 1rpx solid rgba(255,255,255,0.15);
   position: relative;
   z-index: 1;
@@ -148,7 +149,40 @@
   font-size: 30rpx;
   color: #fff;
   width: 100%;
+  display: block;
+  box-sizing: border-box;
   margin-bottom: 40rpx;
+}
+
+/* ===== placeholder 自渲染（绕过 native input）=====
+   微信 <input> 是原生组件，其 placeholder 由 native 控件绘制，
+   不受 CSS line-height 控制，会被裁掉一半。
+   改用 webview 的 <text> 浮在 input 上方，user 输入时 wx:if 隐藏。
+   ⚠️ 关键：<text> 默认是 inline，inline 上 overflow/text-overflow/max-width
+   全部失效，文字按内容宽度撑出去（"对齐不对，跑到输入框外面"）。
+   必须 display:block + absolute 配 right 锁定宽度，ellipsis 才会生效。 */
+.ph-wrap {
+  position: relative;
+  width: 100%;
+}
+.ph {
+  display: block;
+  position: absolute;
+  left: 28rpx;
+  right: 28rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 42rpx;
+  line-height: 42rpx;
+  font-size: 30rpx;
+  color: rgba(255,255,255,0.5);
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ph-modal {
+  color: rgba(0,0,0,0.4);
 }
 
 .role-switch {
@@ -186,4 +220,201 @@
   margin-top: 40rpx;
   position: relative;
   z-index: 1;
+}
+
+/* ========== 注册新班级入口 ========== */
+.register-entry {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  margin-top: 20rpx;
+  padding: 12rpx 32rpx;
+  position: relative;
+  z-index: 1;
+}
+
+.register-entry-text {
+  font-size: 26rpx;
+  color: rgba(168, 130, 255, 0.95);
+}
+
+.register-entry-arrow {
+  font-size: 30rpx;
+  color: rgba(168, 130, 255, 0.95);
+}
+
+/* ========== 注册弹窗（深色，配合登录页主题） ========== */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.68);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 0 48rpx;
+}
+
+.modal-box {
+  width: 100%;
+  background: #221f3d;
+  border: 1rpx solid rgba(255, 255, 255, 0.15);
+  border-radius: 28rpx;
+  padding: 48rpx 40rpx;
+  box-shadow: 0 16rpx 48rpx rgba(0, 0, 0, 0.5);
+  max-height: 86vh;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.modal-title {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  text-align: center;
+  margin-bottom: 12rpx;
+}
+
+.modal-sub {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.modal-input-group {
+  margin-bottom: 28rpx;
+}
+
+.modal-label {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 16rpx;
+  display: block;
+}
+
+.modal-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  border-radius: 12rpx;
+  padding: 24rpx 28rpx;
+  font-size: 30rpx;
+  color: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.modal-tip {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.6;
+  margin-bottom: 36rpx;
+}
+
+.modal-tip.warn {
+  color: rgba(255, 205, 130, 0.9);
+}
+
+.modal-tip.sub {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 22rpx;
+  margin-top: -20rpx;
+  margin-bottom: 36rpx;
+}
+
+.modal-btn-row {
+  display: flex;
+  gap: 20rpx;
+}
+
+.modal-btn {
+  flex: 1;
+  font-size: 30rpx;
+  border-radius: 44rpx;
+  padding: 0;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  border: none;
+}
+
+.modal-btn::after {
+  border: none;
+}
+
+.modal-btn.cancel {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.modal-btn.confirm {
+  background: #6c63ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ========== 创建成功 - 密钥展示 ========== */
+.created-class-name {
+  text-align: center;
+  font-size: 32rpx;
+  color: #c084fc;
+  font-weight: 600;
+  margin-bottom: 36rpx;
+}
+
+.key-display {
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 16rpx;
+  padding: 28rpx 24rpx;
+  margin-bottom: 28rpx;
+}
+
+.key-display-item {
+  margin-bottom: 28rpx;
+}
+
+.key-display-item:last-child {
+  margin-bottom: 0;
+}
+
+.key-display-label {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.55);
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.key-display-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16rpx;
+}
+
+.key-display-value {
+  font-size: 38rpx;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 5rpx;
+  font-family: monospace;
+}
+
+.btn-copy-sm {
+  flex-shrink: 0;
+  font-size: 24rpx;
+  padding: 0 24rpx;
+  height: 54rpx;
+  line-height: 54rpx;
+  background: rgba(108, 99, 255, 0.25);
+  color: #a5b4fc;
+  border-radius: 27rpx;
+  border: 1rpx solid rgba(108, 99, 255, 0.5);
+}
+
+.btn-copy-sm::after {
+  border: none;
 }

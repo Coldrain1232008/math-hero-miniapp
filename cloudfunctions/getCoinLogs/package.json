@@ -1,0 +1,9 @@
+{
+  "name": "getCoinLogs",
+  "version": "1.0.0",
+  "description": "金币查询：流水明细 / 余额与赠送额度 / 全班概览",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
