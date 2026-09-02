@@ -17,9 +17,11 @@
  *   ① 双查    —— 按密钥反查文档：先用用户输入原值查，查不到再用归一化值查
  *   ② 双归一  —— 已拿到文档做比对：两侧都过 normalizeKey 再比较
  *
- * 说明：
- *   本脚本是「清单 + 提示」，不是严格 lint。它按行做启发式判断，
- *   可能对复杂写法误报；看到 ⚠️ 时人工扫一眼列出的行号即可确认。
+ * 豁免：
+ *   正则扫描必然有误报（例如查重代码的值已经在上游归一化过，脚本看不出来）。
+ *   确认为安全后，在 where 行尾或上一行加注释即可显式豁免：
+ *       .where({ classId, studentKey })   // auth-ok: studentKey 已在上方归一化
+ *   脚本仍会列出这些行并标注 ✅ 已豁免，不会静默跳过——豁免是签名，不是删除。
  */
 
 const fs = require('fs')
@@ -44,6 +46,25 @@ function keyFieldsInWhere(line) {
   const trimmed = line.trim()
   if (trimmed.startsWith('//') || trimmed.startsWith('*')) return []
   return KEY_FIELDS.filter((f) => new RegExp('\\b' + f + '\\b').test(line))
+}
+
+// 人工豁免标记：// auth-ok: 理由
+// 可写在 where 行尾，也可单独占上一行
+const EXEMPT_RE = /\/\/\s*auth-ok\b/
+
+/** 判断第 i 行（0 基）是否被人工豁免 */
+function isExempt(lines, i) {
+  if (EXEMPT_RE.test(lines[i])) return true
+  // 向下 1 行：注释写在 where 行后面
+  if (EXEMPT_RE.test(lines[i + 1] || '')) return true
+  // 向上 2 行：链式调用时注释常写在链首行的行尾，例如
+  //   await db.collection('x')  // auth-ok: 值已归一化
+  //     .where({ studentKey })
+  // 这里不能要求「整行都是注释」——行尾注释才是常见写法
+  for (let k = i - 1; k >= Math.max(0, i - 2); k--) {
+    if (EXEMPT_RE.test(lines[k] || '')) return true
+  }
+  return false
 }
 
 /**
@@ -234,7 +255,13 @@ function main() {
       const fields = keyFieldsInWhere(line)
       const dyn = isDynKeyLine(line)
       if (fields.length || dyn) {
-        whereHits.push({ line: i + 1, text: line.trim(), fields, dyn })
+        whereHits.push({
+          line: i + 1,
+          text: line.trim(),
+          fields,
+          dyn,
+          exempt: isExempt(lines, i),
+        })
       }
     })
 
@@ -252,13 +279,16 @@ function main() {
     //      值变量相同，不是 raw+upper 配对
     const genericDual = detectGenericDualQuery(src)
     const queriedFields = new Set()
-    whereHits.forEach((h) => h.fields.forEach((f) => queriedFields.add(f)))
+    whereHits.forEach((h) => {
+      if (h.exempt) return
+      h.fields.forEach((f) => queriedFields.add(f))
+    })
     genericDual.calledFields.forEach((f) => queriedFields.add(f))
 
     const dualQueryFields = []
     const singleQueryFields = []
     for (const f of queriedFields) {
-      const hits = whereHits.filter((h) => h.fields.includes(f))
+      const hits = whereHits.filter((h) => !h.exempt && h.fields.includes(f))
       let dual = isDualQuery(hits)
       // 动态键查询：靠泛型函数（如 findByKey）兜底
       if (!dual && genericDual.fields.has(f)) dual = true
@@ -273,7 +303,7 @@ function main() {
 
     // 动态键行若没被任何字段覆盖（如 updateClassKeys 的 where({ [f]: key })），
     // 单独列出来待确认，不能静默放过
-    const dynHits = whereHits.filter((h) => h.dyn)
+    const dynHits = whereHits.filter((h) => h.dyn && !h.exempt)
     if (dynHits.length) {
       const covered = dynHits.some((h) =>
         h.fields.some((f) => dualQueryFields.some((d) => d.indexOf(f) === 0))
@@ -304,6 +334,7 @@ function main() {
     findings.push({
       fn: d,
       whereHits,
+      exemptCount: whereHits.filter((h) => h.exempt).length,
       hasNormalizeFn,
       hasUpper,
       dualQueryFields,
@@ -349,9 +380,14 @@ function main() {
       verdicts.push(`✅ 双查：${f.dualQueryFields.join(', ')}`)
     }
 
+    if (f.exemptCount) {
+      verdicts.push(`✅ 已豁免 ${f.exemptCount} 处`)
+    }
+
     console.log(`【${f.fn}】  ${verdicts.join('   ') || '—'}`)
     for (const h of f.whereHits) {
-      console.log(`    L${String(h.line).padEnd(4)} ${h.text.slice(0, 88)}`)
+      const tag = h.exempt ? '   ✅ 已豁免' : ''
+      console.log(`    L${String(h.line).padEnd(4)} ${h.text.slice(0, 80)}${tag}`)
     }
     console.log()
   }

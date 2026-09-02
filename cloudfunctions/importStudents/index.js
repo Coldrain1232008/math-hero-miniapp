@@ -10,7 +10,7 @@ const db = cloud.database()
 
 // 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
 // auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
-const { verifyTeacher } = require('./auth')
+const { verifyTeacher, normalizeKey } = require('./auth')
 
 function genKey(len = 6) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -88,6 +88,13 @@ exports.main = async (event) => {
         studentId = generateStudentId(classId, i)
       }
 
+      // 口令统一归一化（trim + 大写）后再落库/查重。
+      // 不归一化的话，教师填 abc123 而库里已有 ABC123 时查重查不到，
+      // 会再建一条小写口令的学生 → 学生登录双查命中两条，行为不确定。
+      if (studentKey) {
+        studentKey = normalizeKey(studentKey)
+      }
+
       // 检查该学号是否已存在（同一班级内）
       const exist = await db.collection('students')
         .where({ classId, studentId })
@@ -106,7 +113,7 @@ exports.main = async (event) => {
 
       // 如果指定了口令，检查班级内是否已有其他学生使用
       if (studentKey) {
-        const keyConflict = await db.collection('students')
+        const keyConflict = await db.collection('students')   // auth-ok: studentKey 已归一化
           .where({ classId, studentKey })
           .get()
         if (keyConflict.data.length > 0) {
@@ -126,7 +133,7 @@ exports.main = async (event) => {
         let attempts = 0
         do {
           studentKey = genKey(6)
-          const dup = await db.collection('students')
+          const dup = await db.collection('students')         // auth-ok: 同左，值已归一化
             .where({ classId, studentKey })
             .get()
           if (dup.data.length === 0) break

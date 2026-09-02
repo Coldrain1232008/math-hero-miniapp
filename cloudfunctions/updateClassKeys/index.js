@@ -31,7 +31,7 @@ function normalizeKey(raw) {
 async function isKeyTaken(key, selfId) {
   const fields = ['teacherKey', 'studentKey']
   for (const f of fields) {
-    const res = await db.collection('classes').where({ [f]: key }).get()
+    const res = await db.collection('classes').where({ [f]: key }).get()  // auth-ok: 查重，key 已由 KEY_REG 保证大写
     const conflict = (res.data || []).filter(c => c._id !== selfId)
     if (conflict.length > 0) return true
   }
