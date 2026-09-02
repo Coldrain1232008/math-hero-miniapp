@@ -356,10 +356,23 @@ Page({
 
     this.setData({ addLoading: true })
     const app = getApp()
+
+    // 服务端要用 teacherKey 反查 classId（不信任前端传的 classId）
+    // 缺失说明是旧登录态，重新登录一次即可补上
+    if (!app.globalData.teacherKey) {
+      this.setData({ addLoading: false })
+      wx.showModal({
+        title: '需要重新登录',
+        content: '登录信息已过期，请退出后重新登录再导入。',
+        showCancel: false,
+      })
+      return
+    }
+
     try {
       const res = await wx.cloud.callFunction({
         name: 'importStudents',
-        data: { lines, classId: app.globalData.classId },
+        data: { lines, teacherKey: app.globalData.teacherKey },
       })
       if (res.result?.success) {
         const results = res.result.results || []
