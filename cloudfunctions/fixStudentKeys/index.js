@@ -4,6 +4,10 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 function genKey(len = 6) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
   let key = ''
@@ -14,8 +18,11 @@ function genKey(len = 6) {
 }
 
 exports.main = async (event) => {
-  const { classId } = event
-  if (!classId) return { success: false, message: '缺少 classId' }
+  // ===== 鉴权第一道：教师密钥 =====
+  // 本函数会重写学生登录密钥，必须确认调用者是该班教师
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, message: auth.error }
+  const classId = auth.classId
 
   try {
     // 先查出该班级所有学生，再在代码中筛选没有密钥的

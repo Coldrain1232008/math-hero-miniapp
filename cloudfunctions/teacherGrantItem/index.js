@@ -5,11 +5,20 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 exports.main = async (event, context) => {
   try {
-    const { classId, studentId, action, amount } = event
+    const { studentId, action, amount } = event
 
-    if (!classId) return { success: false, error: '缺少 classId' }
+    // ===== 鉴权第一道：教师密钥 =====
+    // 本函数给学生发道具/抽卡次数，等于发钱，必须确认调用者是该班教师
+    const auth = await verifyTeacher(event.teacherKey)
+    if (!auth.ok) return { success: false, error: auth.error }
+    const classId = auth.classId
+
     if (!studentId) return { success: false, error: '缺少 studentId' }
     if (!action) return { success: false, error: '缺少 action' }
 

@@ -6,6 +6,10 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 // 内置任务池定义（按天赋类型分类）
 const BUILTIN_TASK_POOL = {
   explorer: [
@@ -65,11 +69,13 @@ const TALENT_MAP = {
 }
 
 exports.main = async (event, context) => {
-  const { action, classId, taskId, title, desc, category } = event
+  const { action, taskId, title, desc, category } = event
 
-  if (!classId) {
-    return { success: false, error: '缺少classId' }
-  }
+  // ===== 鉴权第一道：教师密钥 =====
+  // 任务池决定全班学生每天能领什么任务，必须确认调用者是该班教师
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const classId = auth.classId
 
   try {
     // 获取任务池（合并内置和自定义任务）

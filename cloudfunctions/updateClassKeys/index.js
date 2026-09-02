@@ -5,11 +5,19 @@
 //   action: 'check'  —— 只查重，不落库，用于输入框实时提示「可用 / 已被占用」
 //   action: 'update' —— 校验通过后真正写入（默认）
 //
-// 参数：classId, type('teacherKey' | 'studentKey'), newKey, action
+// 参数：teacherKey, type('teacherKey' | 'studentKey'), newKey, action
+//
+// ⚠️ 鉴权（2026-09-02 补）：此前只收 event.classId 且无任何身份校验，
+//    任何人都能把任意班级的密钥改成自己知道的值 —— 等于直接接管班级。
+//    现在改为凭当前 teacherKey 由服务端反查 classId，不信任前端传参。
 
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
 
 // 密钥格式：4-12 位字母或数字（内部统一转大写，方便学生手抄）
 const KEY_REG = /^[A-Z0-9]{4,12}$/
@@ -31,12 +39,15 @@ async function isKeyTaken(key, selfId) {
 }
 
 exports.main = async (event, context) => {
-  const { classId, type, newKey } = event
+  const { type, newKey } = event
   const mode = event.action || 'update'
 
-  if (!classId) {
-    return { success: false, error: '缺少 classId' }
-  }
+  // ===== 鉴权第一道：教师密钥 =====
+  // classId 由服务端反查。改密钥属于最高危操作，必须确认是本班教师本人
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const classId = auth.classId
+
   if (type !== 'teacherKey' && type !== 'studentKey') {
     return { success: false, error: '密钥类型不正确' }
   }

@@ -31,10 +31,7 @@ Page({
   async loadWallet() {
     const app = getApp()
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'coinOperation',
-        data: { action: 'query', classId: app.globalData.classId }
-      })
+      const res = await app.callTeacherFn('coinOperation', { action: 'query' })
       if (res.result && res.result.success) {
         this.setData({ wallet: res.result.wallet })
       }

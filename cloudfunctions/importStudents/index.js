@@ -8,44 +8,9 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 
-// ============ 鉴权：教师密钥 → 服务端反查 classId ============
-// 与 login.findByKey / manageShop.verifyTeacher 保持一致的双查策略：
-// 先按用户输入的原值查，查不到再按归一化后的大写查。
-// 原因：早期写入数据库的历史密钥可能是小写，只查归一化值会把这批人挡在门外。
-function normalizeKey(raw) {
-  return String(raw || '').trim().toUpperCase()
-}
-
-async function findClassByTeacherKey(teacherKey) {
-  const raw = String(teacherKey || '').trim()
-  if (!raw) return null
-
-  // 第一次：按用户输入原值查（兼容历史小写密钥）
-  try {
-    const res = await db.collection('classes')
-      .where({ teacherKey: raw })
-      .limit(1)
-      .get()
-    if (res.data && res.data.length > 0) return res.data[0]
-  } catch (e) {
-    console.error('[importStudents] 按原值查班级失败:', e)
-  }
-
-  // 第二次：按归一化值查
-  const upper = normalizeKey(raw)
-  if (upper === raw) return null
-  try {
-    const res = await db.collection('classes')
-      .where({ teacherKey: upper })
-      .limit(1)
-      .get()
-    if (res.data && res.data.length > 0) return res.data[0]
-  } catch (e) {
-    console.error('[importStudents] 按归一化值查班级失败:', e)
-  }
-
-  return null
-}
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
 
 function genKey(len = 6) {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -102,11 +67,11 @@ exports.main = async (event) => {
   // ===== 鉴权第一道：教师密钥 =====
   // classId 一律由服务端用 teacherKey 反查，绝不用前端传的 event.classId
   // （前端的 classId 是可伪造值，用它等于没鉴权）
-  const classDoc = await findClassByTeacherKey(event.teacherKey)
-  if (!classDoc) {
-    return { success: false, message: '教师密钥不正确' }
+  const classDoc = await verifyTeacher(event.teacherKey)
+  if (!classDoc.ok) {
+    return { success: false, message: classDoc.error }
   }
-  const classId = classDoc._id
+  const classId = classDoc.classId
 
   if (!lines || lines.length === 0) return { success: false, message: '没有数据' }
 

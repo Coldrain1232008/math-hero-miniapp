@@ -43,6 +43,17 @@ super 充值 → `wallets(_id=classId)` → 教师 grant/deduct → `students.co
 - 铁律：**每个 action 第一行 `verifySuper`**；前端零密钥；
   ⚠️ `admins.superKey` 必须存大写；守恒 `diff != 0` 直接显示差额
 
+## 云函数鉴权（2026-09-02 审计后新增）
+- 铁律：**任何写操作云函数都必须鉴权**，不能只收 `event.classId`
+  —— classId 在前端 globalData 里就有，学生改参数即可跨班写入
+- 正确写法：云函数凭 `teacherKey` 反查 classId，**不信任前端传的 classId**
+  模板见 `importStudents.findClassByTeacherKey`
+- 密钥查询一律**双查**（先原值后归一化），兼容历史小写密钥；
+  只查归一化值 = 复刻 teacher-shop「密钥不正确」事故
+- 自检：`node tools/check-auth.js`（维度一 密钥双查 / 维度二 写操作鉴权）
+  ⚠️ 存量未修：🔴 8 个（addExp coinOperation createStudent dailyTaskRefresh
+  fixStudentKeys manageSpecialTask manageTaskPool teacherGrantItem）+ ⚠️ 11 个
+
 ## 协作原则
 - **不要把"用户未更新代码"当默认假设**，同一问题反复提出 = 问题在代码里
 - **涉及新集合必须立刻告知用户创建**；改云函数先 grep 全部 `db.collection()` 列清单
@@ -71,6 +82,9 @@ super 充值 → `wallets(_id=classId)` → 教师 grant/deduct → `students.co
 ## 教训
 - **写后读回验证**：`doc().update()` / `where().update()` 返回结构不同，踩两次假失败
 - **归一化必须写入侧 + 查询侧成对**：只在一侧 → `longyue7` 永远查不到 `LONGYUE7`
+  - 进阶：**所有密钥查询函数都该双查**（先 raw 后 upper）兼容历史数据
+    —— login.findByKey 是双查，所以小写密钥能登录；但 manageShop.verifyTeacher
+    只查归一化值，登录后进任何需要鉴权的页面都失败。**统一为双查**
 - **事务里 `doc().update()` 撞不存在文档会 reject**（不是 updated=0）→ 事务外先补建
 - **限购按"件数"统计**（一次买 3 件只落 1 条订单）
 - **分页批量删**：`get()` 上限 100；`_.in()` 一次 ≤50 ID；集合不存在不阻断
@@ -81,3 +95,13 @@ super 充值 → `wallets(_id=classId)` → 教师 grant/deduct → `students.co
 - 徽章 streak + milestone，`checkBadges` 被 addExp/login/drawGacha/useChallenge 触发；
   挑战基础 +5EXP + 等级差修正，统一走 `challengeLogs`
 - 教师端喜欢页面内直接操作；重大功能要确认门槛；输出要结构化/表格
+
+## Git
+- 主分支 `main`，提交风格 conventional commits（`feat:` / `chore:`）+ 中文正文
+- 用户不常提交，易积压数月；提交前先 `git log -1` 看上次提交时间，
+  积压多则**按模块拆多个 commit**并征询粒度
+- 拆包技巧：对 `git diff` 新增行跑关键词计数自动归类；交叉文件归命中数最高的
+  模块并在 message 里注明；app.json/app.wxss 放第一个 chore commit
+- ⚠️ 远程地址明文嵌 PAT（`ghp_…`），已提醒用户改 SSH 或轮换 token
+- ⚠️ 仓库**公开**，`.workbuddy/memory/` 已入库（含环境 ID 与密钥设计），
+  用户知情并选择保持现状

@@ -10,6 +10,10 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 const BATCH = 100
 
 /**
@@ -61,6 +65,13 @@ async function removeWhere(name, where, maxRounds = 100) {
 exports.main = async (event, context) => {
   const { studentId } = event || {}
 
+  // ===== 鉴权第一道：教师密钥 =====
+  // 本函数会清掉一个学生在 12 个集合里的全部数据，不可恢复。
+  // 此前完全无鉴权：任何学生传同学的 studentId 就能把对方删光。
+  const auth = await verifyTeacher(event && event.teacherKey)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const classId = auth.classId
+
   if (!studentId) {
     return { success: false, message: '缺少学生ID' }
   }
@@ -77,6 +88,11 @@ exports.main = async (event, context) => {
 
     if (!student) {
       return { success: false, message: '学生不存在或已被删除' }
+    }
+
+    // 归属校验：只能删本班的学生
+    if (student.classId !== classId) {
+      return { success: false, message: '只能删除本班学生' }
     }
 
     console.log(`[deleteStudent] 开始清理学生 ${studentId} (${student.realName || student.heroName || '未命名'})`)

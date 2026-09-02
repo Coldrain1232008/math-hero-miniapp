@@ -8,6 +8,10 @@
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
+
+// 鉴权：verifySuper 用于手动调用时的身份校验（定时触发走 Type:Timer 分支）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifySuper } = require('./auth')
 const _ = db.command
 
 // 任务池（从天assignDailyTask复制，保持一致）
@@ -63,7 +67,18 @@ const TALENT_MAP = {
 }
 
 exports.main = async (event, context) => {
-  const { classId } = event
+  // ===== 鉴权：区分定时触发与手动调用 =====
+  // 定时触发（config.json 里配的每天 6 点）时 event 带 Type: 'Timer'，放行；
+  // 手动调用必须提供 superKey —— 否则任何人都能反复触发任务刷新，
+  // 把别人未完成的任务冲掉。
+  const evt = event || {}
+  const isTimer = evt.Type === 'Timer'
+  if (!isTimer) {
+    const auth = await verifySuper(evt.superKey)
+    if (!auth.ok) return { success: false, error: auth.error }
+  }
+
+  const { classId } = evt
   
   // 获取今天的日期范围
   const today = new Date()

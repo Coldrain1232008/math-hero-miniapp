@@ -101,14 +101,10 @@ Page({
   async checkKeyAvailable(value) {
     const app = getApp()
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'updateClassKeys',
-        data: {
-          action: 'check',
-          classId: app.globalData.classId,
-          type: this.data.keyEditType,
-          newKey: value,
-        }
+      const res = await app.callTeacherFn('updateClassKeys', {
+        action: 'check',
+        type: this.data.keyEditType,
+        newKey: value,
       })
       const r = res.result || {}
       // 云函数里与原值相同会返回 unchanged，这里单独提示
@@ -163,14 +159,10 @@ Page({
         this.setData({ keyUpdating: true })
         wx.showLoading({ title: '保存中...' })
         try {
-          const result = await wx.cloud.callFunction({
-            name: 'updateClassKeys',
-            data: {
-              action: 'update',
-              classId: getApp().globalData.classId,
-              type: keyEditType,
-              newKey: value,
-            }
+          const result = await getApp().callTeacherFn('updateClassKeys', {
+            action: 'update',
+            type: keyEditType,
+            newKey: value,
           })
           wx.hideLoading()
           const r = result.result || {}
@@ -270,10 +262,7 @@ Page({
         if (!res.confirm) return
         wx.showLoading({ title: '生成中...' })
         try {
-          const result = await wx.cloud.callFunction({
-            name: 'fixStudentKeys',
-            data: { classId: getApp().globalData.classId },
-          })
+          const result = await getApp().callTeacherFn('fixStudentKeys')
           wx.hideLoading()
           if (result.result?.success) {
             const { count, total } = result.result
@@ -456,9 +445,8 @@ Page({
             wx.showLoading({ title: '删除中...' })
             try {
               // 调用云函数删除（前端受数据库权限限制）
-              const result = await wx.cloud.callFunction({
-                name: 'deleteStudent',
-                data: { studentId: id }
+              const result = await getApp().callTeacherFn('deleteStudent', {
+                studentId: id,
               })
               wx.hideLoading()
               if (result.result?.success) {

@@ -88,10 +88,7 @@ Page({
     const app = getApp()
     try {
       console.log('加载特殊任务, classId:', app.globalData.classId)
-      const res = await wx.cloud.callFunction({
-        name: 'manageSpecialTask',
-        data: { action: 'get', classId: app.globalData.classId }
-      })
+      const res = await app.callTeacherFn('manageSpecialTask', { action: 'get' })
       console.log('特殊任务返回:', res.result)
       if (res.result && res.result.success) {
         this.setData({ specialTask: res.result.task || null })
@@ -108,10 +105,7 @@ Page({
   async loadSpecialTaskHistory() {
     const app = getApp()
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'manageSpecialTask',
-        data: { action: 'history', classId: app.globalData.classId }
-      })
+      const res = await app.callTeacherFn('manageSpecialTask', { action: 'history' })
       if (res.result && res.result.success) {
         const history = (res.result.tasks || []).map(task => ({
           ...task,
@@ -196,28 +190,20 @@ Page({
       let res
       if (editingSpecialId) {
         // 修改
-        res = await wx.cloud.callFunction({
-          name: 'manageSpecialTask',
-          data: {
-            action: 'update',
-            classId: app.globalData.classId,
-            taskId: editingSpecialId,
-            title: specialForm.title,
-            desc: specialForm.desc,
-            expReward: specialForm.expReward
-          }
+        res = await app.callTeacherFn('manageSpecialTask', {
+          action: 'update',
+          taskId: editingSpecialId,
+          title: specialForm.title,
+          desc: specialForm.desc,
+          expReward: specialForm.expReward
         })
       } else {
         // 发布新任务
-        res = await wx.cloud.callFunction({
-          name: 'manageSpecialTask',
-          data: {
-            action: 'publish',
-            classId: app.globalData.classId,
-            title: specialForm.title,
-            desc: specialForm.desc,
-            expReward: specialForm.expReward
-          }
+        res = await app.callTeacherFn('manageSpecialTask', {
+          action: 'publish',
+          title: specialForm.title,
+          desc: specialForm.desc,
+          expReward: specialForm.expReward
         })
       }
 
@@ -250,13 +236,9 @@ Page({
         wx.showLoading({ title: '删除中...' })
         try {
           const app = getApp()
-          const result = await wx.cloud.callFunction({
-            name: 'manageSpecialTask',
-            data: {
-              action: 'delete',
-              classId: app.globalData.classId,
-              taskId: task._id
-            }
+          const result = await app.callTeacherFn('manageSpecialTask', {
+            action: 'delete',
+            taskId: task._id
           })
           wx.hideLoading()
           if (result.result && result.result.success) {
@@ -279,10 +261,7 @@ Page({
     const { categoryOptions } = this.data
     try {
       console.log('加载任务池, classId:', app.globalData.classId)
-      const res = await wx.cloud.callFunction({
-        name: 'manageTaskPool',
-        data: { action: 'getPool', classId: app.globalData.classId }
-      })
+      const res = await app.callTeacherFn('manageTaskPool', { action: 'getPool' })
       console.log('任务池返回:', res.result)
       if (res.result && res.result.success) {
         // 为自定义任务添加中文分类名
@@ -363,27 +342,19 @@ Page({
       const app = getApp()
       let res
       if (editingCustomId) {
-        res = await wx.cloud.callFunction({
-          name: 'manageTaskPool',
-          data: {
-            action: 'update',
-            classId: app.globalData.classId,
-            taskId: editingCustomId,
-            title: customForm.title,
-            desc: customForm.desc,
-            category: customForm.category
-          }
+        res = await app.callTeacherFn('manageTaskPool', {
+          action: 'update',
+          taskId: editingCustomId,
+          title: customForm.title,
+          desc: customForm.desc,
+          category: customForm.category
         })
       } else {
-        res = await wx.cloud.callFunction({
-          name: 'manageTaskPool',
-          data: {
-            action: 'add',
-            classId: app.globalData.classId,
-            title: customForm.title,
-            desc: customForm.desc,
-            category: customForm.category
-          }
+        res = await app.callTeacherFn('manageTaskPool', {
+          action: 'add',
+          title: customForm.title,
+          desc: customForm.desc,
+          category: customForm.category
         })
       }
 
@@ -415,13 +386,9 @@ Page({
         wx.showLoading({ title: '删除中...' })
         try {
           const app = getApp()
-          const result = await wx.cloud.callFunction({
-            name: 'manageTaskPool',
-            data: {
-              action: 'delete',
-              classId: app.globalData.classId,
-              taskId: id
-            }
+          const result = await app.callTeacherFn('manageTaskPool', {
+            action: 'delete',
+            taskId: id
           })
           wx.hideLoading()
           if (result.result && result.result.success) {
@@ -479,10 +446,7 @@ Page({
 
         wx.showLoading({ title: '重置中...' })
         try {
-          const result = await wx.cloud.callFunction({
-            name: 'resetTaskProgress',
-            data: { classId: app.globalData.classId }
-          })
+          const result = await app.callTeacherFn('resetTaskProgress')
           wx.hideLoading()
           
           if (result.result && result.result.success) {
@@ -519,10 +483,7 @@ Page({
 
         wx.showLoading({ title: '重置中...' })
         try {
-          const result = await wx.cloud.callFunction({
-            name: 'resetTaskProgress',
-            data: { studentId }
-          })
+          const result = await app.callTeacherFn('resetTaskProgress', { studentId })
           wx.hideLoading()
           
           if (result.result && result.result.success) {
@@ -586,14 +547,10 @@ Page({
         wx.showLoading({ title: '处理中...' })
         try {
           const app = getApp()
-          const result = await wx.cloud.callFunction({
-            name: 'teacherGrantItem',
-            data: {
-              classId: app.globalData.classId,
-              studentId: grantTargetId,
-              action,
-              amount: grantCount
-            }
+          const result = await app.callTeacherFn('teacherGrantItem', {
+            studentId: grantTargetId,
+            action,
+            amount: grantCount
           })
           wx.hideLoading()
 

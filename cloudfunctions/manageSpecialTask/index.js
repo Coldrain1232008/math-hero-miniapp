@@ -6,12 +6,18 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
-exports.main = async (event, context) => {
-  const { action, classId, taskId, title, desc, expReward, status } = event
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
 
-  if (!classId && action !== 'getByClass') {
-    return { success: false, error: '缺少classId' }
-  }
+exports.main = async (event, context) => {
+  const { action, taskId, title, desc, expReward, status } = event
+
+  // ===== 鉴权第一道：教师密钥 =====
+  // 特殊任务会影响全班学生的经验获取，必须确认调用者是该班教师
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const classId = auth.classId
 
   try {
     // 获取当前特殊任务

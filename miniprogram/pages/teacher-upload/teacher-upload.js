@@ -195,17 +195,13 @@ Page({
     const toImport = this.data.preview.filter(p => p.matched)
 
     try {
-      await wx.cloud.callFunction({
-        name: 'addExp',
-        data: {
-          batchList: toImport.map(p => ({
-            studentId: p.studentDocId,
-            exp: p.exp,
-          })),
-          type: 'score',
-          desc: `导入成绩 · ${this.data.fileName}`,
-          classId: app.globalData.classId,
-        },
+      await app.callTeacherFn('addExp', {
+        batchList: toImport.map(p => ({
+          studentId: p.studentDocId,
+          exp: p.exp,
+        })),
+        type: 'score',
+        desc: `导入成绩 · ${this.data.fileName}`,
       })
 
       wx.showModal({

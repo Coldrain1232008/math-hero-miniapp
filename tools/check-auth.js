@@ -146,14 +146,20 @@ function scanMissingAuth(dirs) {
     const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 
     // 只读函数不关心
+    // 注意：.remove() 常常不带参数直接跟在 .where() 后面，
+    //      所以不能要求后面必须跟 `{`，否则会漏掉 resetTaskProgress 这类
     const writes = []
-    if (/\.add\s*\(\s*\{/.test(code)) writes.push('add')
-    if (/\.update\s*\(\s*\{/.test(code) || /\.set\s*\(\s*\{/.test(code)) writes.push('update')
-    if (/\.remove\s*\(\s*\{/.test(code)) writes.push('remove')
+    if (/\.add\s*\(/.test(code)) writes.push('add')
+    if (/\.update\s*\(/.test(code) || /\.set\s*\(/.test(code)) writes.push('update')
+    if (/\.remove\s*\(/.test(code)) writes.push('remove')
     if (!writes.length) continue
 
-    // 鉴权手段：是否按密钥查库（维度一已判定过的那批都算）
-    const hasKeyAuth = /(teacherKey|superKey)/.test(code) && /where\s*\(/.test(code)
+    // 鉴权手段：是否调用了鉴权函数
+    //   不能靠「出现 teacherKey + where」判断——teacherGrantItem 用 doc() 不用
+    //   where()，会被漏判；直接认鉴权函数名最稳
+    const hasKeyAuth =
+      /verifyTeacher|verifySuper|authenticate|findByKey/.test(code) ||
+      /require\(\s*['"]\.\/auth['"]\s*\)/.test(code)
     // openid 归属校验：身份由微信上下文推导，前端伪造不了
     const hasOpenidCheck = /WX_OPENID|getWXContext/.test(code)
 
@@ -165,13 +171,30 @@ function scanMissingAuth(dirs) {
       /event\.studentId/.test(code) ||
       /const\s*\{[^}]*\bstudentId\b[^}]*\}\s*=\s*event/.test(code)
 
+    // 「先查后验」模式（deleteClass 用的这种）：
+    //   用 classId 取出班级文档，再把归一化后的密钥和输入值比对，不匹配就拒绝。
+    //   这也是安全的——classId 只用于查找，写操作用的是校验通过后的文档。
+    //
+    //   判定必须收紧到「点号访问班级密钥字段」的字面量写法：
+    //     ✅ deleteClass      normalizeKey(cls.teacherKey)   —— 拿真实密钥比对，是鉴权
+    //     ✘  updateClassKeys  normalizeKey(cls[otherField])  —— 动态字段，那是查重不是鉴权
+    //   两者正则长得像，但语义完全不同，不能一并赦免。
+    const dualNormalizedCmp =
+      /normalizeKey\s*\(\s*cls\.(teacherKey|superKey)\s*\)/.test(code) &&
+      /===|!==/.test(code)
+    const hasKeyCompare =
+      dualNormalizedCmp || /inputKey\s*[!=]==?\s*realKey/.test(code)
+
     const row = { fn: d, writes: writes.join('/'), takesClassId, takesStudentId }
 
-    if (hasKeyAuth) {
+    if (hasKeyAuth || hasKeyCompare) {
       ok.push(row)
     } else if (takesClassId) {
-      // 最危险：前端传什么班就写什么班
-      red.push(row)
+      // 前端传什么班就写什么班。
+      // 但如果做了 openid 校验（身份伪造不了），降级为中危——
+      // 剩下的问题只是「能指定进哪个班」，危害小得多
+      if (hasOpenidCheck) warn.push(row)
+      else red.push(row)
     } else if (takesStudentId && !hasOpenidCheck) {
       warn.push(row)
     } else {

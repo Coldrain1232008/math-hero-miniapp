@@ -41,10 +41,7 @@ Page({
   async loadWallet() {
     const app = getApp()
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'coinOperation',
-        data: { action: 'query', classId: app.globalData.classId }
-      })
+      const res = await app.callTeacherFn('coinOperation', { action: 'query' })
       if (res.result && res.result.success) {
         this.setData({ wallet: res.result.wallet })
       }
@@ -147,15 +144,11 @@ Page({
   async _addExp(studentIds, desc) {
     const app = getApp()
     try {
-      await wx.cloud.callFunction({
-        name: 'addExp',
-        data: {
-          studentIds,
-          exp: 1,
-          type: 'class',
-          desc,
-          classId: app.globalData.classId,
-        },
+      await app.callTeacherFn('addExp', {
+        studentIds,
+        exp: 1,
+        type: 'class',
+        desc,
       })
     } catch (e) {
       console.error(e)
@@ -222,16 +215,12 @@ Page({
     }
 
     try {
-      const res = await wx.cloud.callFunction({
-        name: 'coinOperation',
-        data: {
-          classId: app.globalData.classId,
-          action,
-          studentIds,
-          amount,
-          reason: action === 'grant' ? '课堂奖励' : '教师回收',
-          operatorName: '教师',
-        },
+      const res = await app.callTeacherFn('coinOperation', {
+        action,
+        studentIds,
+        amount,
+        reason: action === 'grant' ? '课堂奖励' : '教师回收',
+        operatorName: '教师',
       })
       return res.result
     } catch (e) {

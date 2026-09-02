@@ -17,6 +17,10 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 // ============ 规则常量（想调随时改这里） ============
 const MIN_AMOUNT = 1        // 单次最小金额
 const MAX_AMOUNT = 999      // 单次最大金额
@@ -172,7 +176,6 @@ async function processOne({ walletId, student, amount, action, classId, reason, 
 
 exports.main = async (event, context) => {
   const {
-    classId,
     action,           // 'grant' | 'deduct' | 'query'
     studentIds,       // 批量
     studentId,        // 单个
@@ -182,7 +185,13 @@ exports.main = async (event, context) => {
     operatorId,
   } = event
 
-  if (!classId) return { success: false, error: '缺少 classId' }
+  // ===== 鉴权第一道：教师密钥 =====
+  // classId 一律由服务端用 teacherKey 反查，绝不用前端传的 event.classId。
+  // 这条如果被绕过，学生改个参数就能给自己刷金币（2026-09-02 审计发现）。
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const classId = auth.classId
+
   if (!action) return { success: false, error: '缺少 action' }
 
   try {

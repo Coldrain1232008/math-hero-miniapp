@@ -4,6 +4,10 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 // 天赋大类映射
 const TALENT_MAP = {
   'A': 'explorer',    // 探索者
@@ -231,7 +235,14 @@ async function calculateBonus(studentId, talentId, baseExp) {
 }
 
 exports.main = async (event) => {
-  const { studentIds, batchList, exp, type, desc, classId, autoBonus = true } = event
+  const { studentIds, batchList, exp, type, desc, autoBonus = true } = event
+
+  // ===== 鉴权第一道：教师密钥 =====
+  // classId 由服务端用 teacherKey 反查，绝不用前端传的 event.classId
+  // （2026-09-02 审计：学生改参数即可给自己加经验升级）
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, message: auth.error }
+  const classId = auth.classId
 
   // 统一处理两种输入：
   //   studentIds + exp（相同经验）

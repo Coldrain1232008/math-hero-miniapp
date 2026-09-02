@@ -1,13 +1,26 @@
 // 云函数：resetTaskProgress
 // 重置学生任务进度，让已完成的学生可以重新做任务
+//
+// ⚠️ 鉴权（2026-09-02 补）：此前只收 event.classId / studentId 且无身份校验，
+//    任何人都能清空任意班级学生的任务记录（学生刷的分可以无限重刷）。
+//    现在改为凭 teacherKey 由服务端反查 classId，不信任前端传参。
 
 const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
 
+// 鉴权：verifyTeacher 用 teacherKey 反查 classId（不信任前端传的 classId）
+// auth.js 由 tools/sync-auth.js 从 tools/auth-template.js 同步，勿直接修改
+const { verifyTeacher } = require('./auth')
+
 exports.main = async (event, context) => {
-  const { classId, studentId } = event
+  const { studentId } = event
+
+  // ===== 鉴权第一道：教师密钥 =====
+  const auth = await verifyTeacher(event.teacherKey)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const classId = auth.classId
 
   try {
     // 获取今天的日期范围
@@ -19,13 +32,18 @@ exports.main = async (event, context) => {
     let result = { success: true }
 
     if (studentId) {
-      // 重置单个学生
+      // 重置单个学生：先确认该生确实属于本班，否则能重置别班的人
+      const stuRes = await db.collection('students').doc(studentId).get()
+      if (!stuRes.data) {
+        return { success: false, error: '学生不存在' }
+      }
+      if (stuRes.data.classId !== classId) {
+        return { success: false, error: '只能操作本班学生' }
+      }
       result = await resetStudentTask(studentId, today, tomorrow)
-    } else if (classId) {
+    } else {
       // 重置全班学生
       result = await resetClassTasks(classId, today, tomorrow)
-    } else {
-      return { success: false, error: '缺少 classId 或 studentId' }
     }
 
     return result
