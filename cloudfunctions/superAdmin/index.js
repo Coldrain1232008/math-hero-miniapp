@@ -27,20 +27,28 @@ function normalizeKey(raw) {
 }
 
 // ===== 鉴权：所有 action 的第一步 =====
+// ⚠️ 必须与 login / manageShop 的密钥查询保持一致 —— 先按用户输入原值查
+// （命中历史数据里的小写密钥），查不到再按归一化值查。否则小写密钥
+// 用户能登录 super 后台但执行任何 action 都会被拒。
 async function verifySuper(superKey) {
-  const key = normalizeKey(superKey)
-  if (!key) return { ok: false, error: '缺少管理员密钥' }
+  const raw = (superKey || '').trim()
+  if (!raw) return { ok: false, error: '缺少管理员密钥' }
 
   try {
-    const res = await db.collection('admins')
-      .where({ role: 'super', superKey: key })
-      .limit(1)
-      .get()
-
-    if (!res.data || res.data.length === 0) {
-      return { ok: false, error: '管理员密钥不正确' }
+    if (raw) {
+      const r1 = await db.collection('admins').where({ role: 'super', superKey: raw }).limit(1).get()
+      if (r1.data && r1.data.length > 0) {
+        return { ok: true, admin: r1.data[0] }
+      }
     }
-    return { ok: true, admin: res.data[0] }
+    const upper = normalizeKey(superKey)
+    if (upper && upper !== raw) {
+      const r2 = await db.collection('admins').where({ role: 'super', superKey: upper }).limit(1).get()
+      if (r2.data && r2.data.length > 0) {
+        return { ok: true, admin: r2.data[0] }
+      }
+    }
+    return { ok: false, error: '管理员密钥不正确' }
   } catch (err) {
     // 集合不存在时给明确提示，不要静默失败（项目铁律：绝不假设集合已存在）
     return {

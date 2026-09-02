@@ -32,36 +32,52 @@ function normalizeKey(raw) {
 }
 
 // ===== 鉴权 A：教师（按 teacherKey 找班）=====
+// ⚠️ 必须与 login 的 findByKey 保持一致！先按用户输入原值查（命中历史
+// 数据里的小写密钥），查不到再按归一化值查。如果只查归一化值，
+// 用户用小写密钥能登录但进任何需要鉴权的页面都会失败。
 async function verifyTeacher(teacherKey) {
-  const key = normalizeKey(teacherKey)
-  if (!key) return { ok: false, error: '缺少教师密钥' }
+  const raw = (teacherKey || '').trim()
+  if (!raw) return { ok: false, error: '缺少教师密钥' }
   try {
-    const res = await db.collection('classes')
-      .where({ teacherKey: key })
-      .limit(1)
-      .get()
-    if (!res.data || res.data.length === 0) {
-      return { ok: false, error: '教师密钥不正确' }
+    if (raw) {
+      const r1 = await db.collection('classes').where({ teacherKey: raw }).limit(1).get()
+      if (r1.data && r1.data.length > 0) {
+        return { ok: true, role: 'teacher', classId: r1.data[0]._id, className: r1.data[0].name }
+      }
     }
-    return { ok: true, role: 'teacher', classId: res.data[0]._id, className: res.data[0].name }
+    const upper = normalizeKey(teacherKey)
+    if (upper && upper !== raw) {
+      const r2 = await db.collection('classes').where({ teacherKey: upper }).limit(1).get()
+      if (r2.data && r2.data.length > 0) {
+        return { ok: true, role: 'teacher', classId: r2.data[0]._id, className: r2.data[0].name }
+      }
+    }
+    return { ok: false, error: '教师密钥不正确' }
   } catch (err) {
     return { ok: false, error: 'classes 集合查询失败：' + err.message }
   }
 }
 
 // ===== 鉴权 B：super（按 superKey 查 admins）=====
+// 与 verifyTeacher 同样的双查逻辑，避免历史小写密钥被漏掉
 async function verifySuper(superKey) {
-  const key = normalizeKey(superKey)
-  if (!key) return { ok: false, error: '缺少管理员密钥' }
+  const raw = (superKey || '').trim()
+  if (!raw) return { ok: false, error: '缺少管理员密钥' }
   try {
-    const res = await db.collection('admins')
-      .where({ role: 'super', superKey: key })
-      .limit(1)
-      .get()
-    if (!res.data || res.data.length === 0) {
-      return { ok: false, error: '管理员密钥不正确' }
+    if (raw) {
+      const r1 = await db.collection('admins').where({ role: 'super', superKey: raw }).limit(1).get()
+      if (r1.data && r1.data.length > 0) {
+        return { ok: true, role: 'super', admin: r1.data[0] }
+      }
     }
-    return { ok: true, role: 'super', admin: res.data[0] }
+    const upper = normalizeKey(superKey)
+    if (upper && upper !== raw) {
+      const r2 = await db.collection('admins').where({ role: 'super', superKey: upper }).limit(1).get()
+      if (r2.data && r2.data.length > 0) {
+        return { ok: true, role: 'super', admin: r2.data[0] }
+      }
+    }
+    return { ok: false, error: '管理员密钥不正确' }
   } catch (err) {
     return {
       ok: false,
