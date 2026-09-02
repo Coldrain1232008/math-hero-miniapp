@@ -1,0 +1,55 @@
+<!-- pages/class-analytics/class-analytics.wxml -->
+<view class="page-bg">
+  <!-- 顶部标题 -->
+  <view class="header gradient-bg">
+    <text class="header-title">班级数据分析</text>
+    <text class="header-sub">共 {{studentCount}} 名学生</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <text>加载中...</text>
+  </view>
+
+  <block wx:else>
+    <!-- 数据卡片 -->
+    <view class="stats-grid">
+      <view class="stat-card">
+        <text class="stat-value">{{avgExp}}</text>
+        <text class="stat-label">平均 EXP</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{taskCompletionRate}}%</text>
+        <text class="stat-label">今日任务完成率</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{activeStudents}}</text>
+        <text class="stat-label">今日活跃学生</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{activeRate}}%</text>
+        <text class="stat-label">活跃率</text>
+      </view>
+    </view>
+
+    <!-- 排行榜 Top 10 -->
+    <view class="card">
+      <view class="card-title">🏆 排行榜 Top 10</view>
+      <view class="rank-list">
+        <view wx:for="{{topStudents}}" wx:key="studentId" class="rank-item">
+          <text class="rank-no {{item.rank <= 3 ? 'top3' : ''}}">
+            {{item.rank === 1 ? '🥇' : item.rank === 2 ? '🥈' : item.rank === 3 ? '🥉' : item.rank}}
+          </text>
+          <view class="rank-info">
+            <text class="rank-name">{{item.heroName}}</text>
+            <text class="rank-level">Lv.{{item.level}}</text>
+          </view>
+          <text class="rank-exp">{{item.totalExp}} EXP</text>
+        </view>
+      </view>
+      <view wx:if="{{topStudents.length === 0}}" class="empty-rank">
+        <text>暂无数据</text>
+      </view>
+    </view>
+  </block>
+</view>

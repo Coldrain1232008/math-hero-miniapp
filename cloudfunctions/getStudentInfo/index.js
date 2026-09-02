@@ -44,6 +44,7 @@ exports.main = async (event, context) => {
       success: true,
       dailyDrawLeft,
       bonusToday,
+      bonusDraws: student.bonusDraws ?? 0,        // 商城购买的永久抽卡次数（不跨日重置）
       challengeVouchers: student.challengeVouchers ?? 0,
       growthAccelerants: student.growthAccelerants ?? 0,
       totalExp: student.totalExp ?? 0,

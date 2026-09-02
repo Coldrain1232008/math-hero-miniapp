@@ -1,0 +1,9 @@
+{
+  "name": "getClassAnalytics",
+  "version": "1.0.0",
+  "description": "获取班级数据分析",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

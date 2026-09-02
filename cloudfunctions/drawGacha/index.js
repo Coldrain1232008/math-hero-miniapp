@@ -26,6 +26,9 @@ exports.main = async (event, context) => {
     const today = getTodayStr()
 
     // === 第一步：处理跨日重置 ===
+    // ⚠️ 只重置 remainingDraws（每日免费次数），绝对不能动 bonusDraws：
+    //    bonusDraws 是学生在商城花金币买的，清零等于吞钱。
+    //    两个字段必须分开，否则"买抽卡次数"这个商品就是骗局。
     const lastDrawDate = student.lastDrawDate || ''
     if (lastDrawDate !== today) {
       await db.collection('students').doc(studentId).update({
@@ -37,26 +40,39 @@ exports.main = async (event, context) => {
     }
 
     // === 第二步：原子扣减次数 ===
-    // 用 where 条件更新，只有 remainingDraws > 0 时才扣，多请求并发也不重复扣
-    const updateRes = await db.collection('students').where({
+    // 消耗顺序：先花购买次数 bonusDraws，再花每日免费次数 remainingDraws。
+    // 用 where 条件更新的方式保证原子性，多请求并发也不会重复扣。
+    let usedBonus = false
+    const bonusRes = await db.collection('students').where({
       _id: studentId,
-      remainingDraws: _.gt(0)
+      bonusDraws: _.gt(0)
     }).update({
-      data: {
-        remainingDraws: _.inc(-1),
-        lastDrawDate: today
-      }
+      data: { bonusDraws: _.inc(-1) }
     })
 
-    // where().update() 的返回结构是 { stats: { updated: N }, errMsg: "..." }
-    // 注意：不是 updateRes.updated，而是 updateRes.stats.updated
-    const updatedCount = updateRes && updateRes.stats ? updateRes.stats.updated : 0
+    let updatedCount = bonusRes && bonusRes.stats ? bonusRes.stats.updated : 0
+    usedBonus = updatedCount > 0
 
     if (!updatedCount) {
-      // 重新查询当前状态，返回真实的剩余次数
+      // 没有购买次数，才动用每日免费次数
+      const dailyRes = await db.collection('students').where({
+        _id: studentId,
+        remainingDraws: _.gt(0)
+      }).update({
+        data: {
+          remainingDraws: _.inc(-1),
+          lastDrawDate: today
+        }
+      })
+      updatedCount = dailyRes && dailyRes.stats ? dailyRes.stats.updated : 0
+    }
+
+    if (!updatedCount) {
+      // 两种次数都没了，重新查询返回真实剩余（免费 + 购买）
       const current = await db.collection('students').doc(studentId).get()
-      const realLeft = current.data?.remainingDraws ?? 0
-      return { success: false, error: '今日抽卡次数已用完', dailyLeft: realLeft }
+      const d = current.data || {}
+      const realLeft = (d.remainingDraws ?? 0) + (d.bonusDraws ?? 0)
+      return { success: false, error: '抽卡次数已用完', dailyLeft: realLeft }
     }
 
     // === 第三步：随机结果并发放奖励 ===
@@ -108,10 +124,23 @@ exports.main = async (event, context) => {
     // === 第四步：返回最新状态 ===
     const updated = await db.collection('students').doc(studentId).get()
     const latest = updated.data || {}
+    
+    // 异步触发徽章检查（fire-and-forget）
+    try {
+      cloud.callFunction({
+        name: 'checkBadges',
+        data: { studentId }
+      }).catch(err => console.warn('checkBadges async error:', err.message))
+    } catch (e) {
+      // 忽略同步错误
+    }
+    
     return {
       success: true,
       result,
+      usedBonus,                       // true=用的购买次数，false=用的每日免费次数
       dailyLeft: latest.remainingDraws !== undefined ? latest.remainingDraws : 0,
+      bonusLeft: latest.bonusDraws !== undefined ? latest.bonusDraws : 0,
       newTotalExp: latest.totalExp || 0,
       challengeVouchers: latest.challengeVouchers || 0,
       growthAccelerants: latest.growthAccelerants || 0

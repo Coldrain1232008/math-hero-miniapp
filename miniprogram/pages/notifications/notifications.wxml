@@ -1,0 +1,45 @@
+<!-- pages/notifications/notifications.wxml -->
+<view class="page-bg">
+  <!-- 顶部操作栏 -->
+  <view class="header-bar" wx:if="{{notifications.length > 0}}">
+    <text class="header-title">消息通知</text>
+    <text class="header-action" bindtap="markAllRead" wx:if="{{unreadCount > 0}}">全部已读</text>
+  </view>
+
+  <!-- 消息列表 -->
+  <view class="notification-list" wx:if="{{notifications.length > 0}}">
+    <view
+      wx:for="{{notifications}}"
+      wx:key="_id"
+      class="notification-item {{item.read ? 'read' : 'unread'}}"
+      bindtap="tapNotification"
+      data-item="{{item}}"
+    >
+      <view class="notification-icon">{{item.type === 'badge_unlock' ? '🎖️' : item.type === 'level_up' ? '🎉' : item.type === 'challenge_win' ? '⚔️' : item.type === 'challenge_lose' ? '💔' : item.type === 'task_complete' ? '✅' : '📢'}}</view>
+      <view class="notification-content">
+        <view class="notification-header">
+          <text class="notification-title">{{item.title}}</text>
+          <text class="notification-time">{{item.createTime}}</text>
+        </view>
+        <text class="notification-desc">{{item.content}}</text>
+      </view>
+      <view class="notification-dot" wx:if="{{!item.read}}"></view>
+    </view>
+  </view>
+
+  <!-- 加载更多 -->
+  <view class="load-more" wx:if="{{loading}}">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 没有更多 -->
+  <view class="no-more" wx:if="{{!hasMore && notifications.length > 0}}">
+    <text>没有更多消息了</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-wrap" wx:if="{{!loading && notifications.length === 0}}">
+    <text class="empty-icon">📭</text>
+    <text class="empty-text">暂无消息通知</text>
+  </view>
+</view>

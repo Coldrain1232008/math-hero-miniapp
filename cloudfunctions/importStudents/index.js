@@ -134,8 +134,11 @@ exports.main = async (event) => {
           level: 1,
           rerollChances: 0,
           // 抽卡系统初始化
+          // dailyDrawLeft 是历史遗留字段（drawGacha 实际读的是 remainingDraws），保留不动
           dailyDrawLeft: 3,
           lastDrawDate: '',
+          remainingDraws: 3,      // 每日免费 3 次，跨日重置
+          bonusDraws: 0,          // 商城购买的抽卡次数，不清零（优先消耗）
           challengeVouchers: 0,
           growthAccelerants: 0,
           attributeGrowthBonus: [0, 0, 0, 0, 0, 0],

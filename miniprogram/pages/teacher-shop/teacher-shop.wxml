@@ -1,0 +1,241 @@
+<!-- pages/teacher-shop/teacher-shop.wxml
+     教师端商城商品管理
+     两级商品：全局模板（super 配，本班只读展示）+ 本班自定义（教师可增删改）
+     项目硬规则：条件分支节点不挂循环指令；所有 input 的提示文字用 ph-wrap 自渲染；
+     flex 内的 button 在 wxss 里写死宽度四件套 -->
+
+<view class="page">
+
+  <!-- 说明条 -->
+  <view class="tip-bar">
+    <text class="tip-text">带「全局」标记的是 super 统一配置的模板，你只能上下架说明，不能修改内容。本班商品由你自己添加。</text>
+  </view>
+
+  <!-- 错误提示 -->
+  <view wx:if="{{errorMsg}}" class="error-box">
+    <text class="error-text">{{errorMsg}}</text>
+  </view>
+
+  <!-- 加载 -->
+  <view wx:if="{{loading}}" class="state-box">
+    <text class="state-text">加载中...</text>
+  </view>
+
+  <!-- 列表 -->
+  <view wx:else>
+    <view wx:if="{{items.length === 0}}" class="state-box">
+      <text class="state-icon">🏪</text>
+      <text class="state-text">还没有任何商品</text>
+      <text class="state-sub">点下方按钮添加本班商品</text>
+    </view>
+
+    <view wx:else>
+      <view wx:for="{{items}}" wx:key="_id" class="item-card {{item.status === 'off' ? 'is-off' : ''}}">
+
+        <view class="item-top">
+          <view class="item-icon-wrap">{{item.icon}}</view>
+
+          <view class="item-main">
+            <view class="item-title-row">
+              <text class="item-name">{{item.name}}</text>
+              <text wx:if="{{item.isGlobal}}" class="tag-global">全局</text>
+              <text wx:if="{{item.status === 'off'}}" class="tag-off">已下架</text>
+            </view>
+            <text class="item-desc">{{item.desc}}</text>
+            <view class="item-meta">
+              <text class="meta-chip price">🪙 {{item.price}}</text>
+              <text class="meta-chip">{{item.typeLabel}} ×{{item.payload}}</text>
+              <text class="meta-chip">{{item.stock >= 0 ? '库存 ' + item.stock : '库存不限'}}</text>
+              <text wx:if="{{item.limitPerUser > 0}}" class="meta-chip">限购{{item.limitPerUser}}件/人</text>
+              <text wx:if="{{item.limitPerDay > 0}}" class="meta-chip">每日{{item.limitPerDay}}件</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 操作区（全局模板只有 super 能改，教师侧隐藏编辑/删除） -->
+        <view wx:if="{{item.editable}}" class="item-actions">
+          <button class="act-btn" bindtap="toggleStatus" data-index="{{index}}">
+            {{item.status === 'off' ? '上架' : '下架'}}
+          </button>
+          <button class="act-btn" bindtap="openEdit" data-index="{{index}}">编辑</button>
+          <button class="act-btn danger" bindtap="removeItem" data-index="{{index}}">删除</button>
+        </view>
+        <view wx:else class="item-actions">
+          <text class="readonly-tip">全局模板，仅 super 可修改</text>
+        </view>
+
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部新增按钮占位 -->
+  <view class="bottom-space"></view>
+
+</view>
+
+<!-- 底部新增按钮 -->
+<view class="footer-bar">
+  <button class="add-btn" bindtap="openAdd">+ 添加本班商品</button>
+</view>
+
+<!-- 商品编辑弹窗 -->
+<view wx:if="{{showForm}}" class="modal-mask" bindtap="closeForm">
+  <view class="modal-card" catchtap="noop">
+
+    <view class="modal-title">{{editingId ? '编辑商品' : '添加商品'}}</view>
+
+    <scroll-view scroll-y class="form-body">
+
+      <!-- 商品名称 -->
+      <view class="form-row">
+        <text class="form-label">商品名称</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            value="{{form.name}}"
+            maxlength="20"
+            bindinput="onInput"
+            data-field="name"
+          />
+          <text wx:if="{{!form.name}}" class="ph">例如：抽卡次数 ×3</text>
+        </view>
+      </view>
+
+      <!-- 简介 -->
+      <view class="form-row">
+        <text class="form-label">商品简介</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            value="{{form.desc}}"
+            maxlength="40"
+            bindinput="onInput"
+            data-field="desc"
+          />
+          <text wx:if="{{!form.desc}}" class="ph">例如：立即获得3次抽卡机会</text>
+        </view>
+      </view>
+
+      <!-- 图标选择 -->
+      <view class="form-row">
+        <text class="form-label">商品图标</text>
+        <view class="icon-grid">
+          <view
+            wx:for="{{iconOptions}}"
+            wx:key="*this"
+            class="icon-cell {{form.icon === item ? 'selected' : ''}}"
+            bindtap="pickIcon"
+            data-icon="{{item}}"
+          >{{item}}</view>
+        </view>
+      </view>
+
+      <!-- 商品类型 -->
+      <view class="form-row">
+        <text class="form-label">商品类型</text>
+        <picker
+          mode="selector"
+          range="{{typeOptions}}"
+          range-key="label"
+          value="{{typeIndex}}"
+          bindchange="onTypeChange"
+        >
+          <view class="picker-view">
+            <text class="picker-text">{{typeOptions[typeIndex].label}}</text>
+            <text class="picker-arrow">›</text>
+          </view>
+        </picker>
+      </view>
+
+      <!-- 发放数量 -->
+      <view class="form-row">
+        <text class="form-label">发放数量</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            type="number"
+            value="{{form.payload}}"
+            bindinput="onInput"
+            data-field="payload"
+          />
+          <text wx:if="{{!form.payload}}" class="ph">购买一次发放几个（1-99）</text>
+        </view>
+      </view>
+
+      <!-- 价格 -->
+      <view class="form-row">
+        <text class="form-label">价格（金币）</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            type="number"
+            value="{{form.price}}"
+            bindinput="onInput"
+            data-field="price"
+          />
+          <text wx:if="{{!form.price}}" class="ph">例如：30</text>
+        </view>
+      </view>
+
+      <!-- 库存 -->
+      <view class="form-row">
+        <text class="form-label">库存总数</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            type="number"
+            value="{{form.stock}}"
+            bindinput="onInput"
+            data-field="stock"
+          />
+          <text wx:if="{{form.stock === ''}}" class="ph">填 -1 表示不限量</text>
+        </view>
+      </view>
+
+      <!-- 每人限购 -->
+      <view class="form-row">
+        <text class="form-label">每人限购</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            type="number"
+            value="{{form.limitPerUser}}"
+            bindinput="onInput"
+            data-field="limitPerUser"
+          />
+          <text wx:if="{{form.limitPerUser === ''}}" class="ph">填 0 表示不限购</text>
+        </view>
+      </view>
+
+      <!-- 每日限购 -->
+      <view class="form-row">
+        <text class="form-label">每日限购</text>
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            type="number"
+            value="{{form.limitPerDay}}"
+            bindinput="onInput"
+            data-field="limitPerDay"
+          />
+          <text wx:if="{{form.limitPerDay === ''}}" class="ph">填 0 表示不限购</text>
+        </view>
+      </view>
+
+      <!-- 上架状态 -->
+      <view class="form-row">
+        <text class="form-label">立即上架</text>
+        <switch checked="{{form.status === 'on'}}" bindchange="onStatusSwitch" color="#f59e0b" />
+      </view>
+
+    </scroll-view>
+
+    <view class="modal-actions">
+      <button class="modal-btn ghost" bindtap="closeForm">取消</button>
+      <button class="modal-btn primary" bindtap="submitForm" disabled="{{saving}}">
+        {{saving ? '保存中' : '保存'}}
+      </button>
+    </view>
+
+  </view>
+</view>

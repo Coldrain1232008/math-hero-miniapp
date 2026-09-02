@@ -1,0 +1,9 @@
+{
+  "name": "manageShop",
+  "version": "1.0.0",
+  "description": "商城商品管理：教师管本班，super 管全局模板",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

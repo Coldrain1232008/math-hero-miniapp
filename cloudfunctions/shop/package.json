@@ -1,0 +1,9 @@
+{
+  "name": "shop",
+  "version": "1.0.0",
+  "description": "商城：商品列表与购买",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

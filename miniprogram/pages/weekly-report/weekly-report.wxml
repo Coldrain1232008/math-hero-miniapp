@@ -1,0 +1,76 @@
+<!-- pages/weekly-report/weekly-report.wxml -->
+<view class="page-bg">
+  <!-- 顶部标题 -->
+  <view class="header gradient-bg">
+    <text class="header-title">学习周报</text>
+    <text class="header-sub">{{weekStart}} ~ {{weekEnd}}</text>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <text>加载中...</text>
+  </view>
+
+  <block wx:else>
+    <!-- 数据卡片 -->
+    <view class="stats-grid">
+      <view class="stat-card">
+        <text class="stat-value">{{expGained}}</text>
+        <text class="stat-label">获得 EXP</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{tasksCompleted}}</text>
+        <text class="stat-label">完成任务</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value">{{activeDays}}/7</text>
+        <text class="stat-label">活跃天数</text>
+      </view>
+      <view class="stat-card">
+        <text class="stat-value {{rankChange > 0 ? 'up' : rankChange < 0 ? 'down' : ''}}">
+          {{rankChange > 0 ? '↑' + rankChange : rankChange < 0 ? '↓' + Math.abs(rankChange) : '-'}}
+        </text>
+        <text class="stat-label">排名变化</text>
+      </view>
+    </view>
+
+    <!-- 每日 EXP 柱状图 -->
+    <view class="card">
+      <view class="card-title">📊 每日经验</view>
+      <view class="chart-container">
+        <view wx:for="{{dailyExp}}" wx:key="index" class="chart-bar-wrap">
+          <view class="chart-bar-bg">
+            <view class="chart-bar" style="height: {{item / maxDailyExp * 100}}%"></view>
+          </view>
+          <text class="chart-bar-value">{{item}}</text>
+          <text class="chart-bar-label">{{dayLabels[index]}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 当前状态 -->
+    <view class="card">
+      <view class="card-title">🎯 当前状态</view>
+      <view class="status-row">
+        <text class="status-label">当前等级</text>
+        <text class="status-value">Lv.{{currentLevel}}</text>
+      </view>
+      <view class="status-row">
+        <text class="status-label">累计经验</text>
+        <text class="status-value">{{totalExp}} EXP</text>
+      </view>
+      <view class="status-row">
+        <text class="status-label">本周获得</text>
+        <text class="status-value highlight">+{{expGained}} EXP</text>
+      </view>
+    </view>
+
+    <!-- 鼓励语 -->
+    <view class="encourage-card">
+      <text class="encourage-icon">{{activeDays >= 5 ? '🎉' : activeDays >= 3 ? '👍' : '💪'}}</text>
+      <text class="encourage-text">
+        {{activeDays >= 5 ? '本周学习非常勤奋！继续保持！' : activeDays >= 3 ? '表现不错，再接再厉！' : '加油，每天学习一点点！'}}
+      </text>
+    </view>
+  </block>
+</view>
