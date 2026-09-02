@@ -11,7 +11,15 @@
     "pages/teacher-task/teacher-task",
     "pages/gacha/gacha",
     "pages/challenge/challenge",
-    "pages/challenge-history/challenge-history"
+    "pages/challenge-history/challenge-history",
+    "pages/badge-book/badge-book",
+    "pages/notifications/notifications",
+    "pages/class-analytics/class-analytics",
+    "pages/weekly-report/weekly-report",
+    "pages/coin-logs/coin-logs",
+    "pages/super/super",
+    "pages/shop/shop",
+    "pages/teacher-shop/teacher-shop"
   ],
   "window": {
     "backgroundTextStyle": "dark",

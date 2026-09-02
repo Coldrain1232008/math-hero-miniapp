@@ -4,6 +4,6 @@
   "description": "学生提交任务完成，等待老师确认",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "latest"
+    "wx-server-sdk": "~2.6.3"
   }
 }

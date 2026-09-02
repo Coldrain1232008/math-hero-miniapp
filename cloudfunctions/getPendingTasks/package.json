@@ -4,6 +4,6 @@
   "description": "获取班级中所有待确认的任务",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "latest"
+    "wx-server-sdk": "~2.6.3"
   }
 }

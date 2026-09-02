@@ -4,6 +4,6 @@
   "description": "获取学生最新数据",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "latest"
+    "wx-server-sdk": "~2.6.3"
   }
 }

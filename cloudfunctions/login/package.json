@@ -4,6 +4,6 @@
   "description": "处理教师和学生登录",
   "main": "index.js",
   "dependencies": {
-    "wx-server-sdk": "latest"
+    "wx-server-sdk": "~2.6.3"
   }
 }

@@ -1,4 +1,49 @@
 /* app.wxss */
+
+/* ===== 关于 box-sizing（值得记住的一条 CSS 规则）=====
+   小程序 CSS 默认是 content-box：写 width:100% 时，padding 加在宽度「外侧」，
+   容器实际宽度 = 100% + 左右 padding → 溢出父容器。
+   在 flex 居中布局下就表现为「左侧留白、右侧顶到屏幕边」。
+   修复方式：给该类容器显式加 box-sizing: border-box。
+
+   ⚠️ 此处【不要】写全局的 `* { box-sizing: border-box }`：
+   项目里有 3 处「固定 width（非 100%）+ padding」的弹窗卡片/输入框，
+   它们在 content-box 下已调试到位，全局改 border-box 会让它们整体变窄：
+     .battle-card  640rpx → 实际 720rpx，改后变 640rpx
+     .result-card  560rpx → 实际 656rpx，改后变 560rpx
+     .amount-input 160rpx → 实际 204rpx，改后变 160rpx
+   要根治就得连同这 3 处一起目视确认，故保持局部修复、不设全局规则。 */
+
+/* ===== 全局 input / textarea 行高修复（必加）=====
+   微信小程序的 <input> 是原生组件，未显式设置 line-height 时，placeholder 文字
+   会被原生层按一个非常小的 line-height 渲染，**只显示字符的下半部分**（"细条状"）。
+   设 1.4 之后占位符与真实输入都按 1.4 倍字号高度渲染，居中、清晰、不被裁剪。
+
+   为什么不写 line-height: 1？
+     1.0 太紧，文字会贴着 padding 内边沿，视觉拥挤。
+   为什么不写死值（如 42rpx）？
+     死值无法适配不同 font-size 的输入框，全局 1.4 会自动按各自字号缩放。
+
+   之前查过 18 处 input 相关样式，17 处没设 line-height——加这一条后全部覆盖。 */
+input, textarea {
+  line-height: 1.4;
+}
+
+/* ===== placeholder 文字被原生 input 裁剪的修复 =====
+   <input> 是原生组件，CSS line-height 加在 input 元素上只影响盒子高度，
+   但 placeholder 文字由原生层用自己的行高渲染，CSS 传不进去。
+   必须用 placeholder-class 直接控制 placeholder 文字的 CSS。
+
+   之前在 input { line-height:1.4 } 上做的修复对真实输入有效，
+   但对 placeholder 无效——所以现在每个 <input>/<textarea> 都补了
+   placeholder-class="input-placeholder"。
+
+   ⚠️ 不要在这里写 color：项目里不同页面的 placeholder 颜色不同
+   （深色页面用半透明白，浅色页面用灰色），写 color 会破坏设计 */
+.input-placeholder {
+  line-height: 1.4;
+}
+
 page {
   background: #f5f5f5;
   font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
