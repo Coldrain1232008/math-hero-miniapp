@@ -1,0 +1,100 @@
+<!-- pages/badge-book/badge-book.wxml -->
+<view class="page-bg">
+  <!-- 顶部统计 -->
+  <view class="badge-book-header gradient-bg">
+    <view class="badge-book-title">徽章图鉴</view>
+    <view class="badge-book-progress">
+      <text class="badge-book-count">{{achievedCount}} / {{totalCount}}</text>
+      <view class="badge-book-bar-bg">
+        <view class="badge-book-bar-fill" style="width:{{progressPercent}}%"></view>
+      </view>
+      <text class="badge-book-percent">收集进度 {{progressPercent}}%</text>
+    </view>
+  </view>
+
+  <!-- Tab 切换 -->
+  <view class="badge-book-tabs">
+    <view class="badge-book-tab {{currentTab === 'all' ? 'active' : ''}}" bindtap="switchTab" data-tab="all">全部</view>
+    <view class="badge-book-tab {{currentTab === 'streak' ? 'active' : ''}}" bindtap="switchTab" data-tab="streak">连续行为</view>
+    <view class="badge-book-tab {{currentTab === 'milestone' ? 'active' : ''}}" bindtap="switchTab" data-tab="milestone">里程碑</view>
+    <view class="badge-book-tab {{currentTab === 'hidden' ? 'active' : ''}}" bindtap="switchTab" data-tab="hidden">隐藏</view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{loading}}" class="loading-wrap">
+    <text>加载中...</text>
+  </view>
+
+  <!-- 徽章网格 -->
+  <view wx:else class="badge-book-grid">
+    <view wx:for="{{filteredBadges}}" wx:key="badgeId" 
+      class="badge-book-item {{item.achieved ? 'achieved' : 'locked'}}"
+      bindtap="showBadgeDetail" data-badge="{{item}}">
+      
+      <!-- 已获得徽章 -->
+      <block wx:if="{{item.achieved}}">
+        <text class="badge-book-icon">{{item.icon}}</text>
+        <text class="badge-book-name">{{item.badgeName}}</text>
+        <text class="badge-book-level" wx:if="{{item.levelName}}">{{item.levelName}}</text>
+      </block>
+      
+      <!-- 隐藏徽章（未解锁） -->
+      <block wx:elif="{{item.isHidden}}">
+        <text class="badge-book-icon hidden">❓</text>
+        <text class="badge-book-name hidden">？？？</text>
+      </block>
+      
+      <!-- 普通未获得徽章 -->
+      <block wx:else>
+        <text class="badge-book-icon locked">{{item.icon}}</text>
+        <text class="badge-book-name">{{item.badgeName}}</text>
+        <text class="badge-book-lock">🔒</text>
+      </block>
+    </view>
+  </view>
+
+  <!-- 空状态 -->
+  <view wx:if="{{!loading && filteredBadges.length === 0}}" class="empty-wrap">
+    <text class="empty-icon">🎖️</text>
+    <text class="empty-text">暂无徽章</text>
+  </view>
+
+  <!-- 徽章详情弹窗 -->
+  <view wx:if="{{showDetail}}" class="modal-mask" bindtap="hideDetail">
+    <view class="modal-box badge-detail-modal" catchtap="preventBubble">
+      <view class="badge-detail-icon">{{selectedBadge.achieved || !selectedBadge.isHidden ? selectedBadge.icon : '❓'}}</view>
+      <text class="badge-detail-name">{{selectedBadge.achieved || !selectedBadge.isHidden ? selectedBadge.badgeName : '？？？'}}</text>
+      <text class="badge-detail-desc" wx:if="{{selectedBadge.desc && (selectedBadge.achieved || !selectedBadge.isHidden)}}">{{selectedBadge.desc}}</text>
+      
+      <!-- 获取方式提示 -->
+      <view class="badge-detail-hint" wx:if="{{!selectedBadge.achieved && !selectedBadge.isHidden && selectedBadge.hint}}">
+        <text class="hint-label">获取方式：</text>
+        <text class="hint-text">{{selectedBadge.hint}}</text>
+      </view>
+      
+      <!-- 隐藏徽章提示 -->
+      <view class="badge-detail-hint" wx:if="{{!selectedBadge.achieved && selectedBadge.isHidden}}">
+        <text class="hint-text">这是一个隐藏徽章，完成特定条件后解锁</text>
+      </view>
+      
+      <!-- 已获得状态 -->
+      <view class="badge-detail-status" wx:if="{{selectedBadge.achieved}}">
+        <text class="status-achieved">✅ 已获得</text>
+        <text class="status-level" wx:if="{{selectedBadge.levelName}}">当前等级：{{selectedBadge.levelName}}</text>
+        <text class="status-streak" wx:if="{{selectedBadge.currentStreak > 0}}">连续天数：{{selectedBadge.currentStreak}} 天</text>
+      </view>
+      
+      <!-- 连续徽章等级信息 -->
+      <view class="badge-detail-levels" wx:if="{{selectedBadge.achieved && selectedBadge.levels}}">
+        <text class="levels-title">等级进度</text>
+        <view wx:for="{{selectedBadge.levels}}" wx:key="days" class="level-item">
+          <text class="level-icon">{{item.icon}}</text>
+          <text class="level-name">{{item.name}}</text>
+          <text class="level-days">{{item.days}}天</text>
+        </view>
+      </view>
+      
+      <button class="btn-primary" bindtap="hideDetail">关闭</button>
+    </view>
+  </view>
+</view>

@@ -1,0 +1,9 @@
+{
+  "name": "updateShowcasedBadges",
+  "version": "1.0.0",
+  "description": "更新用户选择展示的徽章",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -33,6 +33,9 @@
           <view class="record-opponent">
             <text class="vs-label">挑战</text>
             <text class="opponent-name">{{item.opponentName}}</text>
+            <text class="level-badge" wx:if="{{item.levelDiff !== undefined && item.levelDiff !== null}}">
+              {{item.levelDiff > 0 ? '⬆️ Lv+' + item.levelDiff : (item.levelDiff < 0 ? '⬇️ Lv' + item.levelDiff : '')}}
+            </text>
           </view>
           <view class="record-result {{item.resultClass}}">
             <text>{{item.resultText}}</text>
@@ -40,7 +43,10 @@
         </view>
         <view class="record-footer">
           <text class="record-time">{{item.createTimeStr}}</text>
-          <text class="record-exp {{item.expTextClass}}">{{item.expText}} EXP</text>
+          <view class="exp-group">
+            <text class="record-exp {{item.expTextClass}}">{{item.expText}} EXP</text>
+            <text class="reward-note" wx:if="{{item.rewardNote}}">{{item.rewardNote}}</text>
+          </view>
         </view>
       </view>
     </view>
@@ -51,6 +57,9 @@
           <view class="record-opponent">
             <text class="vs-label">来自</text>
             <text class="opponent-name">{{item.opponentName}}</text>
+            <text class="level-badge" wx:if="{{item.levelDiff !== undefined && item.levelDiff !== null}}">
+              {{item.levelDiff > 0 ? '⬆️ Lv+' + item.levelDiff : (item.levelDiff < 0 ? '⬇️ Lv' + item.levelDiff : '')}}
+            </text>
           </view>
           <view class="record-result {{item.resultClass}}">
             <text>{{item.resultText}}</text>

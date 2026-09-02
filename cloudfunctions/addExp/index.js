@@ -323,6 +323,16 @@ exports.main = async (event) => {
         bonusExp,
         hasBonus: bonusExp > 0
       })
+      
+      // 异步触发徽章检查（fire-and-forget）
+      try {
+        cloud.callFunction({
+          name: 'checkBadges',
+          data: { studentId }
+        }).catch(err => console.warn('checkBadges async error:', err.message))
+      } catch (e) {
+        // 忽略同步错误
+      }
     }
 
     return { success: true, count: tasks.length, results }

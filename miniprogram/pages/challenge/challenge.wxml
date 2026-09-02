@@ -10,7 +10,8 @@
 
       <!-- EXP奖励 -->
       <view class="battle-exp" wx:if="{{battleResult.winner === 'me'}}">
-        <text class="exp-badge win">+5 EXP</text>
+        <text class="exp-badge win">+{{battleResult.expAwarded}} EXP</text>
+        <text class="reward-note" wx:if="{{battleResult.rewardNote}}">{{battleResult.rewardNote}}</text>
       </view>
       <view class="battle-exp" wx:elif="{{battleResult.winner === 'opponent'}}">
         <text class="exp-badge lose">-5 EXP</text>
@@ -84,7 +85,12 @@
         <view class="classmate-rank">{{index + 1}}</view>
         <view class="classmate-info">
           <view class="classmate-name">{{item.name}}</view>
-          <view class="classmate-level">Lv.{{item.level}}</view>
+          <view class="classmate-level-row">
+            <text class="classmate-level">Lv.{{item.level}}</text>
+            <text class="level-diff {{item.diffClass}}" wx:if="{{item.levelDiff !== 0}}">
+              {{item.diffText > 0 ? '⬆️ +' + item.diffText : '⬇️ ' + item.diffText}}
+            </text>
+          </view>
         </view>
       </view>
       <view class="classmate-right">
@@ -102,7 +108,8 @@
   <view class="rules">
     <view class="rules-title">📖 挑战规则</view>
     <view class="rules-text">系统随机抽取你的3个属性与对手的3个属性进行对比，共3轮，胜多负少者获胜。</view>
-    <view class="rules-text highlight">胜者 +5 EXP，负者 -5 EXP！被挑战者胜 +1 EXP。</view>
+    <view class="rules-text highlight">胜利奖励：根据等级差计算（对手越强，奖励越高）</view>
+    <view class="rules-text">失败固定 -5 EXP（保底0），被挑战者防守胜利 +1 EXP</view>
     <view class="rules-divider"></view>
     <view class="rules-text">挑战凭证：{{vouchersLeft >= 0 ? vouchersLeft : '—'}} 张</view>
     <view class="btn-history" bindtap="goHistory">📜 查看挑战记录</view>

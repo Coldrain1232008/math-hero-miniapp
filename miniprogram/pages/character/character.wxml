@@ -20,6 +20,10 @@
         </view>
         <text class="hero-exp">累计经验：{{student.totalExp}} EXP</text>
       </view>
+      <view class="notification-bell" bindtap="goNotifications">
+        <text class="bell-icon">🔔</text>
+        <view class="notification-badge" wx:if="{{unreadCount > 0}}">{{unreadCount > 99 ? '99+' : unreadCount}}</view>
+      </view>
     </view>
 
     <!-- 经验条 -->
@@ -35,6 +39,59 @@
     <view wx:else class="exp-bar-wrap">
       <text class="max-level-text">🏆 满级英雄</text>
     </view>
+  </view>
+
+  <!-- 每日签到 -->
+  <view class="card checkin-card {{isCheckedIn ? 'checked' : ''}}" bindtap="doCheckIn">
+    <view class="checkin-left">
+      <text class="checkin-icon">{{isCheckedIn ? '✅' : '📅'}}</text>
+      <view class="checkin-info">
+        <text class="checkin-title">{{isCheckedIn ? '今日已签到' : '每日签到'}}</text>
+        <text class="checkin-desc">{{isCheckedIn ? '连续签到 ' + totalCheckInDays + ' 天' : '签到获得 +5 EXP'}}</text>
+      </view>
+    </view>
+    <button class="checkin-btn {{isCheckedIn ? 'disabled' : ''}}" disabled="{{isCheckedIn || checkingIn}}">
+      {{checkingIn ? '签到中...' : isCheckedIn ? '✅' : '签到'}}
+    </button>
+  </view>
+
+  <!-- 金币资产 -->
+  <view class="card coin-card">
+    <view class="coin-left">
+      <view class="coin-icon-wrap">🪙</view>
+      <view class="coin-info">
+        <text class="coin-value">{{coins}}</text>
+        <text class="coin-sub">累计获得 {{totalCoinsEarned}}</text>
+      </view>
+    </view>
+    <view class="coin-actions">
+      <button class="coin-btn ghost" bindtap="goCoinLogs">明细</button>
+      <button class="coin-btn" bindtap="openTransfer">赠送</button>
+    </view>
+  </view>
+
+  <!-- 金币商城入口 -->
+  <view class="card shop-entry-card" bindtap="goShop">
+    <view class="shop-entry-left">
+      <text class="shop-entry-icon">🏪</text>
+      <view class="shop-entry-info">
+        <text class="shop-entry-title">金币商城</text>
+        <text class="shop-entry-desc">用金币兑换抽卡次数、挑战凭证等道具</text>
+      </view>
+    </view>
+    <text class="shop-entry-arrow">›</text>
+  </view>
+
+  <!-- 学习周报入口 -->
+  <view class="card report-card" bindtap="goWeeklyReport">
+    <view class="report-left">
+      <text class="report-icon">📊</text>
+      <view class="report-info">
+        <text class="report-title">学习周报</text>
+        <text class="report-desc">查看本周学习数据统计</text>
+      </view>
+    </view>
+    <text class="report-arrow">›</text>
   </view>
 
   <!-- 雷达图 + 属性 -->
@@ -143,14 +200,93 @@
   </view>
 
   <!-- 徽章展示 -->
-  <view class="card badge-card" wx:if="{{badges.length > 0}}">
-    <view class="card-title">我的徽章</view>
-    <view class="badge-list">
-      <view wx:for="{{badges}}" wx:key="badgeId" class="badge-item">
-        <view class="badge-icon">{{item.icon}}</view>
-        <text class="badge-name">{{item.levelName}}</text>
-        <text class="badge-streak">{{item.currentStreak}}天</text>
+  <view class="card badge-card">
+    <view class="card-title">
+      <text>我的徽章</text>
+      <text class="badge-manage-btn" bindtap="openBadgeSelector" wx:if="{{badges.length > 0}}">管理</text>
+    </view>
+    
+    <!-- 展示的徽章 -->
+    <view wx:if="{{showcasedBadges.length > 0}}" class="showcased-badges">
+      <view wx:for="{{showcasedBadges}}" wx:key="badgeId" class="showcased-badge-item" bindtap="showBadgeDetail" data-badge="{{item}}">
+        <text class="showcased-badge-icon">{{item.icon}}</text>
+        <text class="showcased-badge-name">{{item.badgeName || item.levelName}}</text>
       </view>
+    </view>
+    
+    <!-- 无徽章提示 -->
+    <view wx:elif="{{badges.length === 0}}" class="badge-empty">
+      <text class="badge-empty-icon">🎖️</text>
+      <text class="badge-empty-text">完成任务、登录打卡解锁徽章</text>
+    </view>
+    
+    <!-- 有徽章但未选择展示 -->
+    <view wx:else class="badge-empty">
+      <text class="badge-empty-text">点击「管理」选择展示徽章</text>
+    </view>
+    
+    <!-- 图鉴入口 -->
+    <view class="badge-book-entry" bindtap="goBadgeBook">
+      <text>📖 徽章图鉴</text>
+      <text class="badge-book-count">{{achievedBadgeCount}}/{{totalBadgeCount}}</text>
+      <text class="badge-book-arrow">›</text>
+    </view>
+  </view>
+
+  <!-- 徽章选择器弹窗 -->
+  <view wx:if="{{showBadgeSelector}}" class="modal-mask" bindtap="closeBadgeSelector">
+    <view class="modal-box badge-selector-modal" catchtap="preventBubble">
+      <view class="modal-title">选择展示徽章（最多3个）</view>
+      <view class="badge-selector-list">
+        <view wx:for="{{badgeSelectorList}}" wx:key="badgeId" 
+          class="badge-selector-item {{item.selected ? 'selected' : ''}}"
+          bindtap="toggleBadge" data-badge-id="{{item.badgeId}}">
+          <text class="badge-selector-icon">{{item.icon}}</text>
+          <view class="badge-selector-info">
+            <text class="badge-selector-name">{{item.badgeName || item.levelName}}</text>
+            <text class="badge-selector-level" wx:if="{{item.levelName}}">{{item.levelName}}</text>
+          </view>
+          <view wx:if="{{item.selected}}" class="badge-selector-check">✓</view>
+        </view>
+      </view>
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="closeBadgeSelector">取消</button>
+        <button class="btn-primary" bindtap="saveShowcasedBadges">确认</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 徽章详情弹窗 -->
+  <view wx:if="{{showBadgeDetail}}" class="modal-mask" bindtap="hideBadgeDetail">
+    <view class="modal-box badge-detail-modal" catchtap="preventBubble">
+      <view class="badge-detail-icon">{{selectedBadge.icon}}</view>
+      <text class="badge-detail-name">{{selectedBadge.badgeName || selectedBadge.levelName}}</text>
+      <text class="badge-detail-desc" wx:if="{{selectedBadge.desc}}">{{selectedBadge.desc}}</text>
+      <view class="badge-detail-info" wx:if="{{selectedBadge.badgeType === 'streak'}}">
+        <view class="badge-detail-row">
+          <text class="badge-detail-label">当前等级</text>
+          <text class="badge-detail-value">{{selectedBadge.levelName}}</text>
+        </view>
+        <view class="badge-detail-row">
+          <text class="badge-detail-label">连续天数</text>
+          <text class="badge-detail-value">{{selectedBadge.currentStreak}} 天</text>
+        </view>
+        <view class="badge-detail-row">
+          <text class="badge-detail-label">下一级需要</text>
+          <text class="badge-detail-value">{{selectedBadge.requiredDays}} 天</text>
+        </view>
+        <view class="badge-detail-row" wx:if="{{selectedBadge.isTalentMatch}}">
+          <text class="badge-detail-label">天赋加成</text>
+          <text class="badge-detail-value talent-match">✅ 匹配天赋，要求降低30%</text>
+        </view>
+      </view>
+      <view class="badge-detail-info" wx:if="{{selectedBadge.badgeType === 'milestone'}}">
+        <view class="badge-detail-row">
+          <text class="badge-detail-label">状态</text>
+          <text class="badge-detail-value">{{selectedBadge.achieved ? '✅ 已解锁' : '🔒 未解锁'}}</text>
+        </view>
+      </view>
+      <button class="btn-primary badge-detail-close" bindtap="hideBadgeDetail">关闭</button>
     </view>
   </view>
 
@@ -184,11 +320,68 @@
       </view>
       <view class="key-input-group">
         <text class="key-label">新口令（6位以上字母+数字）</text>
-        <input class="key-input" placeholder="例如：abc123" value="{{newKeyInput}}" bindinput="onNewKeyInput" maxlength="20" />
+        <view class="ph-wrap">
+          <input class="key-input" value="{{newKeyInput}}" bindinput="onNewKeyInput" maxlength="20" />
+          <text wx:if="{{!newKeyInput}}" class="ph">例如：abc123</text>
+        </view>
       </view>
       <view class="modal-btns">
         <button class="btn-secondary" bindtap="hideChangeKeyDialog">取消</button>
         <button class="btn-primary" bindtap="confirmChangeKey" loading="{{keyChanging}}">确认修改</button>
+      </view>
+    </view>
+  </view>
+
+  <!-- 赠送金币弹窗 -->
+  <view wx:if="{{showTransferDialog}}" class="modal-mask" bindtap="closeTransfer">
+    <view class="modal-box" catchtap="preventBubble">
+      <text class="modal-title">🎁 赠送金币</text>
+      <text class="modal-tip coin-tip">
+        余额 {{coins}} 金币　今日还可赠 {{todayTransfer.remainTimes}} 次 / {{todayTransfer.remainAmount}} 金币
+      </text>
+
+      <view class="key-input-group">
+        <text class="key-label">选择同学</text>
+      </view>
+      <scroll-view scroll-y class="transfer-list">
+        <view wx:if="{{loadingClassmates}}" class="transfer-empty">加载中...</view>
+        <view wx:elif="{{transferList.length === 0}}" class="transfer-empty">暂无同学</view>
+        <view wx:else>
+          <view wx:for="{{transferList}}" wx:key="_id" class="transfer-item {{transferTarget._id === item._id ? 'selected' : ''}}" bindtap="selectTransferTarget" data-index="{{index}}">
+            <text class="transfer-name">{{item.name}}</text>
+            <text class="transfer-lv">Lv.{{item.level}}</text>
+          </view>
+        </view>
+      </scroll-view>
+
+      <view class="key-input-group">
+        <text class="key-label">赠送金额（1-20）</text>
+        <view class="ph-wrap">
+          <input
+            class="key-input"
+            type="number"
+            value="{{transferAmount}}"
+            bindinput="onTransferAmountInput"
+          />
+          <text wx:if="{{!transferAmount}}" class="ph">输入金币数量</text>
+        </view>
+      </view>
+      <view class="key-input-group">
+        <text class="key-label">留言（可选，30 字内）</text>
+        <view class="ph-wrap">
+          <input
+            class="key-input"
+            value="{{transferNote}}"
+            bindinput="onTransferNoteInput"
+            maxlength="30"
+          />
+          <text wx:if="{{!transferNote}}" class="ph">例如：谢谢你帮我讲题</text>
+        </view>
+      </view>
+
+      <view class="modal-btns">
+        <button class="btn-secondary" bindtap="closeTransfer">取消</button>
+        <button class="btn-primary" bindtap="submitTransfer" loading="{{transferring}}">确认赠送</button>
       </view>
     </view>
   </view>

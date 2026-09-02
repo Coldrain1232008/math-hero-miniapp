@@ -1,6 +1,43 @@
 /* pages/ranking/ranking.wxss */
 .page-bg { background: #f0f0f8; min-height: 100vh; padding-bottom: 120rpx; }
 
+/* 挑战按钮 - 放在领奖台顶部 */
+.challenge-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12rpx;
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+  margin: 0 32rpx;
+  padding: 20rpx 28rpx;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 16rpx rgba(255, 107, 107, 0.4);
+}
+
+.challenge-btn-icon {
+  font-size: 36rpx;
+}
+
+.challenge-btn-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #fff;
+}
+
+.challenge-btn-vouchers {
+  font-size: 22rpx;
+  color: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.2);
+  padding: 4rpx 14rpx;
+  border-radius: 20rpx;
+}
+
+.challenge-btn-arrow {
+  font-size: 32rpx;
+  color: rgba(255, 255, 255, 0.8);
+  margin-left: auto;
+}
+
 /* 领奖台 */
 .podium-area {
   padding: 48rpx 32rpx 0;
@@ -161,3 +198,52 @@
 }
 
 .rank-exp { font-size: 22rpx; color: #999; display: block; }
+
+/* 徽章图标 */
+.rank-badges {
+  display: flex;
+  gap: 6rpx;
+  margin-bottom: 8rpx;
+  flex-wrap: wrap;
+}
+
+.rank-badge-icon {
+  font-size: 24rpx;
+  display: inline-block;
+}
+
+/* ============ 榜单切换 ============ */
+.rank-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+}
+
+.rank-tab {
+  padding: 14rpx 40rpx;
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 40rpx;
+}
+
+.rank-tab.active {
+  background: #fff;
+  color: #6c63ff;
+  font-weight: bold;
+}
+
+/* 富豪榜金币数 */
+.podium-level.coin {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  font-weight: bold;
+}
+
+.rank-coin {
+  font-size: 24rpx;
+  color: #b45309;
+  font-weight: bold;
+  display: block;
+}

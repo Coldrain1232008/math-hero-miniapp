@@ -4,39 +4,27 @@ const cloud = require('wx-server-sdk')
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 const db = cloud.database()
 const _ = db.command
-const $ = db.command.aggregate
 
 exports.main = async (event, context) => {
   try {
     const { studentId } = event
     if (!studentId) return { success: false, error: '缺少 studentId' }
 
-    // 验证学生存在
-    const studentRes = await db.collection('students').doc(studentId).get()
-    if (!studentRes.data) {
-      return { success: false, error: '学生信息不存在' }
-    }
+    console.log('查询挑战历史, studentId:', studentId)
 
-    const classId = studentRes.data.classId
-    const now = Date.now()
-    const thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000
-
-    // 查询该学生参与的所有挑战（30天内）
+    // 直接查询该学生参与的所有挑战记录
     const res = await db.collection('challengeLogs')
-      .aggregate()
-      .match({
-        classId,
-        createTime: _.gte(thirtyDaysAgo),
-        or: [
-          { challengerId: studentId },
-          { opponentId: studentId }
-        ]
-      })
-      .sort({ createTime: -1 })
-      .limit(50)
-      .end()
+      .where(_.or([
+        { challengerId: studentId },
+        { opponentId: studentId }
+      ]))
+      .orderBy('createTime', 'desc')
+      .limit(100)
+      .get()
 
-    const logs = res.list || []
+    console.log('查询到记录数:', res.data.length)
+
+    const logs = res.data || []
 
     // 整理为自己发起的（asInitiator=true）和被挑战的（asInitiator=false）
     const asInitiator = []   // 我挑战别人的
@@ -47,6 +35,16 @@ exports.main = async (event, context) => {
       const myWins = isInitiator ? (log.result === 'me') : (log.result === 'opponent')
       const expChange = isInitiator ? (log.challengerExpChange || 0) : (log.opponentExpChange || 0)
 
+      // 等级差显示
+      let levelDiffText = ''
+      if (log.levelDiff !== undefined && log.levelDiff !== null) {
+        if (log.levelDiff > 0) {
+          levelDiffText = `对手高${log.levelDiff}级`
+        } else if (log.levelDiff < 0) {
+          levelDiffText = `对手低${Math.abs(log.levelDiff)}级`
+        }
+      }
+
       const item = {
         _id: log._id,
         myName: isInitiator ? log.challengerName : log.opponentName,
@@ -56,7 +54,12 @@ exports.main = async (event, context) => {
         expChange,
         expText: expChange > 0 ? `+${expChange}` : (expChange < 0 ? `${expChange}` : '0'),
         expTextClass: expChange > 0 ? 'win' : (expChange < 0 ? 'lose' : 'draw'),
+        rewardNote: log.rewardNote || '',  // 额外奖励说明
         resultClass: myWins ? 'win' : (log.result === 'draw' ? 'draw' : 'lose'),
+        levelDiff: log.levelDiff,
+        levelDiffText,
+        myLevel: log.myLevel,
+        opponentLevel: isInitiator ? log.opponentLevel : log.myLevel,
         createTime: log.createTime,
         createTimeStr: formatTime(log.createTime)
       }
@@ -67,6 +70,8 @@ exports.main = async (event, context) => {
         asReceiver.push(item)
       }
     }
+
+    console.log('整理后 - 我发起的:', asInitiator.length, '被挑战:', asReceiver.length)
 
     return {
       success: true,

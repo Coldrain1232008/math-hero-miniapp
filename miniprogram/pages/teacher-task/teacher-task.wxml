@@ -202,35 +202,41 @@
       
       <view class="form-item">
         <text class="form-label">任务标题</text>
-        <input
-          class="form-input"
-          placeholder="例如：本周挑战：解答一道奥数题"
-          value="{{specialForm.title}}"
-          bindinput="onSpecialTitleInput"
-          maxlength="30"
-        />
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            value="{{specialForm.title}}"
+            bindinput="onSpecialTitleInput"
+            maxlength="30"
+          />
+          <text wx:if="{{!specialForm.title}}" class="ph">例如：本周挑战：解答一道奥数题</text>
+        </view>
       </view>
 
       <view class="form-item">
         <text class="form-label">任务描述</text>
-        <textarea
-          class="form-textarea"
-          placeholder="详细描述学生需要完成的任务内容..."
-          value="{{specialForm.desc}}"
-          bindinput="onSpecialDescInput"
-          maxlength="200"
-        />
+        <view class="ph-wrap ph-textarea-wrap">
+          <textarea
+            class="form-textarea"
+            value="{{specialForm.desc}}"
+            bindinput="onSpecialDescInput"
+            maxlength="200"
+          />
+          <text wx:if="{{!specialForm.desc}}" class="ph ph-textarea">详细描述学生需要完成的任务内容...</text>
+        </view>
       </view>
 
       <view class="form-item">
         <text class="form-label">奖励经验值</text>
-        <input
-          class="form-input"
-          type="number"
-          placeholder="默认20"
-          value="{{specialForm.expReward}}"
-          bindinput="onSpecialRewardChange"
-        />
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            type="number"
+            value="{{specialForm.expReward}}"
+            bindinput="onSpecialRewardChange"
+          />
+          <text wx:if="{{!specialForm.expReward}}" class="ph">默认20</text>
+        </view>
         <text class="form-hint">建议高于普通任务（10-15 EXP）</text>
       </view>
 
@@ -248,24 +254,28 @@
       
       <view class="form-item">
         <text class="form-label">任务标题</text>
-        <input
-          class="form-input"
-          placeholder="简短的任务标题"
-          value="{{customForm.title}}"
-          bindinput="onCustomTitleInput"
-          maxlength="30"
-        />
+        <view class="ph-wrap">
+          <input
+            class="form-input"
+            value="{{customForm.title}}"
+            bindinput="onCustomTitleInput"
+            maxlength="30"
+          />
+          <text wx:if="{{!customForm.title}}" class="ph">简短的任务标题</text>
+        </view>
       </view>
 
       <view class="form-item">
         <text class="form-label">任务描述</text>
-        <textarea
-          class="form-textarea"
-          placeholder="详细描述任务内容..."
-          value="{{customForm.desc}}"
-          bindinput="onCustomDescInput"
-          maxlength="200"
-        />
+        <view class="ph-wrap ph-textarea-wrap">
+          <textarea
+            class="form-textarea"
+            value="{{customForm.desc}}"
+            bindinput="onCustomDescInput"
+            maxlength="200"
+          />
+          <text wx:if="{{!customForm.desc}}" class="ph ph-textarea">详细描述任务内容...</text>
+        </view>
       </view>
 
       <view class="form-item">

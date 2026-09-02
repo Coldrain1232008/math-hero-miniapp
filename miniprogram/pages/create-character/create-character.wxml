@@ -35,13 +35,15 @@
 
     <!-- 名字输入 -->
     <view class="name-area">
-      <input
-        class="name-input"
-        placeholder="输入角色名（2-8字）"
-        maxlength="8"
-        value="{{heroName}}"
-        bindinput="onNameInput"
-      />
+      <view class="ph-wrap">
+        <input
+          class="name-input"
+          maxlength="8"
+          value="{{heroName}}"
+          bindinput="onNameInput"
+        />
+        <text wx:if="{{!heroName}}" class="ph">输入角色名（2-8字）</text>
+      </view>
     </view>
 
     <button class="btn-primary next-btn" bindtap="toStep2">下一步 →</button>

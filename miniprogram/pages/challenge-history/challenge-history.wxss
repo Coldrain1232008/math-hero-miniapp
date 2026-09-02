@@ -145,6 +145,14 @@
   color: #333;
 }
 
+.level-badge {
+  font-size: 20rpx;
+  padding: 4rpx 10rpx;
+  border-radius: 10rpx;
+  background: #e8f4ff;
+  color: #1890ff;
+}
+
 .record-result {
   font-size: 24rpx;
   font-weight: 600;
@@ -193,6 +201,19 @@
 
 .record-exp.draw {
   color: #999;
+}
+
+.exp-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4rpx;
+}
+
+.reward-note {
+  font-size: 18rpx;
+  color: #1890ff;
+  font-weight: normal;
 }
 
 /* 空状态 */

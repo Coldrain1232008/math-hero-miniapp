@@ -589,7 +589,7 @@ Page({
           const result = await wx.cloud.callFunction({
             name: 'teacherGrantItem',
             data: {
-              teacherId: app.globalData.teacherId,
+              classId: app.globalData.classId,
               studentId: grantTargetId,
               action,
               amount: grantCount

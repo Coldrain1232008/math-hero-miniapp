@@ -3,7 +3,29 @@
 
   <!-- 前三名领奖台 -->
   <view class="podium-area gradient-bg">
-    <view class="podium-title">班级英雄榜</view>
+    <!-- 挑战入口 - 放在领奖台顶部 -->
+    <navigator class="challenge-btn" url="/pages/challenge/challenge" hover-class="none">
+      <text class="challenge-btn-icon">⚔️</text>
+      <text class="challenge-btn-text">我要挑战</text>
+      <text class="challenge-btn-vouchers" wx:if="{{vouchersLeft > 0}}">{{vouchersLeft}}张凭证</text>
+      <text class="challenge-btn-arrow">›</text>
+    </navigator>
+
+    <!-- 榜单切换 -->
+    <view class="rank-tabs">
+      <view
+        class="rank-tab {{activeTab === 'exp' ? 'active' : ''}}"
+        data-tab="exp"
+        bindtap="switchTab"
+      >🏆 英雄榜</view>
+      <view
+        class="rank-tab {{activeTab === 'coin' ? 'active' : ''}}"
+        data-tab="coin"
+        bindtap="switchTab"
+      >🪙 富豪榜</view>
+    </view>
+
+    <view class="podium-title">{{activeTab === 'exp' ? '班级英雄榜' : '班级富豪榜'}}</view>
     <view class="podium-row" wx:if="{{topThree.length > 0}}">
 
       <!-- 第2名 -->
@@ -12,7 +34,8 @@
           <text class="podium-avatar-icon">{{topThree[1].avatarIcon || '🧙'}}</text>
         </view>
         <text class="podium-name">{{topThree[1].heroName}}</text>
-        <view class="podium-level">Lv.{{topThree[1].level}}</view>
+        <view class="podium-level" wx:if="{{activeTab === 'exp'}}">Lv.{{topThree[1].level}}</view>
+        <view class="podium-level coin" wx:else>🪙 {{topThree[1].coins}}</view>
         <view class="podium-stand stand-2">2</view>
       </view>
 
@@ -23,7 +46,8 @@
           <text class="podium-avatar-icon">{{topThree[0].avatarIcon || '🧙'}}</text>
         </view>
         <text class="podium-name">{{topThree[0].heroName}}</text>
-        <view class="podium-level">Lv.{{topThree[0].level}}</view>
+        <view class="podium-level" wx:if="{{activeTab === 'exp'}}">Lv.{{topThree[0].level}}</view>
+        <view class="podium-level coin" wx:else>🪙 {{topThree[0].coins}}</view>
         <view class="podium-stand stand-1">1</view>
       </view>
 
@@ -33,7 +57,8 @@
           <text class="podium-avatar-icon">{{topThree[2].avatarIcon || '🧙'}}</text>
         </view>
         <text class="podium-name">{{topThree[2].heroName}}</text>
-        <view class="podium-level">Lv.{{topThree[2].level}}</view>
+        <view class="podium-level" wx:if="{{activeTab === 'exp'}}">Lv.{{topThree[2].level}}</view>
+        <view class="podium-level coin" wx:else>🪙 {{topThree[2].coins}}</view>
         <view class="podium-stand stand-3">3</view>
       </view>
 
@@ -46,7 +71,8 @@
     <text class="my-rank-num"># {{myRank}}</text>
     <text class="my-rank-name">{{myStudent.heroName}}</text>
     <text class="my-rank-lv">Lv.{{myStudent.level}}</text>
-    <text class="my-rank-exp">{{myStudent.totalExp}} EXP</text>
+    <text class="my-rank-exp" wx:if="{{activeTab === 'exp'}}">{{myStudent.totalExp}} EXP</text>
+    <text class="my-rank-exp" wx:else>🪙 {{myStudent.coins}}</text>
   </view>
 
   <!-- 完整榜单 -->
@@ -69,13 +95,20 @@
             {{item.title}}
           </text>
         </view>
+        <view class="rank-badges" wx:if="{{item.badgeIcons.length > 0}}">
+          <text wx:for="{{item.badgeIcons}}" wx:for-item="badge" wx:key="badgeId" class="rank-badge-icon">{{badge}}</text>
+        </view>
         <view class="rank-bar-bg">
-          <view class="rank-bar-fill" style="width:{{item.expPercent}}%;background:{{item.talentColor || '#6c63ff'}}"></view>
+          <view
+            class="rank-bar-fill"
+            style="width:{{item.percent}}%;background:{{activeTab === 'coin' ? '#f59e0b' : (item.talentColor || '#6c63ff')}}"
+          ></view>
         </view>
       </view>
       <view class="rank-right">
         <view class="rank-lv-badge">Lv.{{item.level}}</view>
-        <text class="rank-exp">{{item.totalExp}}</text>
+        <text class="rank-exp" wx:if="{{activeTab === 'exp'}}">{{item.totalExp}}</text>
+        <text class="rank-coin" wx:else>🪙 {{item.coins}}</text>
       </view>
     </view>
   </view>

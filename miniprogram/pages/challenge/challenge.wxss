@@ -42,6 +42,20 @@
 .classmate-info {}
 .classmate-name { font-size: 32rpx; font-weight: bold; color: #333; }
 .classmate-level { font-size: 24rpx; color: #999; margin-top: 4rpx; }
+.classmate-level-row { display: flex; align-items: center; gap: 8rpx; margin-top: 4rpx; }
+.level-diff {
+  font-size: 20rpx;
+  padding: 2rpx 10rpx;
+  border-radius: 10rpx;
+}
+.level-diff.higher {
+  background: #fff2f0;
+  color: #ff4d4f;
+}
+.level-diff.lower {
+  background: #f6ffed;
+  color: #52c41a;
+}
 
 .classmate-right { display: flex; align-items: center; gap: 12rpx; }
 .classmate-exp { font-size: 24rpx; color: #10b981; font-weight: 600; }
@@ -122,6 +136,13 @@
 .exp-badge.neutral { background: #f3f4f6; color: #999; }
 .exp-badge.win { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
 .exp-badge.lose { background: linear-gradient(135deg, #ef4444, #dc2626); color: #fff; }
+.reward-note {
+  display: block;
+  font-size: 22rpx;
+  color: #10b981;
+  margin-top: 8rpx;
+  text-align: center;
+}
 
 /* 双方选手 */
 .battle-info {

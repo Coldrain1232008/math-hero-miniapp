@@ -1,0 +1,310 @@
+/* pages/badge-book/badge-book.wxss */
+.page-bg {
+  background: #f0f0f8;
+  min-height: 100vh;
+  padding-bottom: 40rpx;
+}
+
+/* 顶部统计 */
+.badge-book-header {
+  padding: 60rpx 40rpx 48rpx;
+  border-radius: 0 0 40rpx 40rpx;
+}
+
+.badge-book-title {
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 32rpx;
+}
+
+.badge-book-progress {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.badge-book-count {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #fff;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.badge-book-bar-bg {
+  height: 16rpx;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 8rpx;
+  overflow: hidden;
+  margin-bottom: 12rpx;
+}
+
+.badge-book-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a78bfa, #6c63ff);
+  border-radius: 8rpx;
+  transition: width 0.6s ease;
+}
+
+.badge-book-percent {
+  font-size: 24rpx;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Tab 切换 */
+.badge-book-tabs {
+  display: flex;
+  background: #fff;
+  margin: 24rpx;
+  border-radius: 16rpx;
+  padding: 8rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.05);
+}
+
+.badge-book-tab {
+  flex: 1;
+  text-align: center;
+  padding: 20rpx 0;
+  font-size: 26rpx;
+  color: #666;
+  border-radius: 12rpx;
+  transition: all 0.2s ease;
+}
+
+.badge-book-tab.active {
+  background: #6c63ff;
+  color: #fff;
+  font-weight: 600;
+}
+
+/* 加载中 */
+.loading-wrap {
+  text-align: center;
+  padding: 100rpx 0;
+  color: #999;
+}
+
+/* 徽章网格 */
+.badge-book-grid {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0 16rpx;
+  gap: 16rpx;
+}
+
+.badge-book-item {
+  width: calc(33.33% - 12rpx);
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.badge-book-item:active {
+  transform: scale(0.95);
+}
+
+.badge-book-item.achieved {
+  background: linear-gradient(135deg, #f0eeff, #e8e4ff);
+  border: 2rpx solid #d4cfff;
+}
+
+.badge-book-item.locked {
+  opacity: 0.6;
+}
+
+.badge-book-icon {
+  font-size: 56rpx;
+  margin-bottom: 12rpx;
+}
+
+.badge-book-icon.locked {
+  filter: grayscale(100%);
+}
+
+.badge-book-icon.hidden {
+  font-size: 48rpx;
+}
+
+.badge-book-name {
+  font-size: 24rpx;
+  color: #333;
+  text-align: center;
+  margin-bottom: 4rpx;
+}
+
+.badge-book-name.hidden {
+  color: #999;
+}
+
+.badge-book-level {
+  font-size: 20rpx;
+  color: #6c63ff;
+  font-weight: 600;
+}
+
+.badge-book-lock {
+  font-size: 20rpx;
+  margin-top: 4rpx;
+}
+
+/* 空状态 */
+.empty-wrap {
+  text-align: center;
+  padding: 100rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  display: block;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: #999;
+}
+
+/* 徽章详情弹窗 */
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-box {
+  width: 85%;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 40rpx;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.badge-detail-modal {
+  text-align: center;
+}
+
+.badge-detail-icon {
+  font-size: 96rpx;
+  margin-bottom: 20rpx;
+}
+
+.badge-detail-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.badge-detail-desc {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+.badge-detail-hint {
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  text-align: left;
+}
+
+.hint-label {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.hint-text {
+  font-size: 26rpx;
+  color: #333;
+  line-height: 1.6;
+}
+
+.badge-detail-status {
+  background: #f0fdf4;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.status-achieved {
+  font-size: 28rpx;
+  color: #10b981;
+  font-weight: 600;
+  display: block;
+  margin-bottom: 8rpx;
+}
+
+.status-level,
+.status-streak {
+  font-size: 24rpx;
+  color: #666;
+  display: block;
+  margin-top: 4rpx;
+}
+
+.badge-detail-levels {
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 24rpx;
+  text-align: left;
+}
+
+.levels-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.level-item {
+  display: flex;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #e5e7eb;
+}
+
+.level-item:last-child {
+  border-bottom: none;
+}
+
+.level-icon {
+  font-size: 32rpx;
+  margin-right: 16rpx;
+}
+
+.level-name {
+  flex: 1;
+  font-size: 26rpx;
+  color: #555;
+}
+
+.level-days {
+  font-size: 24rpx;
+  color: #999;
+}
+
+.badge-detail-modal .btn-primary {
+  width: 100%;
+  margin-top: 16rpx;
+}

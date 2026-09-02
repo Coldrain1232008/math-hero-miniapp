@@ -82,6 +82,33 @@
   display: block;
 }
 
+/* 消息图标 */
+.notification-bell {
+  position: relative;
+  padding: 16rpx;
+}
+
+.bell-icon {
+  font-size: 40rpx;
+}
+
+.notification-badge {
+  position: absolute;
+  top: 8rpx;
+  right: 8rpx;
+  background: #f5576c;
+  color: #fff;
+  font-size: 20rpx;
+  font-weight: bold;
+  min-width: 32rpx;
+  height: 32rpx;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 8rpx;
+}
+
 /* 经验条 */
 .exp-bar-wrap { }
 .exp-bar-label {
@@ -110,6 +137,101 @@
   font-size: 28rpx;
   color: #fda085;
   font-weight: bold;
+}
+
+/* 每日签到卡片 */
+.checkin-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.checkin-card.checked {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 2rpx solid #86efac;
+}
+
+.checkin-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.checkin-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+
+.checkin-info {
+  flex: 1;
+}
+
+.checkin-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.checkin-desc {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.checkin-btn {
+  background: linear-gradient(135deg, #6c63ff, #8b5cf6);
+  color: #fff;
+  font-size: 26rpx;
+  padding: 16rpx 32rpx;
+  border-radius: 32rpx;
+  border: none;
+  min-width: 120rpx;
+}
+
+.checkin-btn.disabled {
+  background: #e5e7eb;
+  color: #9ca3af;
+}
+
+/* 学习周报卡片 */
+.report-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.report-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+}
+
+.report-icon {
+  font-size: 48rpx;
+  margin-right: 20rpx;
+}
+
+.report-info {
+  flex: 1;
+}
+
+.report-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 4rpx;
+}
+
+.report-desc {
+  font-size: 24rpx;
+  color: #888;
+}
+
+.report-arrow {
+  font-size: 48rpx;
+  color: #ccc;
 }
 
 /* 属性卡片 */
@@ -368,6 +490,23 @@
 /* 徽章卡片 */
 .badge-card { }
 
+.badge-section {
+  margin-bottom: 32rpx;
+}
+
+.badge-section:last-child {
+  margin-bottom: 0;
+}
+
+.badge-section-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #555;
+  margin-bottom: 20rpx;
+  padding-bottom: 12rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
 .badge-list {
   display: flex;
   flex-wrap: wrap;
@@ -382,6 +521,20 @@
   background: #f8f8fc;
   border-radius: 16rpx;
   min-width: 120rpx;
+  transition: all 0.2s ease;
+}
+
+.badge-item:active {
+  transform: scale(0.95);
+  background: #f0f0f8;
+}
+
+.badge-item.streak {
+  min-width: 140rpx;
+}
+
+.badge-item.milestone {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
 }
 
 .badge-icon {
@@ -393,11 +546,122 @@
   font-size: 22rpx;
   color: #555;
   margin-bottom: 4rpx;
+  text-align: center;
 }
 
-.badge-streak {
-  font-size: 20rpx;
+.badge-desc {
+  font-size: 18rpx;
   color: #999;
+  text-align: center;
+}
+
+.badge-progress-wrap {
+  width: 100%;
+  margin-top: 8rpx;
+}
+
+.badge-progress-bg {
+  height: 8rpx;
+  background: #e5e7eb;
+  border-radius: 4rpx;
+  overflow: hidden;
+  margin-bottom: 4rpx;
+}
+
+.badge-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #6c63ff, #a78bfa);
+  border-radius: 4rpx;
+  transition: width 0.6s ease;
+}
+
+.badge-progress-text {
+  font-size: 18rpx;
+  color: #999;
+  text-align: center;
+  display: block;
+}
+
+.badge-empty {
+  text-align: center;
+  padding: 40rpx 0;
+}
+
+.badge-empty-icon {
+  font-size: 64rpx;
+  display: block;
+  margin-bottom: 16rpx;
+}
+
+.badge-empty-text {
+  font-size: 26rpx;
+  color: #999;
+}
+
+/* 徽章详情弹窗 */
+.badge-detail-modal {
+  text-align: center;
+  padding: 48rpx 40rpx;
+}
+
+.badge-detail-icon {
+  font-size: 96rpx;
+  margin-bottom: 20rpx;
+}
+
+.badge-detail-name {
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #333;
+  display: block;
+  margin-bottom: 12rpx;
+}
+
+.badge-detail-desc {
+  font-size: 26rpx;
+  color: #666;
+  display: block;
+  margin-bottom: 24rpx;
+}
+
+.badge-detail-info {
+  background: #f8f9fa;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  margin-bottom: 32rpx;
+  text-align: left;
+}
+
+.badge-detail-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12rpx 0;
+  border-bottom: 1rpx solid #e5e7eb;
+}
+
+.badge-detail-row:last-child {
+  border-bottom: none;
+}
+
+.badge-detail-label {
+  font-size: 26rpx;
+  color: #666;
+}
+
+.badge-detail-value {
+  font-size: 26rpx;
+  color: #333;
+  font-weight: 600;
+}
+
+.badge-detail-value.talent-match {
+  color: #10b981;
+}
+
+.badge-detail-close {
+  width: 100%;
+  margin-top: 16rpx;
 }
 
 /* 重置天赋 */
@@ -502,4 +766,364 @@
   font-size: 30rpx;
   color: #333;
   box-sizing: border-box;
+}
+
+/* placeholder 自渲染（绕过 native input 渲染 bug）
+   ⚠️ <text> 必须 display:block 且配 left+right 锁定宽度，否则 ellipsis 失效 */
+.ph-wrap {
+  position: relative;
+  width: 100%;
+}
+.ph {
+  display: block;
+  position: absolute;
+  left: 24rpx;
+  right: 24rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 42rpx;
+  line-height: 42rpx;
+  font-size: 30rpx;
+  color: #9ca3af;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 徽章展示区 */
+.badge-card .card-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge-manage-btn {
+  font-size: 24rpx;
+  color: #6c63ff;
+  font-weight: normal;
+  padding: 8rpx 16rpx;
+  background: #f0eeff;
+  border-radius: 8rpx;
+}
+
+.showcased-badges {
+  display: flex;
+  gap: 24rpx;
+  margin-bottom: 24rpx;
+}
+
+.showcased-badge-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 16rpx;
+  background: linear-gradient(135deg, #f0eeff, #e8e4ff);
+  border-radius: 16rpx;
+  border: 2rpx solid #d4cfff;
+}
+
+.showcased-badge-icon {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
+}
+
+.showcased-badge-name {
+  font-size: 22rpx;
+  color: #555;
+  text-align: center;
+}
+
+/* 图鉴入口 */
+.badge-book-entry {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 0 0;
+  margin-top: 20rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.badge-book-entry text:first-child {
+  font-size: 26rpx;
+  color: #333;
+}
+
+.badge-book-count {
+  flex: 1;
+  text-align: right;
+  font-size: 24rpx;
+  color: #999;
+  margin-right: 12rpx;
+}
+
+.badge-book-arrow {
+  font-size: 36rpx;
+  color: #ccc;
+}
+
+/* 徽章选择器弹窗 */
+.badge-selector-modal {
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.badge-selector-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 60vh;
+}
+
+.badge-selector-item {
+  display: flex;
+  align-items: center;
+  padding: 20rpx 24rpx;
+  margin-bottom: 12rpx;
+  background: #f8f8fc;
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s ease;
+}
+
+.badge-selector-item.selected {
+  background: #f0eeff;
+  border-color: #6c63ff;
+}
+
+.badge-selector-icon {
+  font-size: 40rpx;
+  margin-right: 20rpx;
+}
+
+.badge-selector-info {
+  flex: 1;
+}
+
+.badge-selector-name {
+  font-size: 28rpx;
+  color: #333;
+  display: block;
+}
+
+.badge-selector-level {
+  font-size: 22rpx;
+  color: #999;
+  display: block;
+  margin-top: 4rpx;
+}
+
+.badge-selector-check {
+  width: 40rpx;
+  height: 40rpx;
+  background: #6c63ff;
+  color: #fff;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: bold;
+}
+
+/* ============ 金币资产卡 ============
+   修过两轮都没彻底搞定，这一次用「死宽度」+「结构重排」一次解决：
+   - .coin-actions 显式 width 锁 264rpx，不再用 min-width 兜底
+     （min-width 在 flex 平分场景下不可靠，截图复现过）
+   - .coin-btn 死 width = 124rpx + padding 0 + text-align:center，
+     杜绝 flex item 被容器平分/拉伸的可能
+   - .coin-btn / .coin-btn.ghost 用 size 区分主次：
+     明细是次要动作（compact 小按钮），赠送是主要动作（preset 主按钮）*/
+.coin-card {
+  display: flex;
+  align-items: center;
+  /* 不用 justify-content:用结构本身保证左右对齐，避免 flex 平分副作用 */
+}
+
+.coin-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;             /* 关键：允许 coin-info 在极端情况下 ellipsis */
+  margin-right: 20rpx;      /* 与右侧按钮组拉开间距 */
+}
+
+.coin-icon-wrap {
+  width: 76rpx;
+  height: 76rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fde68a, #f59e0b);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  margin-right: 20rpx;
+  flex-shrink: 0;
+}
+
+.coin-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;            /* 主动抢占剩余空间：避免被 button 系统样式挤到极窄 */
+  overflow: hidden;   /* 兜底：内部文字溢出时隐藏，不撑爆父容器 */
+}
+
+.coin-value {
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #b45309;
+  line-height: 1.1;
+}
+
+.coin-sub {
+  font-size: 22rpx;
+  color: #9ca3af;
+  margin-top: 6rpx;
+  white-space: nowrap;        /* 禁止换行：即使容器意外被压也不会每字一行 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.coin-actions {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  flex-shrink: 0;
+  width: 256rpx;            /* 死宽度：两个 118 + gap 14 + 6rpx 缓冲 = 256 */
+}
+.coin-actions .coin-btn {
+  /* 死宽度三件套：width + min-width + max-width + flex: 0 0 auto */
+  flex: 0 0 118rpx !important;
+  width: 118rpx !important;
+  min-width: 118rpx !important;
+  max-width: 118rpx !important;
+  height: 56rpx !important;
+  line-height: 56rpx !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  box-sizing: border-box;
+  font-size: 26rpx;
+  text-align: center;
+  border-radius: 28rpx;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border: none;
+}
+
+.coin-actions .coin-btn::after {
+  border: none;
+}
+
+.coin-actions .coin-btn.ghost {
+  background: #fff;
+  color: #b45309;
+  border: 2rpx solid #fcd34d;
+}
+
+/* ============ 金币商城入口（与学习周报卡片同构） ============ */
+.shop-entry-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.shop-entry-left {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-entry-icon {
+  font-size: 44rpx;
+  margin-right: 24rpx;
+  flex-shrink: 0;
+}
+
+.shop-entry-info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+}
+
+.shop-entry-title {
+  font-size: 30rpx;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 6rpx;
+}
+
+.shop-entry-desc {
+  font-size: 24rpx;
+  color: #9ca3af;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shop-entry-arrow {
+  font-size: 48rpx;
+  color: #ccc;
+  flex-shrink: 0;
+}
+
+/* ============ 赠送金币弹窗 ============ */
+.coin-tip {
+  display: block;
+  font-size: 24rpx;
+  color: #92400e;
+  background: #fffbeb;
+  border: 2rpx solid #fde68a;
+  border-radius: 12rpx;
+  padding: 16rpx 20rpx;
+  margin-bottom: 24rpx;
+  line-height: 1.5;
+}
+
+.transfer-list {
+  max-height: 320rpx;
+  margin-bottom: 24rpx;
+  border: 2rpx solid #e5e7eb;
+  border-radius: 12rpx;
+  background: #fafafa;
+}
+
+.transfer-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 24rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+}
+
+.transfer-item:last-child {
+  border-bottom: none;
+}
+
+.transfer-item.selected {
+  background: #eef2ff;
+  font-weight: bold;
+}
+
+.transfer-name {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.transfer-item.selected .transfer-name {
+  color: #6c63ff;
+}
+
+.transfer-lv {
+  font-size: 24rpx;
+  color: #9ca3af;
+}
+
+.transfer-empty {
+  padding: 40rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #9ca3af;
 }

@@ -56,6 +56,14 @@ exports.main = async (event, context) => {
       }
     })
 
+    return {
+      success: true,
+      message: '使用成功',
+      attrIndex,
+      attrName: ATTR_NAMES_ZH[attrIndex],
+      remaining: (student.growthAccelerants || 0) - 1
+    }
+
   } catch (e) {
     console.error('useGrowthAccelerant error:', e)
     return { success: false, error: e.message || '使用失败' }
