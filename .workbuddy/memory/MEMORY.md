@@ -43,16 +43,24 @@ super 充值 → `wallets(_id=classId)` → 教师 grant/deduct → `students.co
 - 铁律：**每个 action 第一行 `verifySuper`**；前端零密钥；
   ⚠️ `admins.superKey` 必须存大写；守恒 `diff != 0` 直接显示差额
 
-## 云函数鉴权（2026-09-02 审计后新增）
+## 云函数鉴权（2026-09-02 审计 + 收口）
 - 铁律：**任何写操作云函数都必须鉴权**，不能只收 `event.classId`
   —— classId 在前端 globalData 里就有，学生改参数即可跨班写入
-- 正确写法：云函数凭 `teacherKey` 反查 classId，**不信任前端传的 classId**
-  模板见 `importStudents.findClassByTeacherKey`
+- 修法：云函数凭 `teacherKey`/`superKey` 反查 classId，**不信任前端传的 classId**；
+  涉及单学生的再补一句「`student.classId !== classId` → 拒绝」
+- 学生端函数（无教师密钥）用 **openid 归属校验**：`students.openid` 首次登录已绑定，
+  占位记录（openid 空）允许首次认领，已绑定必须本人
 - 密钥查询一律**双查**（先原值后归一化），兼容历史小写密钥；
   只查归一化值 = 复刻 teacher-shop「密钥不正确」事故
-- 自检：`node tools/check-auth.js`（维度一 密钥双查 / 维度二 写操作鉴权）
-  ⚠️ 存量未修：🔴 8 个（addExp coinOperation createStudent dailyTaskRefresh
-  fixStudentKeys manageSpecialTask manageTaskPool teacherGrantItem）+ ⚠️ 11 个
+- **工程约定：鉴权代码不复制，靠脚本同步**
+  - 单一真源 `tools/auth-template.js`：`verifyTeacher`/`verifySuper`/`verifyStudentOwner`
+  - `node tools/sync-auth.js` 同步到各云函数目录下的 `auth.js`
+    （微信开发者工具上传单个云函数不带上层目录，故不能建 `common/`）
+  - 新接入鉴权的函数要加进 `sync-auth.js` 的 TARGETS
+  - 前端统一用 `app.callTeacherFn(name, data)`，自动注入 teacherKey + 处理登录过期
+- 自检 `node tools/check-auth.js`：维度一 密钥双查 / 维度二 写操作鉴权
+  当前 🔴 0、⚠️ 12（学生端一批，未做）
+  ⚠️ 脚本是启发式的，判定规则踩过 3 个坑，见 2026-09-02.md
 
 ## 协作原则
 - **不要把"用户未更新代码"当默认假设**，同一问题反复提出 = 问题在代码里
