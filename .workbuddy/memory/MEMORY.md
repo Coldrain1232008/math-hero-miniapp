@@ -83,6 +83,19 @@ super 充值 → `wallets(_id=classId)` → 教师 grant/deduct → `students.co
 - 分享封面 `images/share-cover.png`（5:4），改动文案后跑
   `tools/gen-share-cover.py` 重生成
 
+## 学生登录与批量导入（2026-10-07 查证）
+- **学生登录要两个值**：`classKey`(查 `classes.studentKey`，S 开头班级密钥)
+  + `studentKey`(个人密钥)。**登录不用学号**，也不校验密钥长度/字符集
+  → 4 位纯数字当密钥可行
+- 导入格式 `学号 姓名 口令`，按 `[,，\t ]+` 切分，**第一段必须纯数字**；
+  ⚠️ 文本里不能写 `===== 第1批 =====` 分隔行（会被当成学生导进去），空行安全
+- **1000 人不能一次导入**：每生 3 次 DB 操作 ≈3000 次串行；前端 callFunction
+  默认超时 15s、云函数默认 3s(上限 60s) → 拆批。重复学号判 exists 跳过，**重贴即续跑**
+- **查询上限**：云函数 `.get()` 默认 100(limit 上限 1000)、小程序端 20。
+  `getClassData` 的 students/studentsByName/stats 三分支都没写 limit
+  → 千人班教师端**只显示前 100 人**（不影响登录，正解是分页）
+- 生成导入文本：`tools/gen-roster-text.py`
+
 ## 协作原则
 - **不要把"用户未更新代码"当默认假设**，同一问题反复提出 = 问题在代码里
 - **涉及新集合必须立刻告知用户创建**；改云函数先 grep 全部 `db.collection()` 列清单
