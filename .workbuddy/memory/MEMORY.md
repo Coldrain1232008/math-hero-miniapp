@@ -64,6 +64,25 @@ super 充值 → `wallets(_id=classId)` → 教师 grant/deduct → `students.co
 - 手写 `// auth-ok: 理由` 可豁免误报（where 行尾 / 上或下一行），
   脚本仍列出并标 ✅ 已豁免，不静默跳过。**改判定规则后必须造假函数做负向测试**
 
+## 分享（2026-10-07）
+- 文案单一真源 `miniprogram/utils/share.js`；新页面接分享跑
+  `node tools/add-share-hooks.js`（幂等，重复跑会跳过已注入的）
+- **好友转发**：20 个页面全有 `onShareAppMessage`，`path` 一律指向
+  **登录页** —— 接收者多半没账号，落功能页会卡住，登录页才有「注册新班级」
+- **朋友圈只给登录页**（`TIMELINE_OK` 白名单）。原因：朋友圈打开的是
+  「单页模式」＝ 无登录态 + **禁止任何页面跳转**，依赖 globalData 的页面
+  渲染不出来，连「未登录跳登录页」兜底都跳不走 → 分享出去是白屏
+  - 登录页检测 `scene === 1154` 切静态介绍视图，**不调云函数**
+    （单页模式用云开发要另开「未登录访问」）
+- ⚠️ **微信硬规则：页面要启用朋友圈分享，必须同时定义 `onShareAppMessage`
+  和 `onShareTimeline`**，缺一则入口不渲染**且不报错**（静默失败）
+- 小程序码：云函数 `getShareCode` 走云调用 `wxacode.getUnlimited`；
+  ⚠️ `config.json` 的 `permissions.openapi` **必须一起上传**（漏传 -604100）；
+  `scene` 限 `^[A-Za-z0-9_-]{1,32}$`（不支持 `%`，中文无法 urlencode）；
+  码存云存储固定路径，返回 `cloud://` 供 `<image>` 直渲染
+- 分享封面 `images/share-cover.png`（5:4），改动文案后跑
+  `tools/gen-share-cover.py` 重生成
+
 ## 协作原则
 - **不要把"用户未更新代码"当默认假设**，同一问题反复提出 = 问题在代码里
 - **涉及新集合必须立刻告知用户创建**；改云函数先 grep 全部 `db.collection()` 列清单
