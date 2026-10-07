@@ -22,6 +22,8 @@
     <text class="app-subtitle">淬炼心智，铸就传奇</text>
   </view>
 
+  <!-- 完整模式：登录 / 注册 -->
+  <block wx:if="{{!isSinglePage}}">
   <view class="form-area">
     <view class="role-switch">
       <view class="role-btn {{role === 'student' ? 'active' : ''}}" bindtap="setStudent">学生</view>
@@ -81,6 +83,36 @@
   <view class="register-entry" bindtap="showRegisterDialog">
     <text class="register-entry-text">还没有班级？注册一个新班级</text>
     <text class="register-entry-arrow">›</text>
+  </view>
+
+  <!-- 邀请同行 / 出示小程序码 -->
+  <view class="register-entry" bindtap="showQRCode">
+    <text class="register-entry-text">邀请同行使用 · 出示小程序码</text>
+    <text class="register-entry-arrow">›</text>
+  </view>
+  </block>
+
+  <!--
+    单页模式（从朋友圈打开）：只展示静态介绍，不做任何交互、不调用云函数。
+    这个模式下没有登录态、不能跳转页面，渲染登录表单毫无意义。
+    引导用户点微信底部自带的「前往小程序」进入完整版。
+  -->
+  <view wx:if="{{isSinglePage}}" class="intro-area">
+    <view class="intro-card">
+      <view class="intro-row">
+        <view class="intro-dot"></view>
+        <text class="intro-text">把课堂表现和考试成绩，变成角色成长的动力</text>
+      </view>
+      <view class="intro-row">
+        <view class="intro-dot"></view>
+        <text class="intro-text">六维天赋测试，生成属于你的学习人设</text>
+      </view>
+      <view class="intro-row">
+        <view class="intro-dot"></view>
+        <text class="intro-text">老师一分钟建班，学生凭密钥即可加入</text>
+      </view>
+    </view>
+    <text class="intro-tip">点击底部「前往小程序」开始体验</text>
   </view>
 </view>
 
@@ -158,5 +190,33 @@
       </view>
     </block>
 
+  </view>
+</view>
+
+<!-- 邀请小程序码弹窗 -->
+<view wx:if="{{showQR}}" class="modal-mask" bindtap="hideQRCode">
+  <view class="modal-box" catchtap="preventBubble">
+    <view class="modal-title">邀请使用</view>
+    <view class="modal-sub">对方用微信扫一扫，或长按图片识别</view>
+
+    <view class="qr-wrap">
+      <image
+        wx:if="{{qrFileID}}"
+        class="qr-img"
+        src="{{qrFileID}}"
+        mode="aspectFit"
+        show-menu-by-longpress
+      />
+      <view wx:else class="qr-placeholder">
+        <text class="qr-placeholder-text">{{qrLoading ? '正在生成…' : '暂时无法生成'}}</text>
+      </view>
+    </view>
+
+    <view class="modal-tip">已注册的老师可以把它转发到教师群；新老师扫码后，在登录页底部点「注册一个新班级」即可自助开通。</view>
+
+    <view class="modal-btn-row">
+      <button class="modal-btn cancel" bindtap="hideQRCode">关闭</button>
+      <button class="modal-btn confirm" bindtap="saveQRCode">保存到相册</button>
+    </view>
   </view>
 </view>

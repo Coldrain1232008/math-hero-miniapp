@@ -418,3 +418,94 @@
 .btn-copy-sm::after {
   border: none;
 }
+
+/* ===== 单页模式（朋友圈分享落地页）=====
+   该模式下微信会在顶部固定导航栏、底部固定「前往小程序」操作栏，
+   所以这里不再做垂直居中，避免内容被两根固定栏压住。 */
+.intro-area {
+  width: 100%;
+  padding: 0 48rpx;
+  box-sizing: border-box;
+  margin-top: 30rpx;
+}
+
+.intro-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 32rpx 28rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1rpx solid rgba(139, 131, 255, 0.25);
+}
+
+.intro-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 24rpx;
+}
+
+.intro-row:last-child {
+  margin-bottom: 0;
+}
+
+/* flex item 必须死宽度，否则会被容器剩余空间撑开 */
+.intro-dot {
+  flex: 0 0 12rpx;
+  width: 12rpx;
+  min-width: 12rpx;
+  max-width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: #8b83ff;
+  margin-top: 16rpx;
+  margin-right: 16rpx;
+}
+
+.intro-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 28rpx;
+  line-height: 44rpx;
+  color: #c9c5f0;
+}
+
+.intro-tip {
+  display: block;
+  width: 100%;
+  margin-top: 40rpx;
+  text-align: center;
+  font-size: 26rpx;
+  color: #8b83ff;
+  letter-spacing: 1rpx;
+}
+
+/* ========== 邀请小程序码弹窗 ========== */
+.qr-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 32rpx;
+}
+
+/* 白底图放在深色弹窗上对比最好，所以这里刻意加白底衬垫 */
+.qr-img {
+  width: 420rpx;
+  height: 420rpx;
+  background: #fff;
+  border-radius: 20rpx;
+}
+
+.qr-placeholder {
+  width: 420rpx;
+  height: 420rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.qr-placeholder-text {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.45);
+}

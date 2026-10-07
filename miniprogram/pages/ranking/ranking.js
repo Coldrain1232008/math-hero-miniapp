@@ -2,7 +2,14 @@
 const { calcLevel, calcAttributes, calcTitle, ATTR_NAMES } = require('../../utils/gameData')
 const AvatarManager = require('../../utils/avatarManager')
 
+const share = require('../../utils/share')
+
 Page({
+  // 分享：仅好友转发（path 指向登录页）。
+  // 朋友圈入口只在登录页开放 —— 朋友圈打开是「单页模式」，无登录态且禁止跳转，
+  // 本页在那种环境下渲染不出来，所以不暴露入口，避免分享出去是白屏。
+  onShareAppMessage() { return share.appMessage('ranking') },
+
   data: {
     activeTab: 'exp',      // 'exp' 英雄榜 | 'coin' 富豪榜
     // 两份榜单一次加载好，切换时不用重新请求

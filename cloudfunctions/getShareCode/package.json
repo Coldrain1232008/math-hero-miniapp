@@ -1,0 +1,9 @@
+{
+  "name": "getShareCode",
+  "version": "1.0.0",
+  "description": "生成小程序码，用于邀请同行与分享小程序",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

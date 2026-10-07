@@ -4,7 +4,14 @@ const AvatarManager = require('../../utils/avatarManager')
 
 const ATTR_COLORS = ['#6c63ff', '#f59e0b', '#10b981', '#ec4899', '#3b82f6', '#ef4444']
 
+const share = require('../../utils/share')
+
 Page({
+  // 分享：仅好友转发（path 指向登录页）。
+  // 朋友圈入口只在登录页开放 —— 朋友圈打开是「单页模式」，无登录态且禁止跳转，
+  // 本页在那种环境下渲染不出来，所以不暴露入口，避免分享出去是白屏。
+  onShareAppMessage() { return share.appMessage('teacher-class') },
+
   data: {
     students: [],
     classInfo: null,       // 班级信息（含密钥等）
